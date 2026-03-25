@@ -1,0 +1,50 @@
+services:
+  mongo:
+    image: mongo:8
+    restart: unless-stopped
+    network_mode: host
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: >
+        mongosh --quiet --eval "
+          try { rs.status() }
+          catch(e) { rs.initiate({_id:'rs0', members:[{_id:0, host:'localhost:27017'}]}) };
+          db.adminCommand('ping').ok || quit(1)
+        "
+      interval: 5s
+      timeout: 10s
+      retries: 15
+      start_period: 20s
+
+  livedemo-backend:
+    image: docker.io/livedemo/livedemo-backend:latest
+    restart: unless-stopped
+    pull_policy: always
+    network_mode: host
+    env_file:
+      - envs/backend.env
+    volumes:
+      - backend_data:/home/app/data
+    depends_on:
+      mongo:
+        condition: service_healthy
+    working_dir: /home/app
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - "mkdir -p /home/app/data/demos /home/app/data/stories /home/app/data/storyRequests && exec ./start.sh"
+
+  livedemo-web-app:
+    image: docker.io/livedemo/livedemo-web-app:latest
+    restart: unless-stopped
+    pull_policy: always
+    network_mode: host
+    env_file:
+      - envs/web-app.env
+    depends_on:
+      - livedemo-backend
+
+volumes:
+  mongo_data:
+  backend_data:
