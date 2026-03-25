@@ -2,6 +2,16 @@
 
 Local development deployment using Docker Compose. Runs three containers:
 
+
+---
+
+![Screenshot 1](screenshots/1.png)
+
+![Screenshot 2](screenshots/2.png)
+
+![Screenshot 3](screenshots/3.png)
+
+
 - **mongo** — MongoDB 8, exposed on port `27017` with a persistent local volume
 - **livedemo-backend** — Backend API, exposed on port `3005`
 - **livedemo-web-app** — Frontend app, exposed on port `5000`
@@ -124,18 +134,6 @@ To remove volumes and start fresh:
 ```bash
 docker compose -f local/docker-compose.yml down -v
 ```
-
----
-## Screenshots
-
-### 1
-![Screenshot 1](screenshots/1.png)
-
-### 2
-![Screenshot 2](screenshots/2.png)
-
-### 3
-![Screenshot 3](screenshots/3.png)
 
 ---
 ## License
