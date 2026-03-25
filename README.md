@@ -1,4 +1,4 @@
-# livedemo-deploy-2
+# livedemo-deploy
 
 Local development deployment using Docker Compose. Runs three containers:
 
@@ -124,3 +124,20 @@ To remove volumes and start fresh:
 ```bash
 docker compose -f local/docker-compose.yml down -v
 ```
+
+---
+## Screenshots
+
+### 1
+![Screenshot 1](screenshots/1.png)
+
+### 2
+![Screenshot 2](screenshots/2.png)
+
+### 3
+![Screenshot 3](screenshots/3.png)
+
+---
+## License
+
+MIT License (see [`LICENSE`](LICENSE)).
