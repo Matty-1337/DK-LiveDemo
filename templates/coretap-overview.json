@@ -1,0 +1,102 @@
+{
+  "id": "coretap-overview",
+  "name": "CoreTAP Overview — The Money You're Leaving on the Table",
+  "tier": "all",
+  "price": "all tiers",
+  "description": "8-step first-look at CoreTAP that surfaces hidden revenue, voids, and staff performance for any bar owner in under 4 minutes.",
+  "estimated_duration_minutes": 4,
+  "use_case": "sales",
+  "steps": [
+    {
+      "order": 1,
+      "title": "Welcome to [BAR_NAME]'s CoreTAP Dashboard",
+      "annotation": "This is the command center for [BAR_NAME]. Everything you need to know about your bar's health is on this single screen — built specifically for owners and GMs who don't have time to dig through reports.",
+      "type": "tooltip",
+      "screen_hint": "Capture the main CoreTAP dashboard landing page with the bar name in the header and all KPI widgets visible.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": ["[BAR_NAME]"]
+    },
+    {
+      "order": 2,
+      "title": "Revenue Pulse — Live, Not Lagging",
+      "annotation": "This Revenue Pulse widget updates every 5 minutes from your POS. No more waiting for end-of-night reports — see [BAR_NAME]'s revenue as it happens, with comparisons against last week and last month.",
+      "type": "callout",
+      "screen_hint": "Zoom on the Revenue Pulse widget showing today vs yesterday vs last week comparison.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": ["[BAR_NAME]"]
+    },
+    {
+      "order": 3,
+      "title": "Golden Hours — Where Your Money Actually Comes From",
+      "annotation": "Most bars make 60% of their nightly revenue in just 3 hours. Golden Hours pinpoints exactly when [BAR_NAME]'s peak window is — so you can staff smarter, push happy hour tighter, and stop bleeding labor cost in the dead zones.",
+      "type": "callout",
+      "screen_hint": "Zoom in on the Golden Hours banner / peak-window heatmap on the dashboard.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": ["[BAR_NAME]"]
+    },
+    {
+      "order": 4,
+      "title": "Active Voids Alert — Theft Doesn't Hide Anymore",
+      "annotation": "Every void on every ticket, flagged in real time. CoreTAP groups suspicious patterns by employee and shows you the dollar amount at risk — not just the count. This alone has paid for the system at most of our bars within 30 days.",
+      "type": "callout",
+      "screen_hint": "Highlight the Active Voids alert badge with a real number (e.g. '$847 in voids today').",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": []
+    },
+    {
+      "order": 5,
+      "title": "Staff Performance Ring — Who's Carrying the Bar",
+      "annotation": "A-D grading on every employee, every shift. The ring shows you at a glance who your A-players are and where your D-players are dragging revenue down. [TIER] tier gives you the full leaderboard.",
+      "type": "tooltip",
+      "screen_hint": "Capture the Staff Performance ring widget with A/B/C/D segments visible.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": ["[TIER]"]
+    },
+    {
+      "order": 6,
+      "title": "Quick Wins — Action, Not Analysis Paralysis",
+      "annotation": "CoreTAP doesn't just show you problems — it tells you the next move. The Quick Wins feed is a daily action list: cut this shift, push this drink, talk to this employee. No dashboards-for-the-sake-of-dashboards.",
+      "type": "callout",
+      "screen_hint": "Show the Quick Wins action feed with 3-5 concrete recommendations listed.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": []
+    },
+    {
+      "order": 7,
+      "title": "The Average Bar Loses $2,100/mo to Blind Spots",
+      "annotation": "Across the bars we've onboarded, owners discover an average of $2,100/month in recoverable revenue in their first 30 days — voids, missed peak staffing, and underperforming employees they couldn't see before. For [BAR_NAME], we'd expect a similar or larger find.",
+      "type": "popup",
+      "screen_hint": "Full-screen popup stat card with the $2,100/mo figure prominently displayed and a small bar-icon supporting graphic.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": ["[BAR_NAME]"]
+    },
+    {
+      "order": 8,
+      "title": "See What CoreTAP Finds in Your Bar",
+      "annotation": "Drop your email and we'll set up a free 14-day audit on [BAR_NAME]'s actual POS data. No commitment, no card required — you'll see the dollars before you ever decide to subscribe.",
+      "type": "popup",
+      "screen_hint": "Lead capture form overlay with fields: Name, Email, Bar Name, Phone (optional). Form should match DK brand styling.",
+      "has_cta": true,
+      "cta_label": "Start My Free 14-Day Audit",
+      "cta_url": "https://coretap.ai/get-started",
+      "personalization_tokens": ["[BAR_NAME]"]
+    }
+  ],
+  "lead_capture_step": 8,
+  "final_cta_label": "Start My Free 14-Day Audit",
+  "final_cta_url": "https://coretap.ai/get-started"
+}

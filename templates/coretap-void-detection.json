@@ -1,0 +1,91 @@
+{
+  "id": "coretap-void-detection",
+  "name": "Void Detection — The Theft You're Not Seeing",
+  "tier": "execute",
+  "price": "$599/mo",
+  "description": "7-step demo of CoreTAP's void detection and fraud-pattern alerting — built for the skeptical owner who insists their staff doesn't steal.",
+  "estimated_duration_minutes": 4,
+  "use_case": "sales",
+  "steps": [
+    {
+      "order": 1,
+      "title": "Most Bars Lose 2-4% of Revenue to Voids and Comps",
+      "annotation": "You probably don't think theft is happening at [BAR_NAME]. Neither did 90% of the owners we work with — until CoreTAP showed them the patterns. The average find in month one is $1,200 in suspicious voids.",
+      "type": "popup",
+      "screen_hint": "Opening popup stat card with the 2-4% revenue-loss figure and an industry benchmark callout.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": ["[BAR_NAME]"]
+    },
+    {
+      "order": 2,
+      "title": "The Void Alerts Dashboard",
+      "annotation": "Every void at [BAR_NAME] in real time, grouped by employee, ticket, time of day, and dollar amount. Not a report you have to ask for — a feed that surfaces the suspicious ones automatically.",
+      "type": "tooltip",
+      "screen_hint": "Capture the Void Alerts dashboard with multiple flagged voids visible and severity badges.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": ["[BAR_NAME]"]
+    },
+    {
+      "order": 3,
+      "title": "Filter by Employee — Who's at the Center of the Pattern",
+      "annotation": "One click filters the entire void history by a single employee. You'll see their void rate vs the team average, the times they happen, and the tickets involved. No accusations — just data.",
+      "type": "callout",
+      "screen_hint": "Show the employee filter applied with one bartender's void history surfaced and their void-rate vs team-avg comparison.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": []
+    },
+    {
+      "order": 4,
+      "title": "Suspicious Pattern Detected: This pattern typically indicates [PATTERN_TYPE]",
+      "annotation": "CoreTAP doesn't just show voids — it interprets them. When a bartender voids 6 drinks at the end of every Friday shift, this pattern typically indicates pour-and-pocket or comp-and-keep. We label it so you know what you're looking at.",
+      "type": "callout",
+      "screen_hint": "Highlight a flagged pattern card with the 'pattern typically indicates' interpretation visible.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": []
+    },
+    {
+      "order": 5,
+      "title": "Dollar Amount at Risk — Make It Concrete",
+      "annotation": "This isn't 'maybe a few drinks.' CoreTAP calculates the exact dollar amount of the suspicious voids over the last 30 days. For this employee at [BAR_NAME], that's $847 in pattern-flagged voids — a real number you can act on.",
+      "type": "zoom",
+      "screen_hint": "Zoom on the dollar-at-risk number for the flagged employee with the date range selector visible.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": ["[BAR_NAME]"]
+    },
+    {
+      "order": 6,
+      "title": "The Investigation Workflow",
+      "annotation": "Click 'Investigate' and CoreTAP packages the evidence: every void, every ticket, the times, the cameras (if integrated), and a one-page PDF you can hand to your manager or attorney. No spreadsheet wrangling.",
+      "type": "callout",
+      "screen_hint": "Show the Investigation workflow with the evidence-pack PDF preview and timeline of events.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": []
+    },
+    {
+      "order": 7,
+      "title": "Manager Notification — Action Without Accusation",
+      "annotation": "CoreTAP sends a quiet, manager-only notification the moment a pattern crosses the threshold. No public alerts, no shaming — just the right person knowing the right thing at the right time. Want this running on [BAR_NAME] this week?",
+      "type": "popup",
+      "screen_hint": "Lead capture popup with a small mockup of the manager Slack/SMS notification visible.",
+      "has_cta": true,
+      "cta_label": "Catch My First Pattern Free",
+      "cta_url": "https://coretap.ai/get-started",
+      "personalization_tokens": ["[BAR_NAME]"]
+    }
+  ],
+  "lead_capture_step": 7,
+  "final_cta_label": "Catch My First Pattern Free",
+  "final_cta_url": "https://coretap.ai/get-started"
+}

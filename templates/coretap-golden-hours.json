@@ -1,0 +1,80 @@
+{
+  "id": "coretap-golden-hours",
+  "name": "Golden Hours — Where 60% of Your Revenue Hides",
+  "tier": "monitor",
+  "price": "$449/mo",
+  "description": "6-step deep-dive on the Golden Hours feature for owners who want to understand exactly how the 3-hour peak revenue window is detected and acted on.",
+  "estimated_duration_minutes": 3,
+  "use_case": "sales",
+  "steps": [
+    {
+      "order": 1,
+      "title": "What Are Golden Hours?",
+      "annotation": "Golden Hours is the 3-hour window where [BAR_NAME] makes the majority of its nightly revenue. We detect it automatically by analyzing 30+ days of POS data — no setup, no manual configuration.",
+      "type": "tooltip",
+      "screen_hint": "Capture the Golden Hours feature page with the headline metric ('60% of revenue in 3 hours') visible.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": ["[BAR_NAME]"]
+    },
+    {
+      "order": 2,
+      "title": "The 3-Hour Revenue Window Heatmap",
+      "annotation": "This heatmap shows every hour of every night, color-coded by revenue density. The bright band is your Golden Hours — for [BAR_NAME], that's typically Friday and Saturday between 9pm and midnight.",
+      "type": "zoom",
+      "screen_hint": "Full zoom on the weekly heatmap showing peak revenue windows highlighted in bright color across days.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": ["[BAR_NAME]"]
+    },
+    {
+      "order": 3,
+      "title": "Day-Over-Day Revenue Comparison",
+      "annotation": "Compare today's Golden Hours performance against last week, last month, and the same weeknight pattern. If Saturday at 10pm is down 18%, you'll see it immediately — not three days later in a paper report.",
+      "type": "callout",
+      "screen_hint": "Show the day-over-day comparison chart with up/down arrows and percentage deltas.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": []
+    },
+    {
+      "order": 4,
+      "title": "Most Bars Make 60% of Revenue in 3 Hours",
+      "annotation": "This is the core insight Golden Hours surfaces. If [BAR_NAME] makes $1,000/night, $600 of it is happening in a 3-hour window. Get those 3 hours right and revenue compounds. Get them wrong and the whole night is a loss.",
+      "type": "popup",
+      "screen_hint": "Popup stat card with the '60% / 3 hours' insight in large type and a supporting visualization.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": ["[BAR_NAME]"]
+    },
+    {
+      "order": 5,
+      "title": "Export the Golden Hours Report",
+      "annotation": "One click and you have a PDF or CSV of [BAR_NAME]'s Golden Hours over any date range — perfect for staff meetings, manager 1-on-1s, or sharing with your accountant.",
+      "type": "callout",
+      "screen_hint": "Highlight the Export button and a sample exported PDF preview.",
+      "has_cta": false,
+      "cta_label": null,
+      "cta_url": null,
+      "personalization_tokens": ["[BAR_NAME]"]
+    },
+    {
+      "order": 6,
+      "title": "Unlock Staff Recommendations on Execute Tier",
+      "annotation": "Monitor tier shows you the Golden Hours. Execute tier ($599/mo) tells you exactly which staff to schedule, which drinks to push, and what to prep — based on your historical Golden Hours pattern. Want to see it?",
+      "type": "popup",
+      "screen_hint": "Upgrade overlay comparing Monitor vs Execute features for Golden Hours, with Execute tier highlighted.",
+      "has_cta": true,
+      "cta_label": "Upgrade to Execute Tier",
+      "cta_url": "https://coretap.ai/get-started",
+      "personalization_tokens": []
+    }
+  ],
+  "lead_capture_step": 6,
+  "final_cta_label": "Upgrade to Execute Tier",
+  "final_cta_url": "https://coretap.ai/get-started"
+}
