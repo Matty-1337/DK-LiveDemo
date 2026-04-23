@@ -46,13 +46,14 @@ else
 fi
 
 echo
-echo "==> Claude Desktop MCP config snippet:"
+echo "==> Claude Desktop MCP config snippet (use mcp-remote + bearer token; set MCP_AUTH_TOKEN in env):"
 cat <<EOF
 {
   "mcpServers": {
     "livedemo-dk": {
-      "url": "$MCP_URL/sse",
-      "transport": "sse"
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "$MCP_URL/sse", "--header", "Authorization:Bearer \${MCP_AUTH_TOKEN}"],
+      "env": { "MCP_AUTH_TOKEN": "<from Infisical prod>" }
     }
   }
 }
