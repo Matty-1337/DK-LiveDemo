@@ -10,13 +10,13 @@ import { McpTool } from './lib/tool.js';
 import { zodToJsonSchema } from './lib/tool.js';
 import { demoTools } from './tools/demos.js';
 import { stepTools } from './tools/steps.js';
-import { templateTools } from './tools/templates.js';
 import { analyticsTools } from './tools/analytics.js';
+
+// Phase 6 tools (catalog / generate / status) registered in a later commit.
 
 const ALL_TOOLS: McpTool[] = [
   ...demoTools,
   ...stepTools,
-  ...templateTools,
   ...analyticsTools,
 ];
 
@@ -68,7 +68,7 @@ function buildMcpServer(): Server {
 }
 
 const PORT = Number(process.env.PORT ?? 3100);
-const API_URL = process.env.LIVEDEMO_API_URL ?? 'http://livedemo-backend:3005';
+const API_URL = process.env.LIVEDEMO_API_URL ?? 'http://livedemo-backend.railway.internal:3005';
 
 // Track active SSE transports by sessionId so POST /messages can route to them.
 const transports = new Map<string, SSEServerTransport>();

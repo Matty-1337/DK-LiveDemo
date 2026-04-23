@@ -1,127 +1,149 @@
+// Screen + step tools. In the backend, steps are embedded in screens.steps[]
+// — not a standalone collection (see docs/upstream-data-model.md).
+
 import { z } from 'zod';
 import { defineTool, McpTool } from '../lib/tool.js';
 import { getClient } from '../lib/client.js';
+import { resolveWorkspaceId } from './demos.js';
 
-const stepTypeEnum = z.enum(['tooltip', 'callout', 'popup', 'zoom', 'voiceover']);
+const ObjectId = z.string().regex(/^[a-f0-9]{24}$/i, 'expected 24-hex ObjectId');
 
-const addStepSchema = z.object({
-  demo_id: z.string(),
-  title: z.string(),
-  annotation: z.string(),
-  type: stepTypeEnum,
-  position: z
-    .object({
-      x: z.number(),
-      y: z.number(),
-    })
-    .optional(),
-  order: z.number().int().nonnegative().optional(),
-});
+const StepViewType = z.enum(['hotspot', 'pointer', 'popup', 'none']);
 
-const updateStepSchema = z.object({
-  demo_id: z.string(),
-  step_id: z.string(),
-  title: z.string().optional(),
-  annotation: z.string().optional(),
-  type: stepTypeEnum.optional(),
-});
-
-const deleteStepSchema = z.object({
-  demo_id: z.string(),
-  step_id: z.string(),
-});
-
-const reorderSchema = z.object({
-  demo_id: z.string(),
-  step_order: z.array(z.string()),
-});
-
-const ctaSchema = z.object({
-  demo_id: z.string(),
-  step_id: z.string(),
-  label: z.string(),
-  url: z.string(),
-  style: z.enum(['primary', 'secondary']).optional(),
-});
-
-const leadFormSchema = z.object({
-  demo_id: z.string(),
-  step_id: z.string(),
-  fields: z.array(z.string()),
-  redirect_url: z.string().optional(),
-});
-
-const voiceoverSchema = z.object({
-  demo_id: z.string(),
-  step_id: z.string(),
-  script: z.string(),
-  voice: z.string().optional(),
-});
+const PopupSpec = z
+  .object({
+    type: z.string().optional(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    alignment: z.enum(['center', 'left', 'right']).optional(),
+    showOverlay: z.boolean().optional(),
+    buttons: z
+      .array(
+        z.object({
+          index: z.number().optional(),
+          text: z.string().optional(),
+          gotoType: z.enum(['screen', 'website', 'next', 'none']).optional(),
+          gotoWebsite: z.string().optional(),
+          gotoScreen: ObjectId.optional(),
+          textColor: z.string().optional(),
+          backgroundColor: z.string().optional(),
+        }),
+      )
+      .optional(),
+  })
+  .strict();
 
 export const stepTools: McpTool[] = [
   defineTool({
     name: 'livedemo_add_step',
-    description: 'Add a step (annotation/tooltip/callout/popup/zoom/voiceover) to a demo.',
-    schema: addStepSchema,
-    handler: async ({ demo_id, ...body }) =>
-      getClient().post(`/api/demos/${encodeURIComponent(demo_id)}/steps`, body),
+    description:
+      'Add a step to a screen. Steps are embedded in screens.steps[]; the returned step has an _id but lives inside the screen doc.',
+    schema: z.object({
+      story_id: ObjectId,
+      screen_id: ObjectId,
+      view_type: StepViewType.default('popup'),
+      index: z.number().int().nonnegative().default(0),
+      workspace_id: ObjectId.optional(),
+    }),
+    handler: async ({ story_id, screen_id, view_type, index, workspace_id }) => {
+      return getClient().createStep(resolveWorkspaceId(workspace_id), story_id, screen_id, {
+        index,
+        view: { viewType: view_type },
+      });
+    },
   }),
+
   defineTool({
     name: 'livedemo_update_step',
-    description: 'Update a step on a demo.',
-    schema: updateStepSchema,
-    handler: async ({ demo_id, step_id, ...body }) =>
-      getClient().put(
-        `/api/demos/${encodeURIComponent(demo_id)}/steps/${encodeURIComponent(step_id)}`,
+    description:
+      'Patch an embedded step. Pass only the fields you want to change; the handler uses Mongo positional operators so unspecified fields are preserved.',
+    schema: z.object({
+      story_id: ObjectId,
+      screen_id: ObjectId,
+      step_id: ObjectId,
+      view_type: StepViewType.optional(),
+      content: z.string().optional().describe('HTML body for the step, free-form'),
+      popup: PopupSpec.optional(),
+      workspace_id: ObjectId.optional(),
+    }),
+    handler: async ({ story_id, screen_id, step_id, view_type, content, popup, workspace_id }) => {
+      const body: Record<string, unknown> = {};
+      const view: Record<string, unknown> = {};
+      if (view_type) view.viewType = view_type;
+      if (content !== undefined) view.content = content;
+      if (popup) view.popup = popup;
+      if (Object.keys(view).length) body.view = view;
+      return getClient().patchStep(
+        resolveWorkspaceId(workspace_id),
+        story_id,
+        screen_id,
+        step_id,
         body,
-      ),
+      );
+    },
   }),
+
   defineTool({
     name: 'livedemo_delete_step',
-    description: 'Delete a step from a demo.',
-    schema: deleteStepSchema,
-    handler: async ({ demo_id, step_id }) =>
-      getClient().delete(
-        `/api/demos/${encodeURIComponent(demo_id)}/steps/${encodeURIComponent(step_id)}`,
-      ),
+    description: 'Remove a step from a screen (Mongo $pull from screens.steps[]).',
+    schema: z.object({
+      story_id: ObjectId,
+      screen_id: ObjectId,
+      step_id: ObjectId,
+      workspace_id: ObjectId.optional(),
+    }),
+    handler: async ({ story_id, screen_id, step_id, workspace_id }) => {
+      return getClient().deleteStep(
+        resolveWorkspaceId(workspace_id),
+        story_id,
+        screen_id,
+        step_id,
+      );
+    },
   }),
-  defineTool({
-    name: 'livedemo_reorder_steps',
-    description: 'Reorder all steps in a demo. Pass the new ordered list of step ids.',
-    schema: reorderSchema,
-    handler: async ({ demo_id, step_order }) =>
-      getClient().put(`/api/demos/${encodeURIComponent(demo_id)}/steps/reorder`, {
-        step_order,
-      }),
-  }),
-  defineTool({
-    name: 'livedemo_add_cta',
-    description: 'Attach a call-to-action button to a step.',
-    schema: ctaSchema,
-    handler: async ({ demo_id, step_id, ...body }) =>
-      getClient().post(
-        `/api/demos/${encodeURIComponent(demo_id)}/steps/${encodeURIComponent(step_id)}/cta`,
-        body,
-      ),
-  }),
+
   defineTool({
     name: 'livedemo_add_lead_form',
-    description: 'Attach a lead capture form to a step.',
-    schema: leadFormSchema,
-    handler: async ({ demo_id, step_id, ...body }) =>
-      getClient().post(
-        `/api/demos/${encodeURIComponent(demo_id)}/steps/${encodeURIComponent(step_id)}/lead-form`,
-        body,
-      ),
+    description:
+      'Create a Form and attach it to a step as a popup form. Default fields are Name + Email. Returns the created form doc.',
+    schema: z.object({
+      story_id: ObjectId,
+      screen_id: ObjectId,
+      step_id: ObjectId,
+      workspace_id: ObjectId.optional(),
+    }),
+    handler: async ({ story_id, screen_id, step_id, workspace_id }) => {
+      return getClient().createForm(resolveWorkspaceId(workspace_id), {
+        type: 'step',
+        storyId: story_id,
+        screenId: screen_id,
+        stepId: step_id,
+      });
+    },
   }),
+
   defineTool({
-    name: 'livedemo_generate_voiceover',
-    description: 'Generate an AI voiceover for a step from a script.',
-    schema: voiceoverSchema,
-    handler: async ({ demo_id, step_id, ...body }) =>
-      getClient().post(
-        `/api/demos/${encodeURIComponent(demo_id)}/steps/${encodeURIComponent(step_id)}/voiceover`,
-        body,
-      ),
+    name: 'livedemo_update_form',
+    description: 'Rename a form or convert it to/from HubSpot.',
+    schema: z.object({
+      form_id: ObjectId,
+      title: z.string().optional(),
+      type: z.enum(['step', 'hubspot']).optional(),
+      hubspot: z
+        .object({
+          formId: z.string().optional(),
+          portalId: z.string().optional(),
+          embedVersion: z.number().optional(),
+        })
+        .optional(),
+      workspace_id: ObjectId.optional(),
+    }),
+    handler: async ({ form_id, title, type, hubspot, workspace_id }) => {
+      return getClient().patchForm(resolveWorkspaceId(workspace_id), form_id, {
+        title,
+        type,
+        hubspot,
+      });
+    },
   }),
 ];
