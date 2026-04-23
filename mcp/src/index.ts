@@ -69,22 +69,9 @@ function buildMcpServer(): Server {
 
 const PORT = Number(process.env.PORT ?? 3100);
 const API_URL = process.env.LIVEDEMO_API_URL ?? 'http://livedemo-backend:3005';
-const AUTH_TOKEN = process.env.MCP_AUTH_TOKEN ?? '';
 
 // Track active SSE transports by sessionId so POST /messages can route to them.
 const transports = new Map<string, SSEServerTransport>();
-
-function isAuthorized(req: http.IncomingMessage): boolean {
-  if (!AUTH_TOKEN) return true; // auth disabled — log warning at startup
-  const header = req.headers.authorization ?? '';
-  const match = /^Bearer\s+(.+)$/i.exec(header);
-  return match?.[1] === AUTH_TOKEN;
-}
-
-function reject(res: http.ServerResponse, code: number, message: string) {
-  res.writeHead(code, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ error: message }));
-}
 
 const httpServer = http.createServer(async (req, res) => {
   const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
@@ -96,7 +83,6 @@ const httpServer = http.createServer(async (req, res) => {
   }
 
   if (req.method === 'GET' && url.pathname === '/sse') {
-    if (!isAuthorized(req)) return reject(res, 401, 'Unauthorized');
     const transport = new SSEServerTransport('/messages', res);
     transports.set(transport.sessionId, transport);
     res.on('close', () => {
@@ -108,7 +94,6 @@ const httpServer = http.createServer(async (req, res) => {
   }
 
   if (req.method === 'POST' && url.pathname === '/messages') {
-    if (!isAuthorized(req)) return reject(res, 401, 'Unauthorized');
     const sessionId = url.searchParams.get('sessionId') ?? '';
     const transport = transports.get(sessionId);
     if (!transport) {
@@ -129,11 +114,7 @@ httpServer.listen(PORT, () => {
   console.log(`[livedemo-mcp] backend API: ${API_URL}`);
   console.log(`[livedemo-mcp] tools: ${ALL_TOOLS.length}`);
   console.log(`[livedemo-mcp] SSE endpoint: GET /sse  |  health: GET /health`);
-  if (!AUTH_TOKEN) {
-    console.warn('[livedemo-mcp] WARNING: MCP_AUTH_TOKEN is not set — /sse and /messages are open to any caller.');
-  } else {
-    console.log('[livedemo-mcp] auth: Bearer token required on /sse and /messages');
-  }
+  console.warn('[livedemo-mcp] auth: DISABLED — /sse and /messages are open to any caller.');
 });
 
 function shutdown(signal: string) {
