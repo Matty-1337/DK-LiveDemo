@@ -1,0 +1,405 @@
+{
+  "$schema": "./products.schema.json",
+  "defaults": {
+    "ctaUrl": "https://cal.com/matty-dk",
+    "ctaText": "Book a demo",
+    "captureBaseUrl": "https://app.htxtap.com",
+    "captureWaitStrategy": "networkidle",
+    "captureTimeoutMs": 30000,
+    "hideSelectors": [
+      ".notification-toast",
+      "[data-live-clock]",
+      ".intercom-launcher",
+      ".hotjar-survey",
+      "[data-testid=\"timestamp\"]"
+    ]
+  },
+  "coretap": {
+    "name": "CoreTAP",
+    "productId": "coretap",
+    "baseUrl": "https://app.htxtap.com",
+    "authFn": "coretap",
+    "tiers": {
+      "monitor": { "price": 449, "priceDisplay": "$449/mo" },
+      "execute": { "price": 599, "priceDisplay": "$599/mo" },
+      "command": { "price": 749, "priceDisplay": "$749/mo" }
+    },
+    "modules": {
+      "overview": {
+        "name": "CoreTAP Overview — The Money You're Leaving on the Table",
+        "tier": "all",
+        "description": "8-step first-look for any bar owner; adapted to 6 captured screens with per-screen popups.",
+        "estimatedDurationMinutes": 4,
+        "navigationPlan": [
+          { "path": "/dashboard", "waitFor": "networkidle", "note": "Main dashboard landing — KPI widgets" },
+          { "path": "/dashboard?view=revenue", "waitFor": "networkidle", "note": "Revenue Pulse widget emphasis" },
+          { "path": "/dashboard?view=golden-hours", "waitFor": "networkidle", "note": "Golden Hours heatmap" },
+          { "path": "/dashboard?view=voids", "waitFor": "networkidle", "note": "Active voids alert" },
+          { "path": "/dashboard?view=staff", "waitFor": "networkidle", "note": "Staff performance ring" },
+          { "path": "/dashboard?view=quick-wins", "waitFor": "networkidle", "note": "Quick Wins action feed" }
+        ],
+        "narrative": [
+          {
+            "screenIndex": 0,
+            "popup": {
+              "title": "Welcome to {{prospectName}}'s CoreTAP Dashboard",
+              "body": "<p>This is the command center for <strong>{{prospectName}}</strong>. Everything you need to know about your bar's health is on this single screen — built specifically for owners and GMs who don't have time to dig through reports.</p>",
+              "alignment": "center",
+              "showOverlay": true
+            }
+          },
+          {
+            "screenIndex": 1,
+            "popup": {
+              "title": "Revenue Pulse — Live, Not Lagging",
+              "body": "<p>This Revenue Pulse widget updates every 5 minutes from your POS. No more waiting for end-of-night reports — see <strong>{{prospectName}}</strong>'s revenue as it happens, with comparisons against last week and last month.</p>"
+            }
+          },
+          {
+            "screenIndex": 2,
+            "popup": {
+              "title": "Golden Hours — Where Your Money Actually Comes From",
+              "body": "<p>Most bars make 60% of their nightly revenue in just 3 hours. Golden Hours pinpoints exactly when <strong>{{prospectName}}</strong>'s peak window is — so you can staff smarter, push happy hour tighter, and stop bleeding labor cost in the dead zones.</p>"
+            }
+          },
+          {
+            "screenIndex": 3,
+            "popup": {
+              "title": "Active Voids Alert — Theft Doesn't Hide Anymore",
+              "body": "<p>Every void on every ticket, flagged in real time. CoreTAP groups suspicious patterns by employee and shows you the dollar amount at risk — not just the count. This alone has paid for the system at most of our bars within 30 days.</p>"
+            }
+          },
+          {
+            "screenIndex": 4,
+            "popup": {
+              "title": "Staff Performance Ring — Who's Carrying the Bar",
+              "body": "<p>A-D grading on every employee, every shift. The ring shows you at a glance who your A-players are and where your D-players are dragging revenue down.</p>"
+            }
+          },
+          {
+            "screenIndex": 5,
+            "popup": {
+              "title": "See What CoreTAP Finds in {{prospectName}}",
+              "body": "<p>We'd expect to find $2,000+/month in recoverable revenue at <strong>{{prospectName}}</strong> in the first 30 days — voids, missed peak staffing, and underperforming employees you couldn't see before. Book a 20-minute call and we'll walk through it together.</p>",
+              "cta": { "text": "Book My Free Audit", "url": "https://cal.com/matty-dk" }
+            }
+          }
+        ]
+      },
+
+      "golden-hours": {
+        "name": "Golden Hours — Where 60% of Your Revenue Hides",
+        "tier": "monitor",
+        "description": "Deep-dive on the 3-hour peak revenue window detection.",
+        "estimatedDurationMinutes": 3,
+        "navigationPlan": [
+          { "path": "/golden-hours", "waitFor": "networkidle", "note": "Feature landing page" },
+          { "path": "/golden-hours?view=heatmap", "waitFor": "networkidle", "note": "Weekly heatmap" },
+          { "path": "/golden-hours?view=compare", "waitFor": "networkidle", "note": "Day-over-day comparison" },
+          { "path": "/golden-hours?view=insight", "waitFor": "networkidle", "note": "60%/3hrs insight card" },
+          { "path": "/golden-hours?view=export", "waitFor": "networkidle", "note": "Export panel" }
+        ],
+        "narrative": [
+          {
+            "screenIndex": 0,
+            "popup": {
+              "title": "What Are Golden Hours?",
+              "body": "<p>Golden Hours is the 3-hour window where <strong>{{prospectName}}</strong> makes the majority of its nightly revenue. We detect it automatically by analyzing 30+ days of POS data — no setup, no manual configuration.</p>"
+            }
+          },
+          {
+            "screenIndex": 1,
+            "popup": {
+              "title": "The 3-Hour Revenue Window Heatmap",
+              "body": "<p>This heatmap shows every hour of every night, color-coded by revenue density. The bright band is your Golden Hours — for bars like <strong>{{prospectName}}</strong>, that's typically Friday and Saturday between 9pm and midnight.</p>"
+            }
+          },
+          {
+            "screenIndex": 2,
+            "popup": {
+              "title": "Day-Over-Day Revenue Comparison",
+              "body": "<p>Compare today's Golden Hours performance against last week, last month, and the same weeknight pattern. If Saturday at 10pm is down 18%, you'll see it immediately — not three days later in a paper report.</p>"
+            }
+          },
+          {
+            "screenIndex": 3,
+            "popup": {
+              "title": "60% of Revenue in 3 Hours",
+              "body": "<p>If <strong>{{prospectName}}</strong> makes $1,000/night, $600 of it is happening in a 3-hour window. Get those 3 hours right and revenue compounds. Get them wrong and the whole night is a loss.</p>"
+            }
+          },
+          {
+            "screenIndex": 4,
+            "popup": {
+              "title": "Ready to See {{prospectName}}'s Golden Hours?",
+              "body": "<p>Monitor tier ($449/mo) gets you the live Golden Hours view. Execute tier ($599/mo) adds staff recommendations, drink-push guidance, and prep timing. Want a walkthrough?</p>",
+              "cta": { "text": "Book a 15-Minute Demo", "url": "https://cal.com/matty-dk" }
+            }
+          }
+        ]
+      },
+
+      "void-detection": {
+        "name": "Void Detection — The Theft You're Not Seeing",
+        "tier": "execute",
+        "description": "For the skeptical owner who insists their staff doesn't steal.",
+        "estimatedDurationMinutes": 4,
+        "navigationPlan": [
+          { "path": "/voids", "waitFor": "networkidle", "note": "Void alerts dashboard" },
+          { "path": "/voids?view=feed", "waitFor": "networkidle", "note": "Real-time void feed" },
+          { "path": "/voids?view=by-employee", "waitFor": "networkidle", "note": "Employee filter applied" },
+          { "path": "/voids?view=patterns", "waitFor": "networkidle", "note": "Pattern detection card" },
+          { "path": "/voids?view=risk", "waitFor": "networkidle", "note": "Dollar at risk" },
+          { "path": "/voids?view=investigate", "waitFor": "networkidle", "note": "Investigation workflow" }
+        ],
+        "narrative": [
+          {
+            "screenIndex": 0,
+            "popup": {
+              "title": "Most Bars Lose 2–4% of Revenue to Voids",
+              "body": "<p>You probably don't think theft is happening at <strong>{{prospectName}}</strong>. Neither did 90% of the owners we work with — until CoreTAP showed them the patterns. The average find in month one is $1,200 in suspicious voids.</p>"
+            }
+          },
+          {
+            "screenIndex": 1,
+            "popup": {
+              "title": "The Void Alerts Dashboard",
+              "body": "<p>Every void at <strong>{{prospectName}}</strong> in real time, grouped by employee, ticket, time of day, and dollar amount. Not a report you have to ask for — a feed that surfaces the suspicious ones automatically.</p>"
+            }
+          },
+          {
+            "screenIndex": 2,
+            "popup": {
+              "title": "Filter by Employee — Who's at the Center of the Pattern",
+              "body": "<p>One click filters the entire void history by a single employee. You'll see their void rate vs the team average, the times they happen, and the tickets involved. No accusations — just data.</p>"
+            }
+          },
+          {
+            "screenIndex": 3,
+            "popup": {
+              "title": "Suspicious Pattern Detected",
+              "body": "<p>CoreTAP doesn't just show voids — it interprets them. When a bartender voids 6 drinks at the end of every Friday shift, we label the pattern so you know what you're looking at: pour-and-pocket, comp-and-keep, or legit.</p>"
+            }
+          },
+          {
+            "screenIndex": 4,
+            "popup": {
+              "title": "Dollar Amount at Risk — Make It Concrete",
+              "body": "<p>This isn't 'maybe a few drinks.' CoreTAP calculates the exact dollar amount of suspicious voids over the last 30 days. For this employee at <strong>{{prospectName}}</strong>, that's $847 in pattern-flagged voids — a real number you can act on.</p>"
+            }
+          },
+          {
+            "screenIndex": 5,
+            "popup": {
+              "title": "Catch the First Pattern at {{prospectName}}",
+              "body": "<p>CoreTAP sends a quiet, manager-only notification the moment a pattern crosses the threshold. No public alerts, no shaming — just the right person knowing the right thing at the right time. Want this running on {{prospectName}} this week?</p>",
+              "cta": { "text": "Catch My First Pattern Free", "url": "https://cal.com/matty-dk" }
+            }
+          }
+        ]
+      },
+
+      "employee-grading": {
+        "name": "Staff Performance — Your A-Players vs Your D-Players",
+        "tier": "execute",
+        "description": "A-D grading system for GM/manager-level demos.",
+        "estimatedDurationMinutes": 3,
+        "navigationPlan": [
+          { "path": "/staff", "waitFor": "networkidle", "note": "Staff performance landing" },
+          { "path": "/staff?view=grid", "waitFor": "networkidle", "note": "Grading grid" },
+          { "path": "/staff?view=top-performer", "waitFor": "networkidle", "note": "Top performer profile" },
+          { "path": "/staff?view=underperformer", "waitFor": "networkidle", "note": "D-grade employee profile" },
+          { "path": "/staff?view=trend", "waitFor": "networkidle", "note": "30-day trend chart" }
+        ],
+        "narrative": [
+          {
+            "screenIndex": 0,
+            "popup": {
+              "title": "Every Employee, Graded A Through D",
+              "body": "<p>CoreTAP grades every bartender, server, and barback A through D based on revenue per hour, voids, comps, ticket size, and shift quality. No more gut-feel performance reviews — actual data, every shift.</p>"
+            }
+          },
+          {
+            "screenIndex": 1,
+            "popup": {
+              "title": "The Grading Grid — At-a-Glance Hierarchy",
+              "body": "<p>Every employee at <strong>{{prospectName}}</strong> in a single grid, sorted by grade. A-players in green at the top, D-players in red at the bottom. You'll know in 5 seconds who to invest in and who to coach out.</p>"
+            }
+          },
+          {
+            "screenIndex": 2,
+            "popup": {
+              "title": "Top Performer Highlight",
+              "body": "<p>Click into your top A-player and see exactly what they do differently — bigger tickets, faster turn time, better upsell rate. Then use that as a coaching template for the rest of the team.</p>"
+            }
+          },
+          {
+            "screenIndex": 3,
+            "popup": {
+              "title": "Underperformer Flag — Coaching, Not Firing",
+              "body": "<p>D-grades aren't a death sentence. CoreTAP flags the specific behaviors dragging an employee down — slow turn, low upsell, high void rate — so you can coach the fix instead of guessing what's wrong.</p>"
+            }
+          },
+          {
+            "screenIndex": 4,
+            "popup": {
+              "title": "Your A-Players Make 3x More Than Your D-Players",
+              "body": "<p>Across the bars CoreTAP runs in, A-grade employees generate 3x the revenue per hour of D-grade employees. That gap is the single biggest unrecognized lever in <strong>{{prospectName}}</strong> right now. Want the grading running on your team this week?</p>",
+              "cta": { "text": "Grade My Team Free for 14 Days", "url": "https://cal.com/matty-dk" }
+            }
+          }
+        ]
+      },
+
+      "monitor-pitch": {
+        "name": "Monitor Tier — Stop Bleeding Money You Can't See",
+        "tier": "monitor",
+        "description": "Urgency-framed cold-outreach pitch. Ends in Calendly.",
+        "estimatedDurationMinutes": 2,
+        "navigationPlan": [
+          { "path": "/dashboard", "waitFor": "networkidle", "note": "Dashboard hero — establish product" },
+          { "path": "/dashboard?view=full", "waitFor": "networkidle", "note": "Full Monitor widget view" },
+          { "path": "/pricing?tier=monitor", "waitFor": "networkidle", "note": "Monitor pricing card" },
+          { "path": "/dashboard?view=loss-est", "waitFor": "networkidle", "note": "Loss-estimate widget" },
+          { "path": "/book-demo", "waitFor": "networkidle", "note": "Calendly / book-a-demo landing" }
+        ],
+        "narrative": [
+          {
+            "screenIndex": 0,
+            "popup": {
+              "title": "{{prospectName}} Is Probably Losing $2,400/mo Right Now",
+              "body": "<p>We pulled industry data for bars in <strong>{{prospectName}}</strong>'s revenue range. The average loss to undetected voids, missed peak windows, and underperforming shifts is $2,400/month. You won't see it in your P&amp;L — that's the problem.</p>"
+            }
+          },
+          {
+            "screenIndex": 1,
+            "popup": {
+              "title": "This Is What CoreTAP Sees That You Don't",
+              "body": "<p>Live Revenue Pulse, Active Void Alerts, Golden Hours peak windows, Staff Performance grading — all on one screen for <strong>{{prospectName}}</strong>, updated every 5 minutes from your POS. No reports to run. No spreadsheets to build.</p>"
+            }
+          },
+          {
+            "screenIndex": 2,
+            "popup": {
+              "title": "Monitor Tier — $449/mo. Pays for Itself in Week 2.",
+              "body": "<p>$449/month gets you the full Monitor tier on <strong>{{prospectName}}</strong>: live dashboard, Golden Hours, void alerts, and staff grading. Average customer recovers the subscription cost in their first 14 days. Most recover it in the first week.</p>"
+            }
+          },
+          {
+            "screenIndex": 3,
+            "popup": {
+              "title": "Every Day You Wait, You Lose $80",
+              "body": "<p>If the average bar loses $2,400/month, that's $80/day. Every day you put off booking a demo, you're choosing to let $80 walk out the door at <strong>{{prospectName}}</strong>. We're not selling software — we're selling the dollars you're already losing.</p>"
+            }
+          },
+          {
+            "screenIndex": 4,
+            "popup": {
+              "title": "Book a 20-Minute Demo. See {{prospectName}}'s Number.",
+              "body": "<p>20 minutes on Calendly. We'll pull a sample of <strong>{{prospectName}}</strong>'s public data and show you the specific dollar amount we'd expect to recover in month one. If the number isn't worth your time, we don't ask for a second meeting.</p>",
+              "cta": { "text": "Book My 20-Minute Demo", "url": "https://cal.com/matty-dk" }
+            }
+          }
+        ]
+      },
+
+      "command-full": {
+        "name": "Command Tier — Multi-Location Operating System",
+        "tier": "command",
+        "description": "Comprehensive Command-tier demo for multi-location operators and hospitality groups.",
+        "estimatedDurationMinutes": 7,
+        "navigationPlan": [
+          { "path": "/command", "waitFor": "networkidle", "note": "Command landing — group KPIs" },
+          { "path": "/command?view=switcher", "waitFor": "networkidle", "note": "Multi-location switcher" },
+          { "path": "/command?view=comparison", "waitFor": "networkidle", "note": "Cross-venue comparison" },
+          { "path": "/command?view=exec-report", "waitFor": "networkidle", "note": "Executive summary" },
+          { "path": "/command?view=api", "waitFor": "networkidle", "note": "API docs / Command-tier API keys" },
+          { "path": "/command?view=whitelabel", "waitFor": "networkidle", "note": "White-label preview" },
+          { "path": "/command?view=alerts", "waitFor": "networkidle", "note": "Custom alerts builder" },
+          { "path": "/command?view=support", "waitFor": "networkidle", "note": "Priority support / CSM" },
+          { "path": "/command?view=roi", "waitFor": "networkidle", "note": "ROI calculator" },
+          { "path": "/command?view=benchmark", "waitFor": "networkidle", "note": "Market benchmark + book-a-call" }
+        ],
+        "narrative": [
+          {
+            "screenIndex": 0,
+            "popup": {
+              "title": "Welcome to the {{prospectName}} Command Center",
+              "body": "<p>This is the Command-tier view of <strong>{{prospectName}}</strong> — every location, every revenue line, every alert in a single operating screen. Built for groups running 3+ venues who can't be at every bar every night.</p>"
+            }
+          },
+          {
+            "screenIndex": 1,
+            "popup": {
+              "title": "Multi-Location Switcher — All Your Bars, One Click Away",
+              "body": "<p>Toggle between any of <strong>{{prospectName}}</strong>'s venues instantly. Each bar keeps its own dashboard, its own staff, its own alerts — but you see them all from the same login.</p>"
+            }
+          },
+          {
+            "screenIndex": 2,
+            "popup": {
+              "title": "Cross-Venue Comparison Dashboard",
+              "body": "<p>Side-by-side performance across every <strong>{{prospectName}}</strong> location. Revenue per labor hour, void rate, A-player ratio, Golden Hours capture rate — ranked. You'll see immediately which venue is the model and which one needs a manager change.</p>"
+            }
+          },
+          {
+            "screenIndex": 3,
+            "popup": {
+              "title": "Executive Summary — Your Monday Morning Brief",
+              "body": "<p>Every Monday at 7am, <strong>{{prospectName}}</strong> gets a one-page executive summary across all venues — revenue, alerts, top wins, top problems, and the three actions that will move the needle this week.</p>"
+            }
+          },
+          {
+            "screenIndex": 4,
+            "popup": {
+              "title": "API Access — Plug Into Everything You Already Run",
+              "body": "<p>Full REST and webhook API on Command tier. Pipe CoreTAP metrics into Looker, Sigma, Notion, your own data warehouse, or your CFO's dashboard. We don't fight your stack — we feed it.</p>"
+            }
+          },
+          {
+            "screenIndex": 5,
+            "popup": {
+              "title": "White-Label Option — Your Brand on Our Engine",
+              "body": "<p>For groups, franchises, and management companies: re-skin the entire CoreTAP UI with <strong>{{prospectName}}</strong>'s brand. Your logo, your colors, your domain. CoreTAP becomes invisible — your operating platform becomes the product.</p>"
+            }
+          },
+          {
+            "screenIndex": 6,
+            "popup": {
+              "title": "Custom Alerts — Your Rules, Your Thresholds",
+              "body": "<p>Command tier lets you define custom alerts across every venue. \"Notify me if any <strong>{{prospectName}}</strong> location drops below 80% of forecasted revenue by 10pm.\" Your operating playbook, automated.</p>"
+            }
+          },
+          {
+            "screenIndex": 7,
+            "popup": {
+              "title": "Priority Support — A Human Within 4 Hours",
+              "body": "<p>Command tier comes with priority support: dedicated Slack channel, 4-hour SLA, and a named CSM who knows <strong>{{prospectName}}</strong> by name. When your POS hiccups on a Saturday at 11pm, we're already on it.</p>"
+            }
+          },
+          {
+            "screenIndex": 8,
+            "popup": {
+              "title": "ROI Calculator — Your Payback Period in Real Numbers",
+              "body": "<p>Plug in <strong>{{prospectName}}</strong>'s number of venues and average monthly revenue. The calculator shows your projected month-one recovery, your annualized ROI, and your payback period.</p>"
+            }
+          },
+          {
+            "screenIndex": 9,
+            "popup": {
+              "title": "Book Your Enterprise Call",
+              "body": "<p><strong>{{prospectName}}</strong> benchmarked against the {{prospectLocation}} market: where you lead, where you trail, and the three plays that close the gap fastest. Book 45 minutes and we'll walk you through your specific report and the Command-tier rollout plan.</p>",
+              "cta": { "text": "Book My Enterprise Call", "url": "https://cal.com/matty-dk" }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "atlastap": {
+    "name": "AtlasTAP",
+    "status": "pending",
+    "note": "Pending bot account provisioning. Do not implement auth or capture until CoreTAP end-to-end is green.",
+    "modules": {}
+  }
+}
