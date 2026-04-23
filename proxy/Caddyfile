@@ -37,7 +37,7 @@
 
 	# ── Main reverse proxy with HTML head injection ───────────
 	handle {
-		reverse_proxy livedemo-frontend.railway.internal:8080 {
+		reverse_proxy livedemo-frontend.railway.internal:5000 {
 			header_up Host {upstream_hostport}
 			header_up X-Real-IP {remote_host}
 			header_up X-Forwarded-For {remote_host}
