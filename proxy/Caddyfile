@@ -36,27 +36,19 @@
 	}
 
 	# ── Main reverse proxy with HTML head injection ───────────
+	# `replace` from caddy-replace-response streams through the upstream
+	# body and rewrites matches. Kept outside reverse_proxy so it acts
+	# as a post-handler (handle_response needs a terminal handler like
+	# copy_response to emit a modified body — simpler to skip that).
 	handle {
 		reverse_proxy livedemo-frontend.railway.internal:5000 {
 			header_up Host {upstream_hostport}
 			header_up X-Real-IP {remote_host}
 			header_up X-Forwarded-For {remote_host}
 			header_up X-Forwarded-Proto {scheme}
-
-			# Pass through all response headers
 			header_down -Server
-
-			# Inject DK brand CSS link into every HTML response
-			# Uses Caddy's response header manipulation + streaming replace
-			@html_response {
-				header Content-Type text/html*
-			}
-
-			# Replace </head> with our CSS link + </head> in HTML responses
-			handle_response @html_response {
-				replace "</head>" "<link rel=\"stylesheet\" href=\"/dk-brand.css\" />\n</head>"
-			}
 		}
+		replace "</head>" "<link rel=\"stylesheet\" href=\"/dk-brand.css\" />\n</head>"
 	}
 
 	# ── Security headers ──────────────────────────────────────
