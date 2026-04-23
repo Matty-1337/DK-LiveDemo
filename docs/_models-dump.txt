@@ -1,0 +1,622 @@
+===MODEL:User===
+import mongoose from 'mongoose'
+import bcrypt from 'bcryptjs'
+import OnboardingGoalsTypes from '../constants/OnboardingGoalsTypes.js'
+const options = {
+  discriminatorKey: 'userType',
+  strict: true,
+  timestamps: { createdAt: true, updatedAt: true }
+}
+
+
+const GoogleProfile = new mongoose.Schema({
+  // tokenData: {},
+  email: { type: String, default: '' },
+  familyName: { type: String, default: '' },
+  givenName: { type: String, default: '' },
+  id: { type: String, default: '' },
+  locale: { type: String, default: '' },
+  name: { type: String, default: '' },
+  picture: { type: String, default: '' },
+  verifiedEmail: { type: Boolean, default: false },
+  tokenData: {
+    accessToken: { type: String, default: '' },
+    expiryDate: { type: Number, default: 0 },
+    idToken: { type: String, default: '' },
+    scope: { type: String, default: '' },
+    tokenType: { type: String, default: '' },
+  },
+})
+
+// define the User model schema
+const UserSchema = new mongoose.Schema({
+    email: {
+      type: String,
+      unique: true,
+      index: true
+    },
+    password: String,
+    name: { type: String, default: '' },
+  workspaceMembers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'WorkspaceMember' }],
+    stripeCustomerId: { type: String },
+    defaultCardId: { type: mongoose.Schema.Types.ObjectId, ref: 'Card' },
+    cards: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Card' }],
+    deleted: {type: Boolean, default: false},
+    timezone: {type: String, default: ''},
+    workspaces: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Workspace' }],
+    subscriptions: [
+      { type: mongoose.Schema.Types.ObjectId, ref: 'Subscription' }
+    ],
+    googleProfile: { type: GoogleProfile },
+    featureFlags: {
+      freeActivate: { type: Boolean, default: true},
+    },
+    onboarding: {
+      goals: [{
+        type: String,
+        enum: Object.values(OnboardingGoalsTypes.ONBOARDING_GOALS),
+      }],
+    },
+    // transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' }],
+  }, options
+)
+
+
+/**
+ * Compare the passed password with the value in the database. A model method.
+ *
+ * @param {string} password
+ * @param {function} callback
+ */
+UserSchema.methods.comparePassword = function comparePassword(password, callback) {
+  bcrypt.compare(password, this.password)
+    .then((isMatch) => {
+      callback(null, isMatch)
+    })
+    .catch((err) => {
+      callback(err, false)
+    })
+}
+
+
+/**
+ * The pre-save hook method.
+ */
+UserSchema.pre('save', async function saveHook() {
+  const user = this
+
+  // proceed further only if the password is modified or the user is new
+  if (!user.isModified('password')) return
+
+  const salt = await bcrypt.genSalt()
+  const hash = await bcrypt.hash(user.password, salt)
+
+  user.password = hash
+})
+
+
+export default  UserSchema
+
+===MODEL:AuthToken===
+import AuthTokenTypes from '../constants/AuthTokenTypes.js'
+import AuthTokenStatuses from '../constants/AuthTokenStatuses.js'
+import mongoose from 'mongoose'
+const options = {
+  strict: true,
+  timestamps: { createdAt: true, updatedAt: true },
+  discriminatorKey: 'type'
+}
+
+// define the Auth Tokens Schema
+const AuthTokenSchema = new mongoose.Schema({
+  token: { type: String, required: true, unique: true },
+  type: { type: String, default: AuthTokenTypes.AuthToken },
+  status: { type: String, default: AuthTokenStatuses.ACTIVE},
+  clientId: { type: String, default: 'customScopes' },
+  authorizedInstances: [{ type: String }],
+  scopes: [
+    { type: String }
+  ]
+}, options)
+
+
+export default AuthTokenSchema
+
+
+===MODEL:Workspace===
+import WorkspaceTypes from '../constants/WorkspaceTypes.js'
+import mongoose from 'mongoose'
+import mongooseLongFunction from 'mongoose-long'
+mongooseLongFunction(mongoose)
+
+const options = {
+  strict: false,
+  timestamps: { createdAt: true, updatedAt: true },
+  typeKey: '$type'
+}
+
+const WorkspaceSchema = new mongoose.Schema({
+    name: { $type: String, default: '' },
+    type: { $type: String, default: WorkspaceTypes.EMPTY }, // startup | pro | business
+    integrations: {
+      hubspot: { $type: Boolean, default: false },
+    },
+    adminUser: { $type: mongoose.Schema.ObjectId, ref: 'User'},
+    users: [
+      { $type: mongoose.Schema.ObjectId, ref: 'User' }
+    ],
+    subscriptions: [
+      { $type: mongoose.Schema.ObjectId, ref: 'Subscription' }
+    ],
+    liveDemos: [{
+      $type: mongoose.Schema.Types.ObjectId, ref: 'LiveDemo', default: []
+    }],
+    invitedEmails: [
+      {$type: String, default: []}
+    ],
+    library: {
+      pages: [
+        { $type: mongoose.Schema.Types.ObjectId, ref: 'Screen' },
+      ],
+      screenshots: [
+        { $type: mongoose.Schema.Types.ObjectId, ref: 'Screen' },
+      ],
+      videos: [
+        { $type: mongoose.Schema.Types.ObjectId, ref: 'Screen' },
+      ]
+    }
+  }, options
+)
+
+export default  WorkspaceSchema
+
+===MODEL:Story===
+import StoryStatuses from '../constants/StoryStatuses.js'
+import mongoose from 'mongoose'
+import StoryTypes from "../constants/StoryTypes.js";
+
+const options = {
+    strict: true,
+    timestamps: {createdAt: true, updatedAt: true},
+}
+
+
+const Story = new mongoose.Schema({
+
+        name: {type: String},
+        // shortId: { type: String,
+        //   index: true,
+        //   unique: true
+        // },
+        workspaceId: {type: mongoose.Schema.Types.ObjectId, ref: 'Workspace'},
+        userId: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+        screens: {
+            type: [{type: mongoose.Schema.Types.ObjectId, ref: 'Screen'}],
+            default: []
+        },
+        filePath: {type: String, default: ''},
+        status: {type: String, default: StoryStatuses.UPLOADING},
+        demoSuggestionId: { type: mongoose.Schema.Types.ObjectId, ref: 'DemoSuggestion' },
+    
+        isPublished: {type: Boolean, default: false},
+        type: {type: String, default: StoryTypes.web}, // web, desktop
+        capturedEvents: [],
+        tabInfo: {},
+        windowMeasures: {},
+        videoStartMs: {type: mongoose.Schema.Types.Number},
+        videoEndMs: {type: mongoose.Schema.Types.Number},
+        aspectRatio: {type: mongoose.Schema.Types.String},
+        hasCursorPositions: {type: Boolean},
+        content: {
+            contentStatus: {type: String, default: ''}, //updating, ready
+            contentId: {type: mongoose.Schema.Types.ObjectId, ref: 'StoryContent'}
+        },
+        custom: {
+            header: {
+                isActive: {type: Boolean, default: false},
+                imageUrl: {type: String, default: ''},
+                personName: {type: String, default: ''},
+                text: {type: String, default: ''}
+            },
+            theme: {
+                isActive: {type: Boolean, default: false},
+                stepBackgroundColor: {type: String, default: '#1070ff'}, // backgroundColor
+                backgroundColor: {type: String, default: '#FFFFFF'}, // backgroundColor
+                textColor: {type: String, default: '#FFFFFF'}, // textColor
+                buttonBackgroundColor: {type: String, default: '#1070ff'},// buttonColor
+                buttonTextColor: {type: String, default: '#FFFFFF'}, // buttonColor
+                overlayBackgroundColor: {type: String, default: 'rgba(0,0,0,0.65)'}, // buttonColor
+                watermarkConfig: {
+                    imageUrl: {type: String, default: ''},
+                    text: {type: String, default: ''},
+                    url: {type: String, default: ''},
+                    isActive: {type: Boolean, default: false},
+                }
+            },
+            misc: {
+                isActive: {type: Boolean, default: false},
+                confettiOnLastStep: {type: Boolean, default: true},
+                isOmniBarDisabled: {type: Boolean, default: false},
+                isLiveDemoWatermarkEnabled: {type: Boolean, default: true},
+                isTabsEnabled: {type: Boolean, default: true},
+            },
+            background: {
+                isActive: {type: Boolean, default: false},
+                backgroundColor: {type: String, default: '#FFFFFF'},
+                backgroundBlur: {type: Number, default: 0},
+                backgroundType: {type: String, default: 'color'}, // wallpaper | gradient | color
+                wallpaperImage: {type: String, default: ''},
+                padding: {type: Number, default: 24},
+            },
+            variables: [
+                {
+                    name: String,
+                    value: String
+                }
+            ],
+        },
+
+        thumbnailImageUrl: {type: String, default: ''},
+
+        links: [
+            {type: String, ref: 'Link'}
+        ],
+        deletedAt: {type: Date, default: null}
+    }, options
+)
+
+export default Story
+
+===MODEL:Screen===
+import mongoose from 'mongoose'
+import ScreenType from '../constants/ScreenTypes.js'
+
+const options = {
+  strict: true,
+  timestamps: { createdAt: true, updatedAt: true },
+  discriminatorKey: 'type'
+}
+
+import ScreenTransitionSchema from './ScreenTransition.js'
+import ScreenStepSchema from './ScreenStep.js'
+
+const Screen = new mongoose.Schema({
+
+    name: { type: String, default: '' },
+    storyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Story' },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    workspaceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workspace' },
+
+    type: { type: String, default: ScreenType.SCREEN_SCREENSHOT}, // Screen_Page, Screen_Screenshot, Screen_Video
+    steps: [
+      ScreenStepSchema
+    ],
+    customTransitions: [
+      ScreenTransitionSchema
+    ],
+
+    index: { type: Number },
+    imageUrl: {type: String},
+  }, options
+)
+
+export default  Screen
+
+===MODEL:Step===
+import mongoose from 'mongoose'
+const options = {
+  strict: true,
+  timestamps: { createdAt: true, updatedAt: true },
+}
+
+
+const StepSchema = new mongoose.Schema({
+  index: { type: Number }, //View, Action
+  view: {
+    viewType: {type: String, default: 'popup'}, // Popup, Pointer
+    content: {type: String, default: ''},
+    selector: {type: String, default: ''},
+    placement: {type: String, default: 'auto'},
+    formId: {type:  mongoose.Schema.Types.ObjectId, ref: 'Form' },
+    nextButtonText: {type: String, default: 'Next'},
+    showStepNumbers: {type: Boolean, default: true},
+    /*
+      top, top-start, top-end
+      bottom, bottom-start, bottom-end
+      left, left-start, left-end
+      right, right-start, right-end
+      auto (it will choose the best position)
+      center (set the target to body)
+     */
+
+  },
+  action: {
+    actionType: {type: String, default: 'NextButton'}, // NextButton, ElementClick
+    selector: {type: String, default: ''},
+  }
+
+})
+
+export default  StepSchema
+
+===MODEL:ScreenStep===
+import mongoose from 'mongoose'
+import ZoomSpanScreenshotSchema from "./ZoomSpanScreenshot.js";
+import PopupAlignments from "../constants/PopupAlignments.js";
+import StepAutoPlayTypes from "../constants/StepAutoPlayTypes.js";
+const options = {
+  strict: true,
+  timestamps: { createdAt: true, updatedAt: true },
+}
+
+
+const ScreenStepSchema = new mongoose.Schema({
+  index: { type: Number }, //View, Action
+  view: {
+    viewType: {type: String, default: 'hotspot'}, // hotspot, pointer, popup, none
+    pointer: {
+      selector: {type: String, default: ''},
+      selectorLocation: {
+        positionX: {type: Number, default: 200},
+        positionY: {type: Number, default: 200},
+        width: {type: Number, default: 150},
+        height: {type: Number, default: 50}
+      },
+      placement: {type: String, default: 'auto'},
+    },
+    hotspot: {
+      frameX: { type: Number, default: 200 },
+      frameY: { type: Number, default: 200 },
+      placement: {type: String, default: 'auto'},
+    },
+    popup: {
+      type: {type: String, default: 'popup'}, //popup, form, start, iframe
+      formId: {type:  mongoose.Schema.Types.ObjectId, ref: 'Form', default: null },
+      showOverlay: {type: Boolean, default: false},
+      title: {type: String, default: 'Title'},
+      description: {type: String, default: '<p>Description</p>'},
+      alignment: {type: String, default: PopupAlignments.center}, // center, left, right
+      buttons: [{
+        index: {type: Number, default: 0},
+        text: {type: String, default: "Next"}, // screen | website | none
+        gotoType: {type: String}, // screen | website | next | none
+        gotoWebsite: {type: String},
+        gotoScreen: {type: mongoose.Schema.Types.ObjectId, ref: 'Screen'},
+        textColor: {type: String, default: '#FFFFFF'},// buttonColor
+        backgroundColor: {type: String, default: '#1070ff'},// buttonColor
+
+      }]
+    },
+    content: {type: String, default: ''},
+    nextButtonText: {type: String, default: 'Next'},
+    showStepNumbers: {type: Boolean, default: true},
+    showHeader: {type: Boolean, default: false},
+    showFooter: {type: Boolean, default: false},
+    /*
+      top, top-start, top-end
+      bottom, bottom-start, bottom-end
+      left, left-start, left-end
+      right, right-start, right-end
+      auto (it will choose the best position)
+      center (set the target to body)
+     */
+
+  },
+  zoomSpan: ZoomSpanScreenshotSchema,
+  stepAudioId: {type:  mongoose.Schema.Types.ObjectId, ref: 'Audio', default: null },
+  elementData: {
+    targetHTML: {type: String, default: ''},
+    targetElementType: {type: String, default: 'element'},
+    targetText: {type: String, default: ''},
+  },
+  autoPlayConfig: {
+    enabled: {type: Boolean, default: false},
+    type: {type: String, default: StepAutoPlayTypes.auto}, // auto, manual
+    delay: {type: Number, default: 2},
+  },
+  action: {
+    actionType: {type: String, default: 'NextButton'}, // NextButton, ElementClick
+    selector: {type: String, default: ''},
+  }
+
+})
+
+export default  ScreenStepSchema
+
+===MODEL:Form===
+import mongoose from 'mongoose'
+const options = {
+  strict: true,
+  timestamps: { createdAt: true, updatedAt: true },
+}
+
+
+const FormSchema = new mongoose.Schema({
+  index: { type: Number }, //View, Action
+  type: {type: String, default: ''}, // step, screen
+  fields: [{
+    label: {type: String, default: ''},
+    name: {type: String, default: ''},
+    type: {type: String, default: 'shortText'}, // shortText
+    required: {type: Boolean, default: true},
+    typeData: {}
+  }],
+  hubspot: {
+    formId: {type: String, default: ''},
+    portalId: {type: String, default: ''},
+    embedVersion: {type: Number, default: 2},
+  },
+  title: {type: String, default: 'Get in touch with us'},
+  workspaceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workspace' },
+  storyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Story' },
+  stepId: { type: mongoose.Schema.Types.ObjectId, ref: 'ScreenStep' },
+  transitionId: { type: mongoose.Schema.Types.ObjectId, ref: 'ScreenTransition' },
+  liveDemoId: { type: mongoose.Schema.Types.ObjectId, ref: 'LiveDemo' },
+  screenId: {type: mongoose.Schema.Types.ObjectId, ref: 'Screen'  },
+  leads: {type: mongoose.Schema.Types.ObjectId, ref: 'Lead'}
+})
+
+export default  FormSchema
+
+===MODEL:Lead===
+import mongoose from 'mongoose'
+const options = {
+  strict: true,
+  timestamps: { createdAt: true, updatedAt: true },
+}
+
+const Lead = new mongoose.Schema({
+
+    formId: { type: mongoose.Schema.Types.ObjectId, ref: 'Form' },
+    storyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Story' },
+    liveDemoId: { type: mongoose.Schema.Types.ObjectId, ref: 'LiveDemo' },
+    screenId: { type: mongoose.Schema.Types.ObjectId, ref: 'screenId' },
+    workspaceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workspace' },
+    sessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Session' },
+    data: {
+
+    }
+  }, options
+)
+
+export default  Lead
+
+===MODEL:Session===
+import StoryStatuses from '../constants/StoryStatuses.js'
+import mongoose from 'mongoose'
+const options = {
+  strict: true,
+  timestamps: { createdAt: true, updatedAt: true },
+}
+
+
+const Session = new mongoose.Schema({
+
+    // sessionId: {
+    //   type: String,
+    //   index: true,
+    //   unique: true
+    // },
+    workspaceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workspace' },
+    storyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Story' },
+    clientIpData: {},
+    startTimestamp: { type: Number},
+    endTimestamp: { type: Number},
+    duration: { type: Number},
+    eventsClickCount: {type: Number, default: 0},
+    stepsCount: {type: Number},
+    dropOffStep: {type: Number},
+    didPlay: {type: Boolean, default: false},
+    didComplete: {type: Boolean, default: false},
+  }, options
+)
+
+export default  Session
+
+===MODEL:SessionEvent===
+import StoryStatuses from '../constants/StoryStatuses.js'
+import mongoose from 'mongoose'
+const options = {
+  strict: true,
+  timestamps: { createdAt: true, updatedAt: true },
+}
+
+
+const SessionEvent = new mongoose.Schema({
+
+
+    eventData: {
+      type: { type: Number },
+      data: {},
+      dataSource: {type: Number},
+      dataType: {type: Number},
+      timestamp: {type: Number},
+    },
+    stepIndex: {type: Number, default: 0},
+    sessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Session' },
+    workspaceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workspace' },
+    storyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Story' }
+  }, options
+)
+
+export default  SessionEvent
+
+===MODEL:Link===
+import mongoose from 'mongoose'
+import short from 'short-uuid'
+
+const options = {
+    strict: true,
+    timestamps: {createdAt: true, updatedAt: true},
+}
+
+
+const Link = new mongoose.Schema({
+        _id: {
+            type: String,
+            default: () => short.generate()
+        },
+        name: {type: String},
+        workspaceId: {type: mongoose.Schema.Types.ObjectId, ref: 'Workspace'},
+        storyId: {type: mongoose.Schema.Types.ObjectId, ref: 'Story'},
+
+        variables: [
+            {
+                name: String,
+                value: String
+            }
+        ],
+    }, options
+)
+
+export default Link
+
+===MODEL:PublishedLiveDemo===
+import mongoose from 'mongoose'
+const options = {
+  strict: true,
+  timestamps: { createdAt: true, updatedAt: true },
+}
+
+const PublishedLiveDemo = new mongoose.Schema({
+
+    url: { type: String }, // info | error | saga
+    workspaceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workspace' },
+    path: { type: String },
+    liveDemoId: { type: mongoose.Schema.Types.ObjectId, ref: 'LiveDemo' }
+
+  }, options
+)
+
+export default  PublishedLiveDemo
+
+===MODEL:LiveDemo===
+import mongoose from 'mongoose'
+import LiveDemoStatuses from '../constants/LiveDemoStatuses.js'
+const options = {
+  strict: true,
+  timestamps: { createdAt: true, updatedAt: true },
+}
+
+const LiveDemo = new mongoose.Schema({
+
+    name: { type: String }, // channel | workspace
+    url: { type: String }, // info | error | saga
+    workspaceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workspace' },
+    status: { type: String, default: LiveDemoStatuses.POPULATED }, // populated, updating
+    path: { type: String },
+    sessionRecordingId: { type: String },
+    publishedLiveDemoId: { type: mongoose.Schema.Types.ObjectId, ref: 'PublishedLiveDemo' },
+    requests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Request' }],
+    firstDoc: {},
+    manifest: {},
+    localStorage: {},
+    cookies: {},
+    visible: {type: Boolean, default: true},
+    scripts: [{type: mongoose.Schema.Types.ObjectId, ref: 'Script'}],
+    tours: [{type: mongoose.Schema.Types.ObjectId, ref: 'Tour'}],
+  }, options
+)
+
+export default  LiveDemo
+

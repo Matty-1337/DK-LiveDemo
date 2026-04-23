@@ -1,0 +1,436 @@
+# Upstream LiveDemo — MongoDB Data Model
+
+> Database: `livedemo`, replica set `rs0`.
+> Schemas reconstructed from `src/models/*.js` in
+> `livedemo/livedemo-backend:latest` (sha256 `6e63e427...5a43bb`).
+> Document counts, sample shapes, and index lists for most collections
+> were not captured live in this session — see UNVERIFIED block at the
+> end for how to refresh them.
+
+---
+
+## Collection naming convention
+
+Mongoose pluralizes model names by default. Known mappings:
+
+| Model file | Collection name |
+|---|---|
+| `User.js` | `users` |
+| `AuthToken.js` (+ `AuthToken_User.js` discriminator) | `authtokens` |
+| `Workspace.js` | `workspaces` |
+| `Story.js` | `stories` |
+| `Screen.js` (+ `Screen_Page.js`, `Screen_Screenshot.js`, `Screen_Video.js` discriminators) | `screens` |
+| `ScreenStep.js` | *embedded* in `screens.steps[]` — no own collection |
+| `Form.js` | `forms` |
+| `Lead.js` | `leads` |
+| `Session.js` | `sessions` |
+| `SessionEvent.js` | `sessionevents` |
+| `Link.js` | `links` |
+| `LiveDemo.js` | `livedemos` |
+| `PublishedLiveDemo.js` | `publishedlivedemos` |
+| `Audio.js` | `audios` |
+| `CursorPositions.js` | `cursorpositions` |
+| `AutoRecording.js` | `autorecordings` |
+
+Other collections referenced in source: `autorecordingevents`, `cards`,
+`charges`, `configs`, `contents`, `demoactivityevents`, `demosuggestions`,
+`emails`, `hubspottokens`, `jobs`, `requests`, `screennavigations`,
+`screenpagetransitions`, `screenscreenshottransitions`, `screentransitions`,
+`screen_pages`, `screen_screenshots`, `screen_videos`, `scripts`, `steps`
+(legacy/unused), `stepaudios`, `storycontents`, `subscriptions`, `tours`,
+`tutorials`, `workspacemembers`, `zoomspanscreenshots`, `zoomspanvideos`,
+plus the monq queue collection `jobs-monq`.
+
+---
+
+## users
+
+Strict schema, timestamps on, discriminator key `userType`.
+
+| Field | BSON Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `_id` | ObjectId | yes | auto | |
+| `email` | String | yes | — | unique, indexed |
+| `password` | String | yes | — | bcrypt hash, 10 salt rounds, pre-save hook in `User.js` |
+| `name` | String | no | `''` | |
+| `workspaceMembers` | [ObjectId] → `WorkspaceMember` | no | `[]` | |
+| `stripeCustomerId` | String | no | — | |
+| `defaultCardId` | ObjectId → `Card` | no | — | |
+| `cards` | [ObjectId] → `Card` | no | `[]` | |
+| `deleted` | Boolean | no | `false` | |
+| `timezone` | String | no | `''` | |
+| `workspaces` | [ObjectId] → `Workspace` | no | `[]` | **source of truth for workspace membership** |
+| `subscriptions` | [ObjectId] → `Subscription` | no | `[]` | |
+| `googleProfile` | `GoogleProfile` subdoc | no | — | |
+| `featureFlags.freeActivate` | Boolean | no | `true` | |
+| `onboarding.goals` | [String enum `OnboardingGoalsTypes.ONBOARDING_GOALS`] | no | `[]` | |
+| `userType` | String (discriminator) | no | — | |
+| `createdAt`, `updatedAt` | Date | auto | — | |
+
+**Sample shape** (captured from auth response, fields that come back over the wire):
+```json
+{
+  "id":               "69ea6d7d10a3c3c5d93195b3",
+  "email":            "mcp@deltakinetics.io",
+  "name":             "DK MCP Bot",
+  "timezone":         "",
+  "workspaceMembers": []
+}
+```
+
+---
+
+## authtokens
+
+Strict, timestamps on, discriminator key `type`.
+
+| Field | BSON Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `_id` | ObjectId | yes | auto | |
+| `token` | String | **yes** | — | unique (Mongoose `unique:true`); 64 hex chars from `crypto.randomBytes(32)` |
+| `type` | String | no | `'AuthToken'` | values: `'AuthToken'`, `'AuthToken_User'`, `'AuthToken_UserChangePassword'`, `'AuthToken_UserDirectInstall'` |
+| `status` | String | no | `'active'` | values: `'active'`, `'expired'` |
+| `userId` | String (intentional — stored as string, see `authUtils.js:createTokenForUser`) | yes in practice | — | points to `users._id.toString()` |
+| `clientId` | String | no | `'customScopes'` | `createTokenForUser` sets `'publicClient'` |
+| `authorizedInstances` | [String] | no | `[]` | |
+| `scopes` | [String] | no | `[]` | |
+| `createdAt`, `updatedAt` | Date | auto | — | |
+
+**No `expiresAt` field. No TTL index in source.** Tokens never expire unless
+their status is flipped to `'expired'` by `postLogout.js`.
+
+> ⚠ UNVERIFIED: live index list for `authtokens` not captured this session.
+> Expect at least the unique index on `token`. No TTL is defined in Mongoose,
+> but a DB admin could have added one manually.
+
+---
+
+## workspaces
+
+**Strict: false** (meaning ad-hoc fields are permitted to sneak in), timestamps
+on, **typeKey `$type`** (because of mongoose-long).
+
+| Field | BSON Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `_id` | ObjectId | yes | auto | |
+| `name` | String | no | `''` | |
+| `type` | String | no | `WorkspaceTypes.EMPTY = 'empty'` | values: `'empty'`, `'startup'`, `'pro'`, `'business'` |
+| `integrations.hubspot` | Boolean | no | `false` | |
+| `adminUser` | ObjectId → `User` | no | — | |
+| `users` | [ObjectId → `User`] | no | `[]` | |
+| `subscriptions` | [ObjectId → `Subscription`] | no | `[]` | |
+| `liveDemos` | [ObjectId → `LiveDemo`] | no | `[]` | |
+| `invitedEmails` | [String] | no | `[]` | |
+| `library.pages` | [ObjectId → `Screen`] | no | `[]` | |
+| `library.screenshots` | [ObjectId → `Screen`] | no | `[]` | |
+| `library.videos` | [ObjectId → `Screen`] | no | `[]` | |
+| `createdAt`, `updatedAt` | Date | auto | — | |
+
+**Sample shape** (captured live during bootstrap, 2026-04-23):
+```json
+{
+  "_id": "69ea79a8d7a9e7a66f4a784c",
+  "name": "DK CoreTAP Demos",
+  "type": "empty",
+  "integrations": {"hubspot": false},
+  "adminUser": "69ea6d7d10a3c3c5d93195b3",
+  "users": ["69ea6d7d10a3c3c5d93195b3"],
+  "subscriptions": [],
+  "liveDemos": [],
+  "invitedEmails": [],
+  "library": {"pages": [], "screenshots": [], "videos": []},
+  "createdAt": "2026-04-23T19:57:28.617Z",
+  "updatedAt": "2026-04-23T19:57:28.617Z",
+  "__v": 0
+}
+```
+
+---
+
+## stories
+
+Strict, timestamps on.
+
+| Field | BSON Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `_id` | ObjectId | yes | auto | |
+| `name` | String | no | — | |
+| `workspaceId` | ObjectId → `Workspace` | no | — | |
+| `userId` | ObjectId → `User` | no | — | |
+| `screens` | [ObjectId → `Screen`] | no | `[]` | |
+| `filePath` | String | no | `''` | on-disk JSON dump of `capturedEvents`, only for recorded stories |
+| `status` | String | no | `'uploading'` | values: `'uploading'`, `'ready'`, `'failed'` |
+| `demoSuggestionId` | ObjectId → `DemoSuggestion` | no | — | |
+| `isPublished` | Boolean | no | `false` | |
+| `type` | String | no | `'web'` | values: `'web'`, `'desktop'` |
+| `capturedEvents` | Array (untyped) | no | — | rrweb event stream for recorded demos |
+| `tabInfo` | Object (untyped) | no | — | |
+| `windowMeasures` | Object (untyped) | no | — | e.g. `{innerWidth: 1920, innerHeight: 1080}` |
+| `videoStartMs`, `videoEndMs` | Number | no | — | |
+| `aspectRatio` | String | no | — | |
+| `hasCursorPositions` | Boolean | no | — | |
+| `content.contentStatus` | String | no | `''` | |
+| `content.contentId` | ObjectId → `StoryContent` | no | — | |
+| `custom.header.*`, `custom.theme.*`, `custom.misc.*`, `custom.background.*`, `custom.variables[]` | branding overrides | no | defaults in Mongoose schema | see `Story.js:215–257` |
+| `thumbnailImageUrl` | String | no | `''` | |
+| `links` | [String → `Link` (note: String, not ObjectId, because `Link._id` is a short-uuid)] | no | `[]` | |
+| `deletedAt` | Date | no | `null` | soft-delete flag |
+| `createdAt`, `updatedAt` | Date | auto | — | |
+
+---
+
+## screens
+
+Strict, timestamps on, discriminator key `type`. Actual documents are
+discriminators: `Screen_Page`, `Screen_Screenshot`, `Screen_Video`.
+
+| Field | BSON Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `_id` | ObjectId | yes | auto | |
+| `name` | String | no | `''` | |
+| `storyId` | ObjectId → `Story` | no | — | |
+| `userId` | ObjectId → `User` | no | — | |
+| `workspaceId` | ObjectId → `Workspace` | no | — | |
+| `type` | String | no | `'Screen_Screenshot'` | values from `ScreenTypes`: `'Screen_Page'`, `'Screen_Screenshot'`, `'Screen_Video'` |
+| `steps` | [**`ScreenStepSchema` subdocs**] | no | `[]` | embedded — see shape below |
+| `customTransitions` | [`ScreenTransitionSchema` subdocs] | no | `[]` | |
+| `index` | Number | no | — | 0-based ordering in the story |
+| `imageUrl` | String | no | — | S3 URL of the screenshot (for `Screen_Page`) |
+| `createdAt`, `updatedAt` | Date | auto | — | |
+
+> The discriminator on `type` lets `Screen_Page` add `contentPath`, `width`,
+> `height`, while `Screen_Video` adds `videoUrl`, `startTime`, `endTime`,
+> `playbackRate`. The MCP does **not** currently need to distinguish them —
+> treat as one polymorphic collection.
+
+> ⚠ UNVERIFIED — **high priority**: No live `findOne()` against the `screens`
+> collection was captured this session because (a) the backend kept going
+> idle between probes, (b) the dk-livedemo-mcp workspace has no published
+> demos yet. The step schema below is **source-derived only**. Before the
+> rewrite, run:
+> ```
+> db.screens.findOne({workspaceId: ObjectId('69ea79a8d7a9e7a66f4a784c')})
+> db.screens.findOne({})   // any workspace, sanity check
+> ```
+> and append the raw output to `discovery-log.md` §Phase-4.
+
+---
+
+## screens.steps[] (embedded ScreenStep subdoc)
+
+Strict, timestamps on.
+
+| Field | BSON Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `_id` | ObjectId | auto | auto | each step has its own id even though embedded |
+| `index` | Number | no | — | |
+| `view.viewType` | String | no | `'hotspot'` | `'hotspot'`, `'pointer'`, `'popup'`, `'none'` |
+| `view.pointer.selector` | String | no | `''` | CSS selector |
+| `view.pointer.selectorLocation` | `{positionX,positionY,width,height}` | no | `{200,200,150,50}` | |
+| `view.pointer.placement` | String | no | `'auto'` | |
+| `view.hotspot.frameX` | Number | no | 200 | |
+| `view.hotspot.frameY` | Number | no | 200 | |
+| `view.hotspot.placement` | String | no | `'auto'` | |
+| `view.popup.type` | String | no | `'popup'` | `'popup'`, `'form'`, `'start'`, `'iframe'` |
+| `view.popup.formId` | ObjectId → `Form` | no | `null` | attached by `POST /workspaces/:ws/forms` when `type === 'step'` |
+| `view.popup.showOverlay` | Boolean | no | `false` | |
+| `view.popup.title` | String | no | `'Title'` | |
+| `view.popup.description` | String | no | `'<p>Description</p>'` | HTML |
+| `view.popup.alignment` | String | no | `'center'` | `'center'`, `'left'`, `'right'` |
+| `view.popup.buttons[]` | [{index,text,gotoType,gotoWebsite,gotoScreen,textColor,backgroundColor}] | no | — | `gotoType`: `'screen'` \| `'website'` \| `'next'` \| `'none'` |
+| `view.content` | String | no | `''` | |
+| `view.nextButtonText` | String | no | `'Next'` | |
+| `view.showStepNumbers` | Boolean | no | `true` | |
+| `view.showHeader` | Boolean | no | `false` | |
+| `view.showFooter` | Boolean | no | `false` | |
+| `zoomSpan` | `ZoomSpanScreenshotSchema` subdoc | no | — | |
+| `stepAudioId` | ObjectId → `Audio` | no | `null` | |
+| `elementData.targetHTML` | String | no | `''` | |
+| `elementData.targetElementType` | String | no | `'element'` | |
+| `elementData.targetText` | String | no | `''` | |
+| `autoPlayConfig.enabled` | Boolean | no | `false` | |
+| `autoPlayConfig.type` | String | no | `'auto'` | `'auto'` or `'manual'` |
+| `autoPlayConfig.delay` | Number | no | 2 | seconds |
+| `action.actionType` | String | no | `'NextButton'` | `'NextButton'`, `'ElementClick'` |
+| `action.selector` | String | no | `''` | |
+| `createdAt`, `updatedAt` | Date | auto | — | |
+
+**Default step seeded by `POST .../steps` with `viewType === 'popup'`** (from
+`postSteps.js:596–626`):
+```json
+{
+  "index": 0,
+  "view": {
+    "viewType": "popup",
+    "content": "<p>New step</p>",
+    "popup": {
+      "type": "popup", "title": "Title", "description": "<p>Description</p>",
+      "alignment": "center", "showOverlay": true,
+      "buttons": [{"index":0, "text":"Next", "gotoType":"next", "gotoScreen":"<nextScreenId>"}]
+    }
+  }
+}
+```
+
+---
+
+## forms
+
+Strict, timestamps on.
+
+| Field | BSON Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `_id` | ObjectId | yes | auto | |
+| `index` | Number | no | — | |
+| `type` | String | no | `''` | `'step'`, `'transition'`, `'hubspot'` |
+| `fields[]` | `[{label, name, type, required, typeData}]` | no | `[]` | `type` default `'shortText'` |
+| `hubspot.formId` | String | no | `''` | |
+| `hubspot.portalId` | String | no | `''` | |
+| `hubspot.embedVersion` | Number | no | `2` | |
+| `title` | String | no | `'Get in touch with us'` | |
+| `workspaceId` | ObjectId → `Workspace` | no | — | |
+| `storyId` | ObjectId → `Story` | no | — | |
+| `stepId` | ObjectId → `ScreenStep` | no | — | |
+| `transitionId` | ObjectId → `ScreenTransition` | no | — | |
+| `liveDemoId` | ObjectId → `LiveDemo` | no | — | |
+| `screenId` | ObjectId → `Screen` | no | — | |
+| `leads` | ObjectId → `Lead` | no | — | *singular in schema, but `postLeadsForm.js` uses `$push:{leads:...}` — likely a bug in the schema; treat as array in practice* |
+
+---
+
+## leads
+
+Strict, timestamps on.
+
+| Field | BSON Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `_id` | ObjectId | yes | auto | |
+| `formId` | ObjectId → `Form` | no | — | |
+| `storyId` | ObjectId → `Story` | no | — | |
+| `liveDemoId` | ObjectId → `LiveDemo` | no | — | |
+| `screenId` | ObjectId → `screenId` (typo in ref — see Screens) | no | — | |
+| `workspaceId` | ObjectId → `Workspace` | no | — | |
+| `sessionId` | ObjectId → `Session` | no | — | |
+| `data` | Object (free-form — the submitted form values) | no | — | |
+| `createdAt`, `updatedAt` | Date | auto | — | |
+
+---
+
+## sessions
+
+Strict, timestamps on.
+
+| Field | BSON Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `_id` | ObjectId | yes | auto | |
+| `workspaceId` | ObjectId → `Workspace` | no | — | |
+| `storyId` | ObjectId → `Story` | no | — | |
+| `clientIpData` | Object (free-form: `{ip, country, city, region, flag.emoji, ...}`) | no | — | |
+| `startTimestamp` | Number (ms epoch) | no | — | |
+| `endTimestamp` | Number (ms epoch) | no | — | |
+| `duration` | Number (ms) | no | — | |
+| `eventsClickCount` | Number | no | `0` | |
+| `stepsCount` | Number | no | — | |
+| `dropOffStep` | Number | no | — | |
+| `didPlay` | Boolean | no | `false` | |
+| `didComplete` | Boolean | no | `false` | |
+| `createdAt`, `updatedAt` | Date | auto | — | |
+
+---
+
+## sessionevents
+
+| Field | BSON Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `_id` | ObjectId | yes | auto | |
+| `eventData.type` | Number | no | — | rrweb event type |
+| `eventData.data` | Object (free-form) | no | — | |
+| `eventData.dataSource` | Number | no | — | |
+| `eventData.dataType` | Number | no | — | |
+| `eventData.timestamp` | Number | no | — | |
+| `stepIndex` | Number | no | `0` | |
+| `sessionId` | ObjectId → `Session` | no | — | |
+| `workspaceId` | ObjectId → `Workspace` | no | — | |
+| `storyId` | ObjectId → `Story` | no | — | |
+
+---
+
+## links
+
+Strict, timestamps on. **`_id` is a String** (short-uuid), NOT ObjectId.
+
+| Field | BSON Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `_id` | String | yes | `short.generate()` | e.g. `"abc12def-345"` |
+| `name` | String | no | — | |
+| `workspaceId` | ObjectId → `Workspace` | no | — | |
+| `storyId` | ObjectId → `Story` | no | — | |
+| `variables[]` | `[{name, value}]` | no | — | |
+
+---
+
+## livedemos + publishedlivedemos
+
+Both strict, timestamps on. `livedemos` represents a rendered demo instance;
+`publishedlivedemos` the public URL routing record.
+
+| Collection | Key fields |
+|---|---|
+| `livedemos` | `_id`, `name`, `url`, `workspaceId`, `status` (`'populated'`/`'updating'`), `path`, `sessionRecordingId`, `publishedLiveDemoId` → `PublishedLiveDemo`, `requests[]`, `firstDoc`, `manifest`, `localStorage`, `cookies`, `visible`, `scripts[]`, `tours[]` |
+| `publishedlivedemos` | `_id`, `url`, `workspaceId`, `path`, `liveDemoId` |
+
+---
+
+## Collection counts captured at discovery time
+
+Before bootstrap (from a prior partial probe):
+- 0 users, 0 workspaces, 0 stories, 0 screens, 0 publishedlivedemos (empty DB).
+
+After bootstrap:
+- `users`: 1 (`mcp@deltakinetics.io`, `_id = 69ea6d7d10a3c3c5d93195b3`)
+- `workspaces`: **3** — one auto-created by signup (`"DK's workspace"`), one
+  created during a prior bootstrap attempt (`"Delta Kinetics"`), and one
+  created during Phase 0 of this session (`"DK CoreTAP Demos"`,
+  `_id = 69ea79a8d7a9e7a66f4a784c`, use this one).
+- `authtokens`: at least 1 active (token `2a163442...e1d0d2`). Earlier
+  attempts may have left additional active tokens for the same user.
+- `stories`, `screens`, `forms`, `leads`, `sessions`: **0** as of bootstrap
+  completion.
+
+---
+
+## UNVERIFIED blocks
+
+> ⚠ UNVERIFIED — **screens.findOne() live capture**. The most important
+> schema — the one whose wrongness broke the prior MCP sessions — was
+> not captured from a living document. To capture:
+> 1. Have Matty log into https://demo.deltakinetics.io as
+>    `mcp@deltakinetics.io` (password at Infisical key
+>    `LIVEDEMO_MCP_PASSWORD`), record any 2-step demo of any public page
+>    (name it `discovery-probe-1`), publish it.
+> 2. Then run:
+>    ```
+>    railway redeploy --yes --service livedemo-backend
+>    # wait until railway ssh works
+>    railway ssh --service livedemo-backend
+>    node -e 'const {MongoClient}=require("mongodb"); (async()=>{const c=new MongoClient(process.env.MONGO_URI); await c.connect(); const s=await c.db().collection("screens").findOne({}); console.log(JSON.stringify(s,null,2)); await c.close()})()'
+>    ```
+> 3. Paste the output into `discovery-log.md` under a new "Phase 4
+>    follow-up" section.
+
+> ⚠ UNVERIFIED — **all collection index lists**. None were captured live.
+> For each collection of interest (`authtokens`, `users`, `workspaces`,
+> `stories`, `screens`, `forms`, `leads`, `sessions`, `sessionevents`,
+> `links`), run:
+> ```
+> db.<collection>.getIndexes()
+> ```
+> inside mongosh. Expect at least the auto `_id_` index and the unique
+> indexes declared in Mongoose (`users.email`, `authtokens.token`).
+
+> ⚠ UNVERIFIED — **legacy/unused collections**. The `steps` collection and
+> the `oldModels/` directory in `src/models/` suggest an earlier schema
+> where steps were stored separately. If `db.steps.countDocuments() > 0`,
+> the backend may still read from it in some code paths — flag for
+> investigation. Currently `postSteps.js` writes to `screens.$.steps[]`
+> only.
