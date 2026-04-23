@@ -1,5 +1,5 @@
 {
-  "name": "livedemo-dk-mcp",
+  "name": "dk-livedemo-mcp",
   "version": "1.0.0",
   "description": "LiveDemo MCP Server for Delta Kinetics",
   "main": "dist/index.js",

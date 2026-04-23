@@ -1,4 +1,4 @@
-# livedemo-deploy
+# DK-LiveDemo
 
 Local development deployment using Docker Compose. Runs three containers:
 

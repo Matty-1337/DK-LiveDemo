@@ -1,30 +1,39 @@
+# Bridge networking — works on Windows Docker Desktop (host mode does not).
 services:
   mongo:
     image: mongo:8
     restart: unless-stopped
-    network_mode: host
     command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     volumes:
       - mongo_data:/data/db
+    networks:
+      - livedemo
+    ports:
+      - "27017:27017"
     healthcheck:
       test: >
-        mongosh --quiet --eval "
-          try { rs.status() }
-          catch(e) { rs.initiate({_id:'rs0', members:[{_id:0, host:'localhost:27017'}]}) };
-          db.adminCommand('ping').ok || quit(1)
+        mongosh --quiet --host mongo:27017 --eval "
+        try { rs.status() }
+        catch(e) { rs.initiate({_id:'rs0', members:[{_id:0, host:'mongo:27017'}]}) };
+        db.adminCommand('ping').ok || quit(1)
         "
       interval: 5s
       timeout: 10s
-      retries: 15
-      start_period: 20s
+      retries: 20
+      start_period: 25s
 
   livedemo-backend:
     image: docker.io/livedemo/livedemo-backend:latest
     restart: unless-stopped
     pull_policy: always
-    network_mode: host
+    networks:
+      - livedemo
+    ports:
+      - "3005:3005"
     env_file:
       - envs/backend.env
+    environment:
+      DB_URI: mongodb://mongo:27017/livedemo_app
     volumes:
       - backend_data:/home/app/data
     depends_on:
@@ -39,11 +48,18 @@ services:
     image: docker.io/livedemo/livedemo-web-app:latest
     restart: unless-stopped
     pull_policy: always
-    network_mode: host
+    networks:
+      - livedemo
+    ports:
+      - "5000:5000"
     env_file:
       - envs/web-app.env
     depends_on:
       - livedemo-backend
+
+networks:
+  livedemo:
+    name: livedemo
 
 volumes:
   mongo_data:

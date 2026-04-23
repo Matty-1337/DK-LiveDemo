@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Verify livedemo-dk deployment health.
+# Verify DK-LiveDemo deployment health.
 # Usage: ./verify-deploy.sh [PUBLIC_URL] [MCP_URL]
 
 set -u

@@ -24,7 +24,7 @@ const TOOL_BY_NAME = new Map(ALL_TOOLS.map((t) => [t.name, t]));
 
 function buildMcpServer(): Server {
   const server = new Server(
-    { name: 'livedemo-dk-mcp', version: '1.0.0' },
+    { name: 'dk-livedemo-mcp', version: '1.0.0' },
     { capabilities: { tools: {} } },
   );
 

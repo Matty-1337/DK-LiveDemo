@@ -12,6 +12,8 @@ build/
 .env
 .env.*
 !.env.example
+local/envs/backend.override.env
+local/envs/*.local.env
 *.pem
 *.key
 
