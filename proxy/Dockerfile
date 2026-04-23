@@ -14,5 +14,5 @@ COPY Caddyfile /etc/caddy/Caddyfile
 COPY inject/ /srv/inject/
 EXPOSE 80
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:80/caddy-health || exit 1
+  CMD curl -f "http://localhost:${PORT:-80}/caddy-health" || exit 1
 CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]

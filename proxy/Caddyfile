@@ -10,7 +10,7 @@
 	auto_https off
 }
 
-:80 {
+:{$PORT:80} {
 	# ── Logging ──────────────────────────────────────────────
 	log {
 		output stdout
