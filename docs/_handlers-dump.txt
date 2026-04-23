@@ -1,0 +1,2279 @@
+===HANDLER:postEmptyStory===
+import helpers from '../helpers/livedemoHelpers.js'
+import flixHelpers from '../helpers/flixHelpers.js'
+import postStoriesValidator from '../helpers/validators/stories/postEmptyStory.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+import StoryStatuses from '../constants/StoryStatuses.js'
+import ScreenTypes from '../constants/ScreenTypes.js'
+import ENV from '../envServer.js'
+const { STORY_REQUESTS_FOLDER } = ENV
+import mongoose from 'mongoose';
+const { ObjectId } = mongoose.Types;
+import short from 'short-uuid'
+import stringify from 'stream-json-stringify'
+
+const handler = function (req, res) {
+  let { Models, conn } = req.mongo
+
+  let requestBody = req.body
+  let authUserDoc = null
+
+  return Promise.resolve().then(async () => {
+
+      return helpers.authReq(req, Models)
+    })
+    .then(({ authUser }) => {
+      authUserDoc = authUser
+      let validatedBody = helpers.validateBody(req.body, postStoriesValidator)
+      requestBody = validatedBody.value
+
+      helpers.validateUserHasAccessToWorkspace(authUserDoc, requestBody.workspaceId)
+    })
+    .then(async () => {
+
+      let name = requestBody.name
+      let workspaceId = requestBody.workspaceId
+
+      let capturedEvents = requestBody.capturedEvents
+      let videoStartMs = requestBody.videoStartMs
+      let videoEndMs = requestBody.videoEndMs
+      let aspectRatio = requestBody.aspectRatio
+      let tabInfo = requestBody.tabInfo
+      let windowMeasures = requestBody.windowMeasures || {innerWidth: 1920, innerHeight: 1080}
+      let renderEvents = {}
+      let videoId = short.uuid()
+      let videoAssetId = ''
+
+      let storyId = new ObjectId()
+
+      let videoUrl = ''
+      let screenshots = {}
+      let videos = {}
+
+      /*
+       return new Models.Story({
+        name,
+        workspaceId,
+        userId: authUserDoc._id
+      }).save()
+    })
+       */
+
+      return new Models.Story({
+        _id: storyId,
+        name,
+        workspaceId,
+        userId: authUserDoc.id,
+        status: StoryStatuses.READY,
+        screens: [],
+        capturedEvents,
+        aspectRatio,
+        videoStartMs,
+        videoEndMs,
+        tabInfo,
+        windowMeasures
+      }).save()
+
+
+    })
+    .then((newStory) => {
+      console.log('Story created')
+
+      const resultResponse = {
+        statusCode: ResponseCodes['200_OK'],
+        headers: {
+          'Access-Control-Max-Age': 600,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+          // Required for CORS support to work
+          'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+        }
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(JSON.stringify({
+        _id: newStory._id
+      }))
+    })
+    .catch((error) => {
+      console.log(error)
+
+      let resultResponse
+      if (error.resultResponse) {
+
+        resultResponse = error.resultResponse
+      } else {
+
+
+        resultResponse = {
+          statusCode: ResponseCodes['500_INTERNAL_SERVER_ERROR'],
+          headers: {
+            'Access-Control-Max-Age': 600,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+            // Required for CORS support to work
+            'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+          },
+          body: ''
+        }
+
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(resultResponse.body)
+    })
+}
+
+
+export default  handler
+
+===HANDLER:postStories===
+import helpers from '../helpers/livedemoHelpers.js'
+import flixHelpers from '../helpers/flixHelpers.js'
+import postStoriesValidator from '../helpers/validators/stories/postStoriesValidator.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+import StoryStatuses from '../constants/StoryStatuses.js'
+import ENV from '../envServer.js'
+// const {STORY_REQUESTS_FOLDER} = ENV
+import mongoose from 'mongoose';
+const { ObjectId } = mongoose.Types;
+import short from 'short-uuid'
+import stringify from 'stream-json-stringify'
+import he from 'he'
+
+
+const handler = function (req, res) {
+    let {Models, conn} = req.mongo
+
+    let requestBody = req.body
+    let authUserDoc = null
+
+    return Promise.resolve().then(async () => {
+
+        return helpers.authReq(req, Models)
+    })
+        .then(({authUser}) => {
+            authUserDoc = authUser
+            let validatedBody = helpers.validateBody(req.body, postStoriesValidator)
+            requestBody = validatedBody.value
+
+            helpers.validateUserHasAccessToWorkspace(authUserDoc, requestBody.workspaceId)
+        })
+        .then(() => {
+            if (requestBody.storyId) {
+                return Models.Story.findOne({_id: requestBody.storyId, status: StoryStatuses.UPLOADING})
+                    .then((foundStory) => {
+                        if(!foundStory) {
+                            throw new Error('Story not found')
+                        }
+
+                        return foundStory._id
+                    })
+            } else {
+                return new ObjectId()
+            }
+        })
+        .then(async (storyId) => {
+
+            let name = requestBody.name
+            let workspaceId = requestBody.workspaceId
+
+            let capturedEvents = requestBody.capturedEvents
+                .map(event => {
+                    if(event.targetHTML) {
+                        event.targetHTML = he.encode(event.targetHTML)
+                    }
+                    return event
+                })
+            let videoStartMs = requestBody.videoStartMs
+            let videoEndMs = requestBody.videoEndMs
+            let aspectRatio = requestBody.aspectRatio
+            let tabInfo = requestBody.tabInfo
+            let windowMeasures = requestBody.windowMeasures
+            let renderEvents = {}
+            let videoId = short.uuid()
+            let videoAssetId = ''
+
+            let videoUrl = ''
+            let screenshots = {}
+            let videos = {}
+
+            /*
+             return new Models.Story({
+              name,
+              workspaceId,
+              userId: authUserDoc._id
+            }).save()
+          })
+             */
+
+
+            const contentStream = stringify(requestBody, {
+                highWaterMark: 0.2 * 1000000
+            })
+
+            return helpers.writeToSystemFromStream(`${ENV.STORY_REQUESTS_FOLDER}/${storyId}.json`, contentStream, 'utf8')
+                .then((filePath) => {
+                    return Models.Story.findOneAndUpdate({_id: storyId},{
+                        _id: storyId,
+                        name,
+                        workspaceId,
+                        userId: authUserDoc.id,
+                        filePath,
+                        status: StoryStatuses.UPLOADING,
+                        screens: [],
+                        capturedEvents,
+                        aspectRatio,
+                        videoStartMs,
+                        videoEndMs,
+                        tabInfo,
+                        windowMeasures
+                    }, {upsert: true, new: true})
+                })
+                .then((newStoryDoc) => {
+
+                    return flixHelpers.enqueueProcessStoryDemo(newStoryDoc._id.toString(16))
+                        .then(() => {
+
+                            return newStoryDoc
+                        })
+                })
+        })
+        .then((newStory) => {
+            console.log('Story created')
+
+            const resultResponse = {
+                statusCode: ResponseCodes['200_OK'],
+                headers: {
+                    'Access-Control-Max-Age': 600,
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+                    // Required for CORS support to work
+                    'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+                }
+            }
+
+            res.set(resultResponse.headers)
+            res.status(resultResponse.statusCode)
+            res.send(JSON.stringify({
+                _id: newStory._id
+            }))
+        })
+        .catch((error) => {
+            console.log(error)
+
+            let resultResponse
+            if (error.resultResponse) {
+
+                resultResponse = error.resultResponse
+            } else {
+
+
+                resultResponse = {
+                    statusCode: ResponseCodes['500_INTERNAL_SERVER_ERROR'],
+                    headers: {
+                        'Access-Control-Max-Age': 600,
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+                        // Required for CORS support to work
+                        'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+                    },
+                    body: ''
+                }
+
+            }
+
+            res.set(resultResponse.headers)
+            res.status(resultResponse.statusCode)
+            res.send(resultResponse.body)
+        })
+}
+
+===HANDLER:postInProgressStory===
+import helpers from '../helpers/livedemoHelpers.js'
+import postStoriesValidator from '../helpers/validators/stories/postInProgressStoryValidator.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+import StoryStatuses from '../constants/StoryStatuses.js'
+// const {STORY_REQUESTS_FOLDER} = ENV
+import mongoose from 'mongoose';
+const { ObjectId } = mongoose.Types;
+
+
+const handler = function (req, res) {
+    let {Models, conn} = req.mongo
+
+    let requestBody = req.body
+    let authUserDoc = null
+
+    return Promise.resolve().then(async () => {
+
+        return helpers.authReq(req, Models)
+    })
+        .then(({authUser}) => {
+            authUserDoc = authUser
+            let validatedBody = helpers.validateBody(req.body, postStoriesValidator)
+            requestBody = validatedBody.value
+
+            helpers.validateUserHasAccessToWorkspace(authUserDoc, requestBody.workspaceId)
+        }).then(() => {
+
+            return new Models.Story({
+                name: requestBody.name,
+                workspaceId: requestBody.workspaceId,
+                userId: authUserDoc.id,
+                status: StoryStatuses.UPLOADING,
+                screens: [],
+            }).save()
+        })
+        .then((newStory) => {
+            console.log('Story created')
+
+            const resultResponse = {
+                statusCode: ResponseCodes['200_OK'],
+                headers: {
+                    'Access-Control-Max-Age': 600,
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+                    // Required for CORS support to work
+                    'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+                }
+            }
+
+            res.set(resultResponse.headers)
+            res.status(resultResponse.statusCode)
+            res.send(JSON.stringify({
+                _id: newStory._id
+            }))
+        })
+        .catch((error) => {
+            console.log(error)
+
+            let resultResponse
+            if (error.resultResponse) {
+
+                resultResponse = error.resultResponse
+            } else {
+
+
+                resultResponse = {
+                    statusCode: ResponseCodes['500_INTERNAL_SERVER_ERROR'],
+                    headers: {
+                        'Access-Control-Max-Age': 600,
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+                        // Required for CORS support to work
+                        'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+                    },
+                    body: ''
+                }
+
+            }
+
+            res.set(resultResponse.headers)
+            res.status(resultResponse.statusCode)
+            res.send(resultResponse.body)
+        })
+}
+
+
+export default handler
+
+===HANDLER:postScreens===
+import postScreensValidator from '../helpers/validators/stories/screens/postScreensValidator.js'
+import helpers from '../helpers/livedemoHelpers.js'
+import short from 'short-uuid'
+import ResponseCodes from '../constants/ResponseCodes.js'
+import mongoose from 'mongoose';
+const { ObjectId } = mongoose.Types;
+import ENV from '../envServer.js'
+import fsp from 'fs/promises'
+
+import * as parse5 from 'parse5'
+// const {parse5} = parse5Import
+import parse5Helper from 'parse5-helper'
+
+import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
+import xpath from 'xpath'
+import jsdom from 'jsdom'
+const { JSDOM } = jsdom
+
+const SCREENDOC_ENCODING = 'utf-8'
+
+function handler(req, res){
+  let {Models, conn} = req.mongo
+
+  let workspaceId = req.params.workspaceId
+  let storyId = req.params.storyId
+  let requestBody = req.body
+  let authUserDoc = null
+
+  return Promise.resolve().then(async () => {
+
+      return helpers.authReq(req, Models)
+    })
+    .then(({ authUser }) => {
+      authUserDoc = authUser
+      let validatedBody = helpers.validateBody(req.body, postScreensValidator)
+      requestBody = validatedBody.value
+
+      helpers.validateUserHasAccessToWorkspace(authUserDoc, workspaceId)
+    })
+    .then(async () => {
+
+      let name = requestBody.name
+      let width = requestBody.width
+      let height = requestBody.height
+      let content = requestBody.content
+      let imageData = requestBody.imageData
+      let screenId = new ObjectId()
+
+      let storyDir = `${ENV.STORIES_FOLDER}/${storyId}`
+      let screenDir = `${storyDir}/${screenId}.html`
+
+      let imageUrl = ''
+      let imageName = short.uuid() + '.png'
+
+      return helpers.uploadImage(imageData, imageName)
+        .then((uploadResult) => {
+          console.log(uploadResult)
+          imageUrl = uploadResult.Location
+
+          return imageUrl
+        })
+        .then(async () => {
+          return fsp.access(storyDir)
+            .catch(() => {
+
+              return fsp.mkdir(storyDir)
+            })
+        })
+        .then(() => {
+
+          console.log('before')
+          // console.log(content)
+          // const document = new DOMParser().parseFromString(content)
+          // const documentString = new XMLSerializer().serializeToString(document)
+
+          const document = parse5.parse(content)
+
+          const documentString = parse5.serialize(document)
+
+
+          console.log('after')
+          // console.log(documentString)
+          // Linkedom
+          // const { document }= parseHTML(content)
+          // const documentString = document.toString()
+
+          // JSDOM
+          // const document = new JSDOM(content, {
+          //   parsingMode: 'xml',
+          //   resources: "usable"
+          // })
+          // const documentString = document.serialize()
+
+          // // Serializes a document.
+          // const html = parse5.serialize(document);
+          //
+          // // Serializes the <html> element content.
+          // const str = parse5.serialize(document.childNodes[1]);
+          //
+          // console.log(str); //> '<head></head><body>Hi there!</body>'
+
+          return helpers.writeToSystem(screenDir, documentString, SCREENDOC_ENCODING)
+          // return fsp.writeFile(screenDir, documentString, { encoding: SCREENDOC_ENCODING })
+        })
+        .then(() => {
+
+          return Models.Story.findOne({ _id: storyId })
+            .lean()
+            .then((storyDoc) => {
+              let screensLength = storyDoc.screens.length
+
+              let screenObj = {
+                _id: screenId,
+                name,
+                workspaceId,
+                userId: authUserDoc._id,
+                storyId: storyId,
+                contentPath: screenDir,
+                width: width,
+                height: height,
+                imageUrl: imageUrl,
+                index: screensLength
+              }
+
+              // if (screensLength === 0) {
+              let newStep = new Models.Step({
+                view: {
+                  content: '<p>Welcome to our StoryDemo!</p>'
+                }
+              })
+              screenObj.steps = [
+                newStep
+              ]
+              // }
+
+              return new Models.Screen_Page(screenObj).save()
+            })
+
+        })
+
+
+    })
+    .then((newScreen) => {
+      return Models.Story.findOneAndUpdate({ _id: storyId }, {
+          $push: {
+            screens: newScreen._id
+          }
+        })
+        .then(() => {
+          return Models.Workspace.findOneAndUpdate({ _id: workspaceId }, {
+            $addToSet: {
+              'library.pages': newScreen._id,
+            }
+          })
+        })
+        .then(() => newScreen)
+    })
+    .then((newScreen) => {
+
+      const resultResponse = {
+
+===HANDLER:postSteps===
+import helpers from '../helpers/livedemoHelpers.js'
+import postStepValidator from '../helpers/validators/stories/screens/steps/postStepValidator.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+import StepViewTypes from '../constants/StepViewTypes.js'
+import ScreenPopupTypes from '../constants/ScreenPopupTypes.js'
+import mongoose from 'mongoose'
+
+const { ObjectId } = mongoose.Types
+
+const handler = function (req, res) {
+    let { Models, conn } = req.mongo
+
+    let requestBody = null
+
+    let workspaceId = req.params.workspaceId
+    let storyId = req.params.storyId
+    let screenId = req.params.screenId
+    let authUserDoc = null
+
+    return Promise.resolve().then(async () => {
+
+        return helpers.authReq(req, Models)
+    })
+        .then(({ authUser }) => {
+            authUserDoc = authUser
+
+            let validatedBody = helpers.validateBody(req.body, postStepValidator)
+            requestBody = validatedBody.value
+
+            helpers.validateUserHasAccessToWorkspace(authUserDoc, workspaceId)
+        })
+        .then(() => {
+
+            // Find all screens in the current workspace and story, ordered by index ascending
+            return Models.Screen.find({
+                storyId: storyId,
+                // workspaceId: workspaceId
+            })
+                .sort({ index: 1 })
+                .then((screens) => {
+                    let currentScreen = screens.find(s => s._id.toString() === screenId.toString());
+                    let nextScreen = screens[currentScreen.index + 1] || currentScreen
+                    return { screens, nextScreen };
+                })
+        })
+        .then(({ screens, nextScreen }) => {
+            let stepIndex = requestBody.index
+            let viewType = requestBody.view && requestBody.view.viewType
+
+            // Handle if viewType is Popup to add default Popup config
+            let additionalConfigForPopup = {
+                popup: {
+                    type: 'popup',
+                    title: 'Title',
+                    description: '<p>Description</p>',
+                    alignment: 'center',
+                    showOverlay: true,
+                    buttons: [
+                        {
+                            index: 0,
+                            text: 'Next',
+                            gotoType: 'next',
+                            gotoScreen: nextScreen._id,
+                        }
+                    ]
+                }
+            }
+
+            let additionalConfig = {}
+            if(viewType === StepViewTypes.POPUP) {
+                additionalConfig = additionalConfigForPopup
+            }
+
+            let newStep = new Models.ScreenStep({
+                index: stepIndex,
+                view: {
+                    viewType: StepViewTypes[viewType.toUpperCase()],
+                    content: '<p>New step</p>',
+
+                    ...additionalConfig
+                }})
+
+            return Models.Screen.findOneAndUpdate({ _id: screenId }, { $push: { steps: newStep } }, { new: true })
+                .then(() => {
+                    return newStep
+                })
+        })
+        .then((newStepDoc) => {
+
+            if (!newStepDoc) {
+                throw new Error('Step couldn\'t be created')
+            }
+
+            const resultResponse = {
+                statusCode: ResponseCodes['200_OK'],
+                headers: {
+                    'Access-Control-Max-Age': 600,
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+                    // Required for CORS support to work
+                    'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+                },
+                body: JSON.stringify(newStepDoc)
+            }
+
+            res.set(resultResponse.headers)
+            res.status(resultResponse.statusCode)
+            res.send(resultResponse.body)
+
+        })
+        .catch((error) => {
+            console.log(error)
+
+            let resultResponse
+            if (error.resultResponse) {
+
+                resultResponse = error.resultResponse
+            } else {
+
+
+                resultResponse = {
+                    statusCode: ResponseCodes['500_INTERNAL_SERVER_ERROR'],
+                    headers: {
+                        'Access-Control-Max-Age': 600,
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+                        // Required for CORS support to work
+                        'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+                    },
+                    body: ''
+                }
+
+            }
+
+            res.set(resultResponse.headers)
+            res.status(resultResponse.statusCode)
+            res.send(resultResponse.body)
+        })
+
+}
+
+export default handler
+
+===HANDLER:patchStep===
+import helpers from '../helpers/livedemoHelpers.js'
+import patchStepValidator from '../helpers/validators/stories/screens/steps/patchStepValidator.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+
+const handler = function (req, res) {
+  let { Models, conn } = req.mongo
+
+
+  let requestBody = null
+
+  let workspaceId = req.params.workspaceId
+  let storyId = req.params.storyId
+  let screenId = req.params.screenId
+  let stepId = req.params.stepId
+  let authUserDoc = null
+
+  return Promise.resolve().then(async () => {
+
+      return helpers.authReq(req, Models)
+    })
+    .then(({ authUser }) => {
+      authUserDoc = authUser
+
+      let validatedBody = helpers.validateBody(req.body, patchStepValidator)
+      requestBody = validatedBody.value
+
+      helpers.validateUserHasAccessToWorkspace(authUserDoc, workspaceId)
+    })
+    .then(() => {
+
+      const stepView = requestBody.view
+      const stepAction = requestBody.action
+      const stepAudioId = requestBody.stepAudioId
+      const stepAutoPlayConfig = requestBody.autoPlayConfig
+
+
+      let updateObj = {}
+
+      if (stepView && stepView.content) {
+        updateObj['steps.$.view.content'] = stepView.content
+      }
+
+      if (stepView && stepView.hotspot && stepView.hotspot.frameX) {
+        updateObj['steps.$.view.hotspot.frameX'] = stepView.hotspot.frameX
+      }
+
+      if (stepView && stepView.hotspot && stepView.hotspot.frameY) {
+        updateObj['steps.$.view.hotspot.frameY'] = stepView.hotspot.frameY
+      }
+
+      if (stepView && stepView.hotspot && stepView.hotspot.placement) {
+        updateObj['steps.$.view.hotspot.placement'] = stepView.hotspot.placement
+      }
+
+      if (stepView && stepView.pointer && stepView.pointer.selector) {
+        updateObj['steps.$.view.pointer.selector'] = stepView.pointer.selector
+      }
+
+      if (stepView && stepView.pointer && stepView.pointer.selectorLocation && stepView.pointer.selectorLocation) {
+        updateObj['steps.$.view.pointer.selectorLocation'] = stepView.pointer.selectorLocation
+      }
+
+      if (stepView && stepView.pointer && stepView.pointer.placement) {
+        updateObj['steps.$.view.pointer.placement'] = stepView.pointer.placement
+      }
+
+      if (stepView && stepView.popup && stepView.popup.title) {
+        updateObj['steps.$.view.popup.title'] = stepView.popup.title
+      }
+
+      if (stepView && stepView.popup && stepView.popup.description) {
+        updateObj['steps.$.view.popup.description'] = stepView.popup.description
+      }
+
+      if (stepView && stepView.popup && stepView.popup.buttons) {
+        updateObj['steps.$.view.popup.buttons'] = stepView.popup.buttons
+      }
+
+      if (stepView && stepView.popup && stepView.popup.type) {
+        updateObj['steps.$.view.popup.type'] = stepView.popup.type
+      }
+
+      if (stepView && stepView.popup && stepView.popup.alignment) {
+        updateObj['steps.$.view.popup.alignment'] = stepView.popup.alignment
+      }
+
+      if (stepView && stepView.popup && stepView.popup.showOverlay !== undefined) {
+        updateObj['steps.$.view.popup.showOverlay'] = stepView.popup.showOverlay
+      }
+
+      if (stepView && stepView.viewType) {
+        updateObj['steps.$.view.viewType'] = stepView.viewType
+      }
+
+      if (stepView && stepView.showStepNumbers !== undefined) {
+        updateObj['steps.$.view.showStepNumbers'] = stepView.showStepNumbers
+      }
+
+      if (stepView && stepView.showHeader !== undefined) {
+        updateObj['steps.$.view.showHeader'] = stepView.showHeader
+      }
+
+      if (stepView && stepView.showFooter !== undefined) {
+        updateObj['steps.$.view.showFooter'] = stepView.showFooter
+      }
+
+      if (stepView && stepView.nextButtonText) {
+        updateObj['steps.$.view.nextButtonText'] = stepView.nextButtonText
+      }
+
+      if (stepAction && stepAction.selector) {
+        updateObj['steps.$.action.selector'] = stepAction.selector
+      }
+
+      if (stepAction && stepAction.actionType) {
+        updateObj['steps.$.action.actionType'] = stepAction.actionType
+      }
+
+      if(stepAudioId || stepAudioId === '') {
+        updateObj['steps.$.stepAudioId'] = stepAudioId
+      }
+
+      if(stepAutoPlayConfig && stepAutoPlayConfig.enabled !== undefined) {
+        updateObj['steps.$.autoPlayConfig.enabled'] = stepAutoPlayConfig.enabled
+      }
+
+      if(stepAutoPlayConfig && stepAutoPlayConfig.type) {
+        updateObj['steps.$.autoPlayConfig.type'] = stepAutoPlayConfig.type
+      }
+
+      if(stepAutoPlayConfig && stepAutoPlayConfig.delay) {
+        updateObj['steps.$.autoPlayConfig.delay'] = stepAutoPlayConfig.delay
+      }
+
+      if (Object.keys(updateObj).length !== 0) {
+
+        return Models.Screen.findOneAndUpdate({ _id: screenId, 'steps._id': stepId }, { $set: updateObj }, {
+            new: true,
+            overwrite: false
+          })
+          .then((result) => {
+
+            return Models.Screen.findOne({
+                _id: screenId
+              })
+              .populate({
+                path: 'steps.view.popup.formId',
+                model: 'Form',
+              })
+              .populate({
+                path: 'steps.view.popup.buttons.gotoScreen',
+                model: 'Screen',
+              })
+              .populate({
+                path: 'steps.stepAudioId',
+                model: 'Audio',
+              })
+              .lean()
+              .then((newScreenDoc) => {
+
+
+===HANDLER:deleteStep===
+import helpers from '../helpers/livedemoHelpers.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+
+const handler = function (req, res) {
+  let { Models, conn } = req.mongo
+
+
+  let requestBody = null
+
+  let workspaceId = req.params.workspaceId
+  let storyId = req.params.storyId
+  let screenId = req.params.screenId
+  let stepId = req.params.stepId
+  let authUserDoc = null
+
+  return Promise.resolve().then(async () => {
+
+      return helpers.authReq(req, Models)
+    })
+    .then(({ authUser }) => {
+      authUserDoc = authUser
+
+      // let validatedBody = validateBody(req.body, postStepValidator)
+      // requestBody = validatedBody.value
+
+      helpers.validateUserHasAccessToWorkspace(authUserDoc, workspaceId)
+    })
+    .then(() => {
+
+      return Models.Screen.findOneAndUpdate({ _id: screenId }, {
+        $pull: {
+          steps: { _id: stepId }
+        }
+      }, { new: true })
+
+    })
+    .then((newScreen) => {
+
+      if (!newScreen) {
+        throw new Error('Step couldn\'t be deleted')
+      }
+
+      const resultResponse = {
+        statusCode: ResponseCodes['200_OK'],
+        headers: {
+          'Access-Control-Max-Age': 600,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+          // Required for CORS support to work
+          'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+        },
+        body: JSON.stringify({})
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(resultResponse.body)
+
+    })
+    .catch((error) => {
+      console.log(error)
+
+      let resultResponse
+      if (error.resultResponse) {
+
+        resultResponse = error.resultResponse
+      } else {
+
+
+        resultResponse = {
+          statusCode: ResponseCodes['500_INTERNAL_SERVER_ERROR'],
+          headers: {
+            'Access-Control-Max-Age': 600,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+            // Required for CORS support to work
+            'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+          },
+          body: ''
+        }
+
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(resultResponse.body)
+    })
+
+}
+
+export default  handler
+
+===HANDLER:postStoryPublish===
+import helpers from '../helpers/livedemoHelpers.js'
+import postStoryPublishValidator from '../helpers/validators/stories/postStoryPublish.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+
+import ENV from '../envServer.js'
+const { STORY_REQUESTS_FOLDER } = ENV
+import mongoose from 'mongoose';
+const { ObjectId } = mongoose.Types;
+
+
+const handler = function (req, res) {
+  let { Models, conn } = req.mongo
+
+  let requestBody = null
+
+  let workspaceId = req.params.workspaceId
+  let storyId = req.params.storyId
+  let screenId = req.params.screenId
+  let authUserDoc = null
+
+  return Promise.resolve().then(async () => {
+
+      return helpers.authReq(req, Models)
+    })
+    .then(({ authUser }) => {
+      authUserDoc = authUser
+
+      let validatedBody = helpers.validateBody(req.body, postStoryPublishValidator)
+      requestBody = validatedBody.value
+
+      helpers.validateUserHasAccessToWorkspace(authUserDoc, workspaceId)
+    })
+    .then(() => {
+
+      let isPublished = requestBody.isPublished
+
+      return Models.Story.findOneAndUpdate({ _id: storyId }, { $set: { isPublished: isPublished } }, { new: true })
+        .then(() => {
+
+          return Models.Story.findOne({
+              _id: storyId
+            })
+            .populate({
+              path: 'screens',
+              populate: [
+                {
+                  path: 'customTransitions.gotoScreen',
+                  model: 'Screen',
+                  select: '_id name'
+                },
+                {
+                  path: 'steps.view.formId',
+                  model: 'Form',
+                },
+              ],
+              select: '_id name type steps customTransitions imageUrl index imageUrl asset',
+              options: { sort: { 'index': 1 } }
+            })
+        })
+    })
+    .then((newStoryDoc) => {
+
+      if (!newStoryDoc) {
+        throw new Error('Story couldn\'t be published')
+      }
+
+      const resultResponse = {
+        statusCode: ResponseCodes['200_OK'],
+        headers: {
+          'Access-Control-Max-Age': 600,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+          // Required for CORS support to work
+          'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+        },
+        body: JSON.stringify(newStoryDoc)
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(resultResponse.body)
+
+    })
+    .catch((error) => {
+      console.log(error)
+
+      let resultResponse
+      if (error.resultResponse) {
+
+        resultResponse = error.resultResponse
+      } else {
+
+
+        resultResponse = {
+          statusCode: ResponseCodes['500_INTERNAL_SERVER_ERROR'],
+          headers: {
+            'Access-Control-Max-Age': 600,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+            // Required for CORS support to work
+            'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+          },
+          body: ''
+        }
+
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(resultResponse.body)
+    })
+}
+
+export default  handler
+
+===HANDLER:postForms===
+import helpers from '../helpers/livedemoHelpers.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+import FormTypes from '../constants/FormTypes.js'
+import postFormValidator from '../helpers/validators/forms/postFormValidator.js'
+
+const handler = function (req, res) {
+  let { Models, conn } = req.mongo
+
+  let requestBody = null
+
+  let workspaceId = req.params.workspaceId
+  let authUserDoc = null
+
+  return Promise.resolve().then(async () => {
+
+      return helpers.authReq(req, Models)
+    })
+    .then(({ authUser }) => {
+      authUserDoc = authUser
+
+      let validatedBody = helpers.validateBody(req.body, postFormValidator)
+      requestBody = validatedBody.value
+
+      helpers.validateUserHasAccessToWorkspace(authUserDoc, workspaceId)
+    })
+    .then(() => {
+      let { storyId, transitionId, screenId, stepId, type } = requestBody
+
+      let formType = FormTypes[type.toUpperCase()]
+
+      let newForm = new Models.Form({
+        title: 'Get in touch with us',
+        type: formType,
+        fields: [
+          {
+            label: 'Name',
+            name: 'name',
+            required: true,
+            typeData: {}
+          },
+          {
+            label: 'Email',
+            name: 'email',
+            required: true,
+            typeData: {}
+          }
+        ],
+        storyId: storyId,
+        stepId: stepId,
+        screenId: screenId,
+        transitionId: transitionId,
+        workspaceId: workspaceId,
+      })
+
+      return newForm.save()
+    })
+    .then((newFormDoc) => {
+      let { screenId, stepId, transitionId, type } = requestBody
+
+      if(type === FormTypes.STEP) {
+        return Models.Screen.findOneAndUpdate({ _id: screenId, 'steps._id': stepId }, {
+            $set: {
+              'steps.$.view.popup.formId': newFormDoc._id
+            }
+          }, {
+            new: true,
+            overwrite: false
+          })
+          .then((newScreenDoc) => {
+
+            return newFormDoc
+          })
+      } else if(type === FormTypes.TRANSITION) {
+        return Models.Screen.findOneAndUpdate({ _id: screenId,'customTransitions._id': transitionId }, {
+            $set: {
+              'customTransitions.$.popup.formId': newFormDoc._id
+            }
+          }, {
+            new: true,
+            overwrite: false
+          })
+          .then((newScreenDoc) => {
+
+            return newFormDoc
+          })
+      } else {
+        return newFormDoc
+      }
+
+    })
+    .then((newFormDoc) => {
+
+      if (!newFormDoc) {
+        throw new Error('Form couldn\'t be created')
+      }
+
+      const resultResponse = {
+        statusCode: ResponseCodes['200_OK'],
+        headers: {
+          'Access-Control-Max-Age': 600,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+          // Required for CORS support to work
+          'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+        },
+        body: JSON.stringify(newFormDoc)
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(resultResponse.body)
+
+    })
+    .catch((error) => {
+      console.log(error)
+
+      let resultResponse
+      if (error.resultResponse) {
+
+        resultResponse = error.resultResponse
+      } else {
+
+
+        resultResponse = {
+          statusCode: ResponseCodes['500_INTERNAL_SERVER_ERROR'],
+          headers: {
+            'Access-Control-Max-Age': 600,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+            // Required for CORS support to work
+            'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+          },
+          body: ''
+        }
+
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(resultResponse.body)
+    })
+
+}
+
+export default  handler
+
+===HANDLER:patchForm===
+import helpers from '../helpers/livedemoHelpers.js'
+import patchFormValidator from '../helpers/validators/forms/patchFormValidator.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+
+const handler = function (req, res) {
+  let { Models, conn } = req.mongo
+
+
+  let requestBody = null
+
+  let workspaceId = req.params.workspaceId
+  // let storyId = req.params.storyId
+  // let screenId = req.params.screenId
+  // let stepId = req.params.stepId
+  let formId = req.params.formId
+  let authUserDoc = null
+
+  return Promise.resolve().then(async () => {
+
+      return helpers.authReq(req, Models)
+    })
+    .then(({ authUser }) => {
+      authUserDoc = authUser
+
+      let validatedBody = helpers.validateBody(req.body, patchFormValidator)
+      requestBody = validatedBody.value
+
+      helpers.validateUserHasAccessToWorkspace(authUserDoc, workspaceId)
+    })
+    .then(() => {
+
+      const title = requestBody.title
+      const type = requestBody.type
+      const hubspot = requestBody.hubspot
+
+      
+
+      let updateObj = {}
+
+      if (title) {
+        updateObj['title'] = title
+      }
+
+      if (type) {
+        updateObj['type'] = type
+      }
+
+      if (hubspot) {
+        updateObj['hubspot'] = hubspot
+      }
+
+      if (Object.keys(updateObj).length !== 0) {
+
+        return Models.Form.findOneAndUpdate({ _id: formId}, { $set: updateObj }, {
+            new: true,
+            overwrite: false
+          })
+      } else {
+
+        return null
+      }
+
+    })
+    .then((updatedFormDoc) => {
+
+      if (!updatedFormDoc) {
+        throw new Error('Form couldn\'t be updated')
+      }
+
+      const resultResponse = {
+        statusCode: ResponseCodes['200_OK'],
+        headers: {
+          'Access-Control-Max-Age': 600,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+          // Required for CORS support to work
+          'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+        },
+        body: JSON.stringify(updatedFormDoc)
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(resultResponse.body)
+
+    })
+    .catch((error) => {
+      console.log(error)
+
+      let resultResponse
+      if (error.resultResponse) {
+
+        resultResponse = error.resultResponse
+      } else {
+
+
+        resultResponse = {
+          statusCode: ResponseCodes['500_INTERNAL_SERVER_ERROR'],
+          headers: {
+            'Access-Control-Max-Age': 600,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+            // Required for CORS support to work
+            'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+          },
+          body: ''
+        }
+
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(resultResponse.body)
+    })
+}
+
+export default  handler
+
+===HANDLER:postLeadsForm===
+import helpers from '../helpers/livedemoHelpers.js'
+import validator from 'validator'
+import ResponseCodes from '../constants/ResponseCodes.js'
+import axios from 'axios'
+import ENV from '../envServer.js'
+import monq from 'monq'
+
+const FORM_FIELD_NAME = {
+  EMAIL: 'email',
+  NAME: 'name',
+}
+
+function validateBodyFromForm(formDoc, body) {
+  let fieldsObj = formDoc.fields.reduce((accum, field) => {
+    accum[field.name] = field
+
+    return accum
+  }, {})
+
+  let jsonBody = body
+
+  let bodyFields = Object.entries(jsonBody).reduce((accum, [key, value]) => {
+    if (fieldsObj[key]) {
+
+      accum[key] = value
+    }
+
+    return accum
+  }, {})
+
+  let allRequiredFieldsAreFilled = Object.values(fieldsObj).every(fieldObj => {
+    if (fieldObj.required) {
+
+      return !!bodyFields[fieldObj.name]
+    } else {
+
+      return true
+    }
+  })
+
+  if (!allRequiredFieldsAreFilled) {
+    throw new Error('Incorrect data')
+  }
+
+  let allFiledsAreValid = Object.entries(bodyFields).every(([key, value]) => {
+
+    if (key === FORM_FIELD_NAME.EMAIL) {
+
+      let isValueValid = validator.isEmail(value)
+      return isValueValid
+    }
+
+    if (key === FORM_FIELD_NAME.NAME) {
+
+      let isValueValid = value.length > 3 && value.length < 255
+      return isValueValid
+    }
+  })
+
+  if (!allFiledsAreValid) {
+    throw new Error('Incorrect data')
+  }
+
+  return bodyFields
+}
+
+function validateCaptcha(captchaToken) {
+  return axios.post(
+    `https://www.google.com/recaptcha/api/siteverify?secret=${ENV.CAPTCHA_SECRET_KEY}&response=${captchaToken}`
+    )
+    .then((res) => {
+      if (res.data.success) {
+        return true
+      } else {
+
+        throw new Error('Invalid captcha')
+      }
+    })
+}
+
+function enqueueDemoLeadCollectionEvent(storyId, workspaceId, leadId, leadData) {
+  const client = monq(ENV.DB_URI || 'mongodb://localhost:27017/livedemo_app')
+  const queue = client.queue('demoActivityEvents', { collection: 'jobs-monq' })
+
+  return new Promise((resolve, reject) => {
+    let jobName = 'lead-collection-event'
+    queue.enqueue(jobName, { 
+      storyId, 
+      workspaceId, 
+      leadId: leadId.toString(),
+      eventName: 'lead-collection',
+      leadData 
+    }, function (err, job) {
+      if (err) {
+        reject(err)
+      }
+      console.log('Enqueued lead-collection-event:', job.data)
+      resolve()
+    })
+  })
+}
+
+const handler = function (req, res) {
+  let { Models, conn } = req.mongo
+
+
+  let formId = req.params.formId
+  let captchaToken = req.body && req.body.captchaToken
+  let livedemoSessionId = req.headers ? req.headers.livedemosessionid : ''
+
+  return validateCaptcha(captchaToken)
+    .then(async () => {
+
+      return Models.Form.findOne({ _id: formId }).lean()
+    })
+    .then((formDoc) => {
+      if (!formDoc) {
+        throw new Error('Form not found')
+      }
+
+      let bodyFields = validateBodyFromForm(formDoc, req.body)
+
+
+      let newLead = new Models.Lead({
+        formId: formDoc._id,
+        storyId: formDoc.storyId,
+        liveDemoId: formDoc.liveDemoId,
+        screenId: formDoc.screenId,
+        workspaceId: formDoc.workspaceId,
+        sessionId: livedemoSessionId,
+        data: bodyFields
+      })
+
+      return newLead.save()
+    })
+    .then((newLeadDoc) => {
+      // if(!ENV.PROCESS_DEMO_ACTIVITY_EVENTS) {
+      //   return newLeadDoc
+      // }
+      
+      // Enqueue lead-collection-event
+      return enqueueDemoLeadCollectionEvent(
+        newLeadDoc.storyId.toString(),
+        newLeadDoc.workspaceId.toString(),
+        newLeadDoc._id,
+        newLeadDoc.data
+      )
+        .then(() => newLeadDoc)
+        .catch((err) => {
+          // Log error but don't fail the request if enqueueing fails
+          console.error('Failed to enqueue lead-collection-event:', err)
+          return newLeadDoc
+        })
+    })
+    .then((newLeadDoc) => {
+      return Models.Form.findOneAndUpdate({ _id: formId }, {
+        $push: {
+          'leads': newLeadDoc._id
+        }
+      }, {
+
+===HANDLER:getStoryById===
+import helpers from '../helpers/livedemoHelpers.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+
+const handler = function (req, res) {
+  let { Models, conn } = req.mongo
+
+  let workspaceId = req.params.workspaceId
+  let storyId = req.params.storyId
+  let authUserDoc = null
+
+  return Promise.resolve().then(async () => {
+
+    return helpers.authReq(req, Models)
+  })
+    .then(({ authUser }) => {
+      authUserDoc = authUser
+
+      helpers.validateUserHasAccessToWorkspace(authUserDoc, workspaceId)
+    })
+    .then(async () => {
+
+      let storyPromise = Models.Story.findOne({
+        _id: storyId,
+        workspaceId: workspaceId,
+        deletedAt: null
+      })
+        .populate({
+          path: 'screens',
+          populate: [
+            {
+              path: 'customTransitions.gotoScreen',
+              model: 'Screen',
+              select: '_id name'
+            },
+            {
+              path: 'steps.view.popup.formId',
+              model: 'Form',
+            },
+            {
+              path: 'steps.stepAudioId',
+              model: 'Audio',
+            },
+            {
+              path: 'steps.view.popup.buttons.gotoScreen',
+              model: 'Screen',
+            },
+            {
+              path: 'cursorPositions',
+              model: 'CursorPositions',
+            }
+          ],
+          select: '_id name type screens steps customTransitions width height imageUrl index asset playbackRate popups zoomSpans zoomSpan startTime endTime cursorPositions',
+        })
+        .populate('content.contentId')
+
+      let cursorPositionsPromise = Models.CursorPositions.find({ storyId }).lean()
+
+      return Promise.all([storyPromise, cursorPositionsPromise])
+    })
+    .then(([foundStory, cursorPositions]) => {
+      let responsePayload = foundStory ? (foundStory.toObject ? foundStory.toObject() : foundStory) : null;
+      if (responsePayload) {
+        if (Array.isArray(responsePayload.screens)) {
+          responsePayload.screens.sort((a, b) => a.index - b.index)
+        }
+        responsePayload.cursorPositions = cursorPositions;
+      }
+
+      const resultResponse = {
+        statusCode: ResponseCodes['200_OK'],
+        headers: {
+          'Access-Control-Max-Age': 600,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+          // Required for CORS support to work
+          'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+        }
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(JSON.stringify(responsePayload))
+    })
+    .catch((error) => {
+      console.log(error)
+
+      let resultResponse
+      if (error.resultResponse) {
+
+        resultResponse = error.resultResponse
+      } else {
+
+
+        resultResponse = {
+          statusCode: ResponseCodes['500_INTERNAL_SERVER_ERROR'],
+          headers: {
+            'Access-Control-Max-Age': 600,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+            // Required for CORS support to work
+            'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+          },
+          body: ''
+        }
+
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(resultResponse.body)
+    })
+}
+
+export default handler
+
+
+===HANDLER:getWorkspaceSessions===
+import helpers from '../helpers/livedemoHelpers.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+import moment from 'moment'
+import mongoose from 'mongoose';
+const { ObjectId } = mongoose.Types;
+const VIEW_TYPES = {
+  '48H': '48H',
+  '7D': '7D',
+  '30D': '30D',
+}
+
+const handler = function (req, res) {
+  let { Models, conn } = req.mongo
+
+  let workspaceId = req.params.workspaceId
+  let viewType = VIEW_TYPES[req.query.viewType]
+  
+  // Parse pagination parameters
+  let limit = parseInt(req.query.limit) || 10
+  let page = parseInt(req.query.page) || 1
+  
+  // Validate pagination parameters
+  if (limit < 1) limit = 10
+  if (page < 1) page = 1
+
+  let requestBody = null
+  let authUserDoc = null
+
+  let subtractDays = viewType === VIEW_TYPES['48H'] ? 2 : (viewType === VIEW_TYPES['7D'] ? 7 : 30)
+
+  let startTimestamp = moment().subtract(subtractDays, 'day').valueOf()
+  let endTimestamp = moment().valueOf()
+
+
+
+  return Promise.resolve().then(async () => {
+
+    return helpers.authReq(req, Models)
+  })
+    .then(({ authUser }) => {
+      authUserDoc = authUser
+
+      helpers.validateUserHasAccessToWorkspace(authUserDoc, workspaceId)
+    })
+    .then(async () => {
+      // First, use aggregation to group sessions by storyId, get latest timestamp for each,
+      // sort by latest timestamp, and get the top N storyIds for current page
+      const skip = (page - 1) * limit
+      
+      // Get total count of unique storyIds for pagination meta
+      const totalCountResult = await Models.Session.aggregate([
+        {
+          $match: {
+            workspaceId: new ObjectId(workspaceId),
+            startTimestamp: { $gte: startTimestamp, $lte: endTimestamp }
+          }
+        },
+        {
+          $group: {
+            _id: '$storyId'
+          }
+        },
+        {
+          $count: 'total'
+        }
+      ])
+      
+      const totalItems = totalCountResult.length > 0 ? totalCountResult[0].total : 0
+      const totalPages = Math.ceil(totalItems / limit)
+      
+      // Get the top N storyIds for current page (sorted by latest session timestamp)
+      const topStoryIdsResult = await Models.Session.aggregate([
+        {
+          $match: {
+            workspaceId: new ObjectId(workspaceId),
+            startTimestamp: { $gte: startTimestamp, $lte: endTimestamp }
+          }
+        },
+        {
+          $group: {
+            _id: '$storyId',
+            latestTimestamp: { $max: '$startTimestamp' }
+          }
+        },
+        {
+          $sort: { latestTimestamp: -1 }
+        },
+        {
+          $skip: skip
+        },
+        {
+          $limit: limit
+        },
+        {
+          $project: {
+            _id: 1
+          }
+        }
+      ])
+      
+      const paginatedStoryIds = topStoryIdsResult.map(item => item._id)
+      
+      // Build pagination meta object
+      const meta = {
+        pagination: {
+          currentPage: page,
+          itemsPerPage: limit,
+          totalItems: totalItems,
+          totalPages: totalPages,
+          hasNextPage: page < totalPages,
+          hasPreviousPage: page > 1
+        }
+      }
+      
+      // Now fetch only sessions for the paginated storyIds
+      const sessionDocs = await Models.Session.find(
+        { 
+          workspaceId: workspaceId, 
+          startTimestamp: { $gte: startTimestamp, $lte: endTimestamp },
+          storyId: { $in: paginatedStoryIds }
+        },
+        '_id storyId workspaceId startTimestamp endTimestamp eventsClickCount createdAt duration  stepsCount didPlay didComplete dropOffStep clientIpData.ip clientIpData.country clientIpData.city clientIpData.region clientIpData.flag')
+        .populate('storyId', 'name')
+        .sort({ startTimestamp: -1 })
+        .lean()
+      
+      if (!sessionDocs) {
+        throw new Error('Sessions not found')
+      }
+      
+      // Fetch stories for the paginated storyIds
+      const storyDocs = await Models.Story.find(
+        { _id: { $in: paginatedStoryIds } },
+        '_id name workspaceId createdAt updatedAt userId isPublished status'
+      ).lean()
+      
+      return { storyDocs, sessionDocs, meta }
+    })
+    .then(async ({ storyDocs, sessionDocs, meta }) => {
+      // Get all leads counts for all storyDocs in one query
+      const storyIds = storyDocs.map(storyDoc => storyDoc._id)
+      const leadsAggregation = await Models.Lead.aggregate([
+        { $match: { storyId: { $in: storyIds } } },
+        { $group: { _id: '$storyId', count: { $sum: 1 } } }
+      ])
+      
+      // Create a lookup map for leads counts
+      const leadsCountMap = {}
+      leadsAggregation.forEach(item => {
+        leadsCountMap[item._id.toString()] = item.count
+      })
+
+      // Calculate metrics for each storyDoc
+      const storyDocsWithMetricsUnsorted = storyDocs.map((storyDoc) => {
+        const storyIdStr = storyDoc._id.toString()
+
+        // Get all sessions for this storyDoc
+        const storySessions = sessionDocs.filter(sessionDoc => {
+          const sessionStoryId = sessionDoc.storyId?._id?.toString?.() ?? sessionDoc.storyId?.toString?.() ?? sessionDoc.storyId
+          return sessionStoryId === storyIdStr
+
+===HANDLER:getWorkspaceLeads===
+import helpers from '../helpers/livedemoHelpers.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+import moment from 'moment'
+
+const VIEW_TYPES = {
+  '48H': '48H',
+  '7D': '7D',
+  '30D': '30D',
+}
+
+const handler = function (req, res) {
+  let { Models, conn } = req.mongo
+
+  let workspaceId = req.params.workspaceId
+  let viewType = VIEW_TYPES[req.query.viewType]
+
+  let requestBody = null
+  let authUserDoc = null
+
+  let subtractDays = viewType === VIEW_TYPES['48H'] ? 2 : (viewType === VIEW_TYPES['7D'] ? 7 : 30)
+
+  let startTimestamp = moment().subtract(subtractDays, 'day').valueOf()
+  let endTimestamp = moment().valueOf()
+
+
+
+  return Promise.resolve().then(async () => {
+
+      return helpers.authReq(req, Models)
+    })
+    .then(({ authUser }) => {
+      authUserDoc = authUser
+
+      helpers.validateUserHasAccessToWorkspace(authUserDoc, workspaceId)
+    })
+    .then(() => {
+      return Models.Lead.find({ workspaceId: workspaceId, createdAt: { $gte: startTimestamp, $lte: endTimestamp }, },
+        '_id storyId workspaceId createdAt sessionId data')
+        .populate({
+          path: 'storyId',
+          select: '_id name ',
+        })
+        .populate({
+          path: 'sessionId',
+          select: '_id clientIpData.country clientIpData.flag.emoji',
+        })
+        .sort({createdAt: -1})
+        .lean()
+    })
+    .then((leadDocs) => {
+      if(!leadDocs) {
+        throw new Error('Leads not found')
+      }
+
+
+
+
+      const resultResponse = {
+        statusCode: ResponseCodes['200_OK'],
+        headers: {
+          'Access-Control-Max-Age': 600,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+          // Required for CORS support to work
+          'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+        }
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(leadDocs)
+    })
+    .catch((error) => {
+      console.log(error)
+
+      let resultResponse
+      if (error.resultResponse) {
+
+        resultResponse = error.resultResponse
+      } else {
+
+
+        resultResponse = {
+          statusCode: ResponseCodes['500_INTERNAL_SERVER_ERROR'],
+          headers: {
+            'Access-Control-Max-Age': 600,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+            // Required for CORS support to work
+            'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+          },
+          body: ''
+        }
+
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(resultResponse.body)
+    })
+}
+
+export default  handler
+
+===HANDLER:deleteStory===
+import helpers from '../helpers/livedemoHelpers.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+
+const handler = function (req, res) {
+    let {Models, conn} = req.mongo
+
+    let workspaceId = req.params.workspaceId
+    let storyId = req.params.storyId
+    let authUserDoc = null
+
+    return Promise.resolve().then(async () => {
+
+        return helpers.authReq(req, Models)
+    })
+        .then(({authUser}) => {
+            authUserDoc = authUser
+
+            helpers.validateUserHasAccessToWorkspace(authUserDoc, workspaceId)
+        })
+        .then(async () => {
+
+
+            return Models.Story.findOneAndUpdate({
+                _id: storyId
+            }, {
+                $set: {
+                    deletedAt: new Date()
+                }
+            }, {
+                new: true
+            })
+        })
+        .then((deletedStory) => {
+
+            const resultResponse = {
+                statusCode: ResponseCodes['200_OK'],
+                headers: {
+                    'Access-Control-Max-Age': 600,
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+                    // Required for CORS support to work
+                    'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+                }
+            }
+
+            res.set(resultResponse.headers)
+            res.status(resultResponse.statusCode)
+            res.send(JSON.stringify(deletedStory))
+        })
+        .catch((error) => {
+            console.log(error)
+
+            let resultResponse
+            if (error.resultResponse) {
+
+                resultResponse = error.resultResponse
+            } else {
+
+
+                resultResponse = {
+                    statusCode: ResponseCodes['500_INTERNAL_SERVER_ERROR'],
+                    headers: {
+                        'Access-Control-Max-Age': 600,
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+                        // Required for CORS support to work
+                        'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+                    },
+                    body: ''
+                }
+
+            }
+
+            res.set(resultResponse.headers)
+            res.status(resultResponse.statusCode)
+            res.send(resultResponse.body)
+        })
+}
+
+export default handler
+
+
+===HANDLER:postStoryLinks===
+import helpers from '../helpers/livedemoHelpers.js'
+import postStoryLinksValidator from '../helpers/validators/stories/postStoryLinksValidator.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+import mongoose from 'mongoose';
+const { ObjectId } = mongoose.Types;
+
+const handler = function (req, res) {
+    let {Models, conn} = req.mongo
+
+    let workspaceId = req.params.workspaceId
+    let storyId = req.params.storyId
+    let requestBody = null
+    let authUserDoc = null
+
+    return Promise.resolve().then(async () => {
+
+        return helpers.authReq(req, Models)
+    })
+        .then(({authUser}) => {
+            authUserDoc = authUser
+            let validatedBody = helpers.validateBody(req.body, postStoryLinksValidator)
+            requestBody = validatedBody.value
+
+            helpers.validateUserHasAccessToWorkspace(authUserDoc, workspaceId)
+        })
+        .then(() => {
+            return Models.Story.findOne({ _id: storyId }).lean()
+        })
+        .then(async (storyDoc) => {
+            let linkName = requestBody.name ? requestBody.name : `${authUserDoc.name.split(' ')[0]}'s link`
+            let defaultVariables = storyDoc.custom.variables && storyDoc.custom.variables.length > 0 ? storyDoc.custom.variables : []
+            // Clear default values, keep only their names
+            defaultVariables = defaultVariables.map(varItem => {
+                return {
+                    _id: new ObjectId(),
+                    name: varItem.name,
+                    value: varItem.value
+                }
+            })
+
+            return new Models.Link({
+                name: linkName,
+                storyId: storyId,
+                workspaceId: workspaceId,
+                variables: defaultVariables
+            })
+                .save()
+                .then((newLinkDoc) => {
+                    return Models.Story.findOneAndUpdate({
+                            _id: storyId
+                        }, {
+                            $push: {
+                                'links': newLinkDoc._id.toString()
+                            }
+                        }, {new: true}
+                    )
+                        .then((updatedDoc) => {
+
+                            return newLinkDoc
+                        })
+                })
+        })
+        .then((newLinkDoc) => {
+
+                const resultResponse = {
+                    statusCode: ResponseCodes['200_OK'],
+                    headers: {
+                        'Access-Control-Max-Age': 600,
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+                        // Required for CORS support to work
+                        'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+                    }
+                }
+
+                res.set(resultResponse.headers)
+                res.status(resultResponse.statusCode)
+                res.send(JSON.stringify(newLinkDoc))
+            }
+        )
+        .catch((error) => {
+            console.log(error)
+
+            let resultResponse
+            if (error.resultResponse) {
+
+                resultResponse = error.resultResponse
+            } else {
+
+
+                resultResponse = {
+                    statusCode: ResponseCodes['500_INTERNAL_SERVER_ERROR'],
+                    headers: {
+                        'Access-Control-Max-Age': 600,
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+                        // Required for CORS support to work
+                        'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+                    },
+                    body: ''
+                }
+
+            }
+
+            res.set(resultResponse.headers)
+            res.status(resultResponse.statusCode)
+            res.send(resultResponse.body)
+        })
+}
+
+export default handler
+
+===HANDLER:patchScreen===
+import helpers from '../helpers/livedemoHelpers.js'
+import patchScreenValidator from '../helpers/validators/stories/screens/patchScreenValidator.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+
+import ENV from '../envServer.js'
+const { STORY_REQUESTS_FOLDER } = ENV
+import mongoose from 'mongoose';
+const { ObjectId } = mongoose.Types;
+
+
+const handler = function (req, res) {
+  let { Models, conn } = req.mongo
+
+  let requestBody = null
+
+  let workspaceId = req.params.workspaceId
+  let storyId = req.params.storyId
+  let screenId = req.params.screenId
+  let authUserDoc = null
+
+  return Promise.resolve().then(async () => {
+
+      return helpers.authReq(req, Models)
+    })
+    .then(({ authUser }) => {
+      authUserDoc = authUser
+
+      let validatedBody = helpers.validateBody(req.body, patchScreenValidator)
+      requestBody = validatedBody.value
+
+      helpers.validateUserHasAccessToWorkspace(authUserDoc, workspaceId)
+    })
+    .then(async () => {
+      let index = requestBody.index
+      let name = requestBody.name
+      let startTime = requestBody.startTime
+      let endTime = requestBody.endTime
+      let playbackRate = requestBody.playbackRate
+
+      let updateObj = {}
+
+      if(startTime  || startTime  === 0) {
+        updateObj.startTime  = startTime
+      }
+
+      if(endTime  || endTime  === 0) {
+        updateObj.endTime  = endTime
+      }
+
+      if(playbackRate) {
+        updateObj.playbackRate  = playbackRate
+      }
+
+      if(index || index === 0) {
+        updateObj.index = index
+      }
+
+      if(name || name === '') {
+        updateObj.name = name
+      }
+
+      return Models.Screen.db.collection('screens').findOneAndUpdate({ _id: new ObjectId(screenId) },  { $set: updateObj }, {
+        returnDocument: 'after'
+      })
+    })
+    .then((screenDoc) => {
+
+      const resultResponse = {
+        statusCode: ResponseCodes['200_OK'],
+        headers: {
+          'Access-Control-Max-Age': 600,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+          // Required for CORS support to work
+          'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+        }
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(JSON.stringify(screenDoc.value))
+    })
+    .catch((error) => {
+      console.log(error)
+
+      let resultResponse
+      if (error.resultResponse) {
+
+        resultResponse = error.resultResponse
+      } else {
+
+
+        resultResponse = {
+          statusCode: ResponseCodes['500_INTERNAL_SERVER_ERROR'],
+          headers: {
+            'Access-Control-Max-Age': 600,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+            // Required for CORS support to work
+            'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+          },
+          body: ''
+        }
+
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(resultResponse.body)
+    })
+}
+
+export default  handler
+
+===HANDLER:postStoryUpdateScreenOrder===
+import helpers from '../helpers/livedemoHelpers.js'
+import postUpdateScreenOrder from '../helpers/validators/stories/postUpdateScreenOrderValidator.js'
+import ResponseCodes from '../constants/ResponseCodes.js'
+
+const handler = function (req, res) {
+  let { Models, conn } = req.mongo
+
+  let requestBody = null
+
+  let workspaceId = req.params.workspaceId
+  let storyId = req.params.storyId
+  let screenId = req.params.screenId
+  let authUserDoc = null
+
+  return Promise.resolve().then(async () => {
+
+      return helpers.authReq(req, Models)
+    })
+    .then(({ authUser }) => {
+      authUserDoc = authUser
+
+      let validatedBody = helpers.validateBody(req.body, postUpdateScreenOrder)
+      requestBody = validatedBody.value
+
+      helpers.validateUserHasAccessToWorkspace(authUserDoc, workspaceId)
+    })
+    .then(async () => {
+      let screens = requestBody.screens
+
+      let updateOps = []
+      screens.forEach((screen) => {
+
+        updateOps.push({
+          updateOne: {
+            filter: {
+              _id: screen._id,
+            },
+            update: {
+              index: screen.index,
+            }
+          }
+        })
+      })
+
+
+      return Models.Screen.bulkWrite(updateOps)
+    })
+    .then((writeResult) => {
+
+      const resultResponse = {
+        statusCode: ResponseCodes['200_OK'],
+        headers: {
+          'Access-Control-Max-Age': 600,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+          // Required for CORS support to work
+          'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+        }
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send()
+    })
+    .catch((error) => {
+      console.log(error)
+
+      let resultResponse
+      if (error.resultResponse) {
+
+        resultResponse = error.resultResponse
+      } else {
+
+
+        resultResponse = {
+          statusCode: ResponseCodes['500_INTERNAL_SERVER_ERROR'],
+          headers: {
+            'Access-Control-Max-Age': 600,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'ClientId,Authorization,Content-Type,Accept', // Required for CORS support to work
+            // Required for CORS support to work
+            'Access-Control-Allow-Credentials': true, // Required for cookies, authorization headers with HTTPS
+          },
+          body: ''
+        }
+
+      }
+
+      res.set(resultResponse.headers)
+      res.status(resultResponse.statusCode)
+      res.send(resultResponse.body)
+    })
+}
+
+export default  handler
+
