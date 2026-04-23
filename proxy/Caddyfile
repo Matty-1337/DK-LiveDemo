@@ -1,18 +1,69 @@
+# =============================================================
+# Delta Kinetics — LiveDemo Caddy Reverse Proxy
+# Injects DK brand CSS into every HTML response
+# Serves static brand assets from /srv/inject/
+# =============================================================
+
 {
-	auto_https off
+	# Global options
 	admin off
+	auto_https off
 }
 
 :80 {
-	encode gzip
-
-	# Backend API routes
-	handle /api/* {
-		reverse_proxy livedemo-backend.railway.internal:3005
+	# ── Logging ──────────────────────────────────────────────
+	log {
+		output stdout
+		format json
+		level INFO
 	}
 
-	# Everything else → frontend
+	# ── Compression ───────────────────────────────────────────
+	encode gzip zstd
+
+	# ── Serve brand CSS as static file ───────────────────────
+	# Must be declared BEFORE the reverse_proxy catch-all
+	handle /dk-brand.css {
+		root * /srv/inject
+		file_server
+		header Cache-Control "public, max-age=3600"
+		header Content-Type "text/css; charset=utf-8"
+	}
+
+	# ── Health check endpoint (Railway uses this) ─────────────
+	handle /caddy-health {
+		respond "OK" 200
+	}
+
+	# ── Main reverse proxy with HTML head injection ───────────
 	handle {
-		reverse_proxy livedemo-frontend.railway.internal:5000
+		reverse_proxy livedemo-frontend.railway.internal:5000 {
+			header_up Host {upstream_hostport}
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+
+			# Pass through all response headers
+			header_down -Server
+
+			# Inject DK brand CSS link into every HTML response
+			# Uses Caddy's response header manipulation + streaming replace
+			@html_response {
+				header Content-Type text/html*
+			}
+
+			# Replace </head> with our CSS link + </head> in HTML responses
+			handle_response @html_response {
+				replace "</head>" "<link rel=\"stylesheet\" href=\"/dk-brand.css\" />\n</head>"
+			}
+		}
+	}
+
+	# ── Security headers ──────────────────────────────────────
+	header {
+		X-Frame-Options "SAMEORIGIN"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
 	}
 }

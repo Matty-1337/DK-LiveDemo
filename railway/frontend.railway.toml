@@ -1,0 +1,11 @@
+# =============================================================
+# railway/frontend.railway.toml
+# LiveDemo Frontend — internal only, proxied by Caddy
+# =============================================================
+
+[build]
+  dockerImage = "docker.io/livedemo/livedemo-web-app:latest"
+
+[deploy]
+  restartPolicyType = "ON_FAILURE"
+  restartPolicyMaxRetries = 3

@@ -1,0 +1,20 @@
+# =============================================================
+# railway/mongo.railway.toml
+# MongoDB 8 — internal only, no public domain
+# =============================================================
+
+[build]
+  builder = "DOCKERFILE"
+  dockerfilePath = "mongo/Dockerfile"
+
+[deploy]
+  restartPolicyType = "ON_FAILURE"
+  restartPolicyMaxRetries = 3
+
+[deploy.healthcheck]
+  # MongoDB doesn't have HTTP health; Railway uses TCP probe on 27017
+  timeout = 30
+
+[[mounts]]
+  mountPath = "/data/db"
+  name = "mongo_data"

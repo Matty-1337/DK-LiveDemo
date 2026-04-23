@@ -1,0 +1,552 @@
+/* =============================================================
+   Delta Kinetics — LiveDemo Brand Override
+   Injected by Caddy proxy into every HTML response
+   Brand system v2.0 | CoreTAP accent
+   ============================================================= */
+
+/* ── Font Import ─────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ── CSS Custom Properties ───────────────────────────────────── */
+:root {
+  /* DK Core Palette */
+  --dk-bg:              #0A1420;
+  --dk-bg-elevated:     #0F1B2D;
+  --dk-bg-card:         rgba(255, 255, 255, 0.04);
+  --dk-bg-card-hover:   rgba(255, 255, 255, 0.07);
+  --dk-bg-input:        rgba(255, 255, 255, 0.06);
+
+  /* CoreTAP Accents */
+  --dk-cyan:            #40F0F0;
+  --dk-magenta:         #E040C0;
+  --dk-cyan-dim:        rgba(64, 240, 240, 0.15);
+  --dk-cyan-glow:       rgba(64, 240, 240, 0.25);
+  --dk-magenta-dim:     rgba(224, 64, 192, 0.15);
+
+  /* Gradient — ALWAYS gradient, never flat cyan */
+  --dk-gradient:        linear-gradient(90deg, #92F7FC, #B6E2FF);
+  --dk-gradient-btn:    linear-gradient(135deg, #40F0F0 0%, #27D3F7 50%, #B6E2FF 100%);
+  --dk-gradient-hero:   linear-gradient(135deg, #92F7FC 0%, #40F0F0 40%, #E040C0 100%);
+
+  /* Text */
+  --dk-text-primary:    #F0F4FF;
+  --dk-text-secondary:  #8899BB;
+  --dk-text-muted:      #4A5878;
+  --dk-text-accent:     #40F0F0;
+
+  /* Borders */
+  --dk-border:          rgba(64, 240, 240, 0.15);
+  --dk-border-hover:    rgba(64, 240, 240, 0.35);
+  --dk-border-input:    rgba(64, 240, 240, 0.20);
+
+  /* Radius */
+  --dk-radius-sm:       8px;
+  --dk-radius-md:       16px;
+  --dk-radius-lg:       24px;
+
+  /* Shadows */
+  --dk-shadow-card:     0 4px 24px rgba(0, 0, 0, 0.4);
+  --dk-shadow-cyan:     0 0 20px rgba(64, 240, 240, 0.15);
+  --dk-shadow-btn:      0 4px 16px rgba(64, 240, 240, 0.30);
+  --dk-shadow-modal:    0 16px 64px rgba(0, 0, 0, 0.6);
+
+  /* Typography */
+  --dk-font-body:       'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --dk-font-mono:       'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Transitions */
+  --dk-transition:      0.2s ease;
+  --dk-transition-md:   0.4s ease;
+}
+
+/* ── Global Reset to DK Dark ─────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: var(--dk-bg) !important;
+  color: var(--dk-text-primary) !important;
+  font-family: var(--dk-font-body) !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* ── Navigation / Header ─────────────────────────────────────── */
+nav,
+header,
+[class*="navbar"],
+[class*="header"],
+[class*="topbar"],
+[class*="nav-"],
+[id*="navbar"],
+[id*="header"] {
+  background-color: var(--dk-bg-elevated) !important;
+  background-image: none !important;
+  border-bottom: 1px solid var(--dk-border) !important;
+  color: var(--dk-text-primary) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+aside,
+[class*="sidebar"],
+[class*="side-panel"],
+[class*="drawer"],
+[id*="sidebar"] {
+  background-color: var(--dk-bg-elevated) !important;
+  background-image: none !important;
+  border-right: 1px solid var(--dk-border) !important;
+  color: var(--dk-text-primary) !important;
+}
+
+/* ── Main Content Areas ──────────────────────────────────────── */
+main,
+[class*="main-content"],
+[class*="page-content"],
+[class*="content-area"],
+[class*="workspace"],
+[class*="dashboard"] {
+  background-color: var(--dk-bg) !important;
+  color: var(--dk-text-primary) !important;
+}
+
+/* ── Cards ───────────────────────────────────────────────────── */
+[class*="card"],
+[class*="panel"],
+[class*="tile"],
+[class*="block"],
+[class*="box"],
+article {
+  background-color: var(--dk-bg-card) !important;
+  background-image: none !important;
+  border: 1px solid var(--dk-border) !important;
+  border-radius: var(--dk-radius-md) !important;
+  box-shadow: var(--dk-shadow-card) !important;
+  color: var(--dk-text-primary) !important;
+  transition: background-color var(--dk-transition), border-color var(--dk-transition), box-shadow var(--dk-transition) !important;
+}
+
+[class*="card"]:hover,
+[class*="panel"]:hover {
+  background-color: var(--dk-bg-card-hover) !important;
+  border-color: var(--dk-border-hover) !important;
+  box-shadow: var(--dk-shadow-cyan) !important;
+}
+
+/* ── Modals / Dialogs ────────────────────────────────────────── */
+[class*="modal"],
+[class*="dialog"],
+[class*="overlay-content"],
+[role="dialog"] {
+  background-color: var(--dk-bg-elevated) !important;
+  border: 1px solid var(--dk-border) !important;
+  border-radius: var(--dk-radius-lg) !important;
+  box-shadow: var(--dk-shadow-modal) !important;
+  color: var(--dk-text-primary) !important;
+}
+
+[class*="modal-backdrop"],
+[class*="overlay"],
+[class*="backdrop"] {
+  background-color: rgba(10, 20, 32, 0.85) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* ── Buttons — Primary (gradient) ───────────────────────────── */
+button[class*="primary"],
+[class*="btn-primary"],
+[class*="button-primary"],
+[class*="btn"][class*="primary"],
+a[class*="btn-primary"] {
+  background: var(--dk-gradient-btn) !important;
+  background-size: 200% 200% !important;
+  border: none !important;
+  border-radius: var(--dk-radius-sm) !important;
+  color: #0A1420 !important;
+  font-family: var(--dk-font-body) !important;
+  font-weight: 600 !important;
+  box-shadow: var(--dk-shadow-btn) !important;
+  transition: all var(--dk-transition) !important;
+  cursor: pointer !important;
+}
+
+button[class*="primary"]:hover,
+[class*="btn-primary"]:hover {
+  transform: translateY(-1px) scale(1.02) !important;
+  box-shadow: 0 6px 24px rgba(64, 240, 240, 0.45) !important;
+}
+
+/* ── Buttons — Secondary / Ghost ────────────────────────────── */
+button[class*="secondary"],
+[class*="btn-secondary"],
+[class*="btn-outline"],
+[class*="btn-ghost"],
+button:not([class*="primary"]):not([class*="danger"]):not([class*="submit"]) {
+  background: transparent !important;
+  border: 1px solid var(--dk-border) !important;
+  border-radius: var(--dk-radius-sm) !important;
+  color: var(--dk-text-primary) !important;
+  font-family: var(--dk-font-body) !important;
+  font-weight: 500 !important;
+  transition: all var(--dk-transition) !important;
+  cursor: pointer !important;
+}
+
+button[class*="secondary"]:hover,
+[class*="btn-ghost"]:hover {
+  background: var(--dk-bg-card) !important;
+  border-color: var(--dk-cyan) !important;
+  color: var(--dk-cyan) !important;
+}
+
+/* ── Danger Buttons ──────────────────────────────────────────── */
+button[class*="danger"],
+[class*="btn-danger"],
+[class*="btn-red"],
+button[class*="delete"] {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+  color: #FCA5A5 !important;
+}
+
+/* ── Form Inputs ─────────────────────────────────────────────── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+textarea,
+select {
+  background-color: var(--dk-bg-input) !important;
+  border: 1px solid var(--dk-border-input) !important;
+  border-radius: var(--dk-radius-sm) !important;
+  color: var(--dk-text-primary) !important;
+  font-family: var(--dk-font-body) !important;
+  transition: border-color var(--dk-transition), box-shadow var(--dk-transition) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--dk-cyan) !important;
+  box-shadow: 0 0 0 3px var(--dk-cyan-dim) !important;
+  outline: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--dk-text-muted) !important;
+}
+
+/* ── Labels & Form Text ──────────────────────────────────────── */
+label,
+[class*="label"] {
+  color: var(--dk-text-secondary) !important;
+  font-family: var(--dk-font-body) !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+}
+
+/* ── Typography ──────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--dk-text-primary) !important;
+  font-family: var(--dk-font-body) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.2 !important;
+}
+
+p, span, li, td, th {
+  color: var(--dk-text-primary) !important;
+  font-family: var(--dk-font-body) !important;
+}
+
+/* Muted / secondary text */
+[class*="muted"],
+[class*="secondary-text"],
+[class*="text-gray"],
+[class*="subtitle"],
+small {
+  color: var(--dk-text-secondary) !important;
+}
+
+/* ── Links ───────────────────────────────────────────────────── */
+a:not([class*="btn"]):not([class*="button"]) {
+  color: var(--dk-cyan) !important;
+  text-decoration: none !important;
+  transition: color var(--dk-transition) !important;
+}
+
+a:not([class*="btn"]):hover {
+  color: #B6E2FF !important;
+}
+
+/* ── Tables ──────────────────────────────────────────────────── */
+table {
+  border-collapse: collapse !important;
+  width: 100% !important;
+}
+
+thead, [class*="table-head"] {
+  background-color: rgba(64, 240, 240, 0.06) !important;
+}
+
+th {
+  border-bottom: 1px solid var(--dk-border) !important;
+  color: var(--dk-text-secondary) !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  padding: 10px 16px !important;
+  text-transform: uppercase !important;
+}
+
+td {
+  border-bottom: 1px solid rgba(64, 240, 240, 0.06) !important;
+  padding: 12px 16px !important;
+}
+
+tr:hover td {
+  background-color: rgba(64, 240, 240, 0.04) !important;
+}
+
+/* ── Badges / Tags / Pills ───────────────────────────────────── */
+[class*="badge"],
+[class*="tag"],
+[class*="pill"],
+[class*="chip"] {
+  background-color: var(--dk-cyan-dim) !important;
+  border: 1px solid var(--dk-border) !important;
+  border-radius: 999px !important;
+  color: var(--dk-cyan) !important;
+  font-family: var(--dk-font-mono) !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  padding: 2px 10px !important;
+}
+
+/* ── Metrics / Numbers ───────────────────────────────────────── */
+[class*="metric"],
+[class*="stat"],
+[class*="count"],
+[class*="number"],
+[class*="kpi"] {
+  color: var(--dk-cyan) !important;
+  font-family: var(--dk-font-mono) !important;
+  font-weight: 700 !important;
+}
+
+/* ── Code Blocks ─────────────────────────────────────────────── */
+code, pre, kbd {
+  background-color: rgba(10, 14, 26, 0.8) !important;
+  border: 1px solid var(--dk-border) !important;
+  border-radius: var(--dk-radius-sm) !important;
+  color: var(--dk-cyan) !important;
+  font-family: var(--dk-font-mono) !important;
+  font-size: 0.85em !important;
+}
+
+pre {
+  padding: 16px !important;
+  overflow-x: auto !important;
+}
+
+code {
+  padding: 2px 6px !important;
+}
+
+/* ── Dropdowns / Menus ───────────────────────────────────────── */
+[class*="dropdown"],
+[class*="menu"],
+[class*="popover"],
+[role="menu"],
+[role="listbox"] {
+  background-color: var(--dk-bg-elevated) !important;
+  border: 1px solid var(--dk-border) !important;
+  border-radius: var(--dk-radius-md) !important;
+  box-shadow: var(--dk-shadow-modal) !important;
+}
+
+[class*="dropdown-item"],
+[class*="menu-item"],
+[role="menuitem"],
+[role="option"] {
+  color: var(--dk-text-primary) !important;
+  transition: background-color var(--dk-transition) !important;
+}
+
+[class*="dropdown-item"]:hover,
+[class*="menu-item"]:hover,
+[role="menuitem"]:hover {
+  background-color: var(--dk-cyan-dim) !important;
+  color: var(--dk-cyan) !important;
+}
+
+/* ── Tooltips ────────────────────────────────────────────────── */
+[class*="tooltip"] {
+  background-color: var(--dk-bg-elevated) !important;
+  border: 1px solid var(--dk-border) !important;
+  border-radius: var(--dk-radius-sm) !important;
+  box-shadow: var(--dk-shadow-cyan) !important;
+  color: var(--dk-text-primary) !important;
+  font-family: var(--dk-font-body) !important;
+  font-size: 0.8rem !important;
+}
+
+/* ── Progress / Loading Bars ─────────────────────────────────── */
+[class*="progress"],
+[role="progressbar"] {
+  background-color: var(--dk-bg-card) !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+}
+
+[class*="progress-bar"],
+[class*="progress-fill"] {
+  background: var(--dk-gradient-btn) !important;
+  border-radius: 999px !important;
+  transition: width 0.6s ease !important;
+}
+
+/* ── Tabs ────────────────────────────────────────────────────── */
+[class*="tab"]:not([class*="table"]) {
+  color: var(--dk-text-secondary) !important;
+  transition: color var(--dk-transition) !important;
+}
+
+[class*="tab"][class*="active"],
+[class*="tab"][aria-selected="true"] {
+  color: var(--dk-cyan) !important;
+  border-bottom: 2px solid var(--dk-cyan) !important;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dk-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--dk-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dk-cyan-dim);
+}
+
+/* ── Selection ───────────────────────────────────────────────── */
+::selection {
+  background-color: var(--dk-cyan-dim);
+  color: var(--dk-cyan);
+}
+
+/* ── Dividers ────────────────────────────────────────────────── */
+hr, [class*="divider"], [class*="separator"] {
+  border-color: var(--dk-border) !important;
+}
+
+/* ── Alerts / Toasts ─────────────────────────────────────────── */
+[class*="alert"],
+[class*="toast"],
+[class*="notification"],
+[role="alert"] {
+  background-color: var(--dk-bg-elevated) !important;
+  border: 1px solid var(--dk-border) !important;
+  border-radius: var(--dk-radius-md) !important;
+  color: var(--dk-text-primary) !important;
+}
+
+[class*="alert-success"],
+[class*="toast-success"] {
+  border-color: rgba(64, 240, 240, 0.4) !important;
+  background-color: rgba(64, 240, 240, 0.08) !important;
+}
+
+[class*="alert-error"],
+[class*="toast-error"] {
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  background-color: rgba(239, 68, 68, 0.08) !important;
+}
+
+/* ── LiveDemo-Specific: Demo Player ──────────────────────────── */
+/* Step annotation bubbles */
+[class*="annotation"],
+[class*="hotspot"],
+[class*="step-bubble"],
+[class*="callout"] {
+  background: var(--dk-bg-elevated) !important;
+  border: 1px solid var(--dk-border) !important;
+  border-radius: var(--dk-radius-md) !important;
+  box-shadow: var(--dk-shadow-cyan) !important;
+  color: var(--dk-text-primary) !important;
+}
+
+/* Hotspot pulse ring */
+[class*="hotspot-ring"],
+[class*="pulse-ring"] {
+  border-color: var(--dk-cyan) !important;
+  box-shadow: 0 0 0 4px var(--dk-cyan-dim) !important;
+}
+
+/* Demo progress indicator */
+[class*="demo-progress"],
+[class*="step-indicator"] {
+  background-color: var(--dk-cyan) !important;
+}
+
+/* ── Watermark Override ──────────────────────────────────────── */
+/* Remove any LiveDemo watermark / powered-by text */
+[class*="watermark"],
+[class*="powered-by"],
+a[href*="livedemo.ai"]:not(.dk-footer-link) {
+  display: none !important;
+}
+
+/* ── DK Footer Attribution ───────────────────────────────────── */
+body::after {
+  content: "Powered by Delta Kinetics";
+  position: fixed;
+  bottom: 12px;
+  right: 16px;
+  z-index: 9999;
+  font-family: var(--dk-font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--dk-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.7;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Entry Animations ────────────────────────────────────────── */
+@keyframes dk-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+[class*="card"],
+[class*="modal"],
+[class*="annotation"] {
+  animation: dk-fade-in 0.35s ease both;
+}
+
+/* ── Responsive Adjustments ──────────────────────────────────── */
+@media (max-width: 768px) {
+  [class*="sidebar"] {
+    border-right: none !important;
+    border-bottom: 1px solid var(--dk-border) !important;
+  }
+}
