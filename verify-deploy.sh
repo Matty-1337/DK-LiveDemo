@@ -4,7 +4,7 @@
 
 set -u
 
-PUBLIC_URL="${1:-https://demo.deltakinetics.io}"
+PUBLIC_URL="${1:-https://livedemo-proxy-production.up.railway.app}"
 MCP_URL="${2:-https://livedemo-mcp-production.up.railway.app}"
 
 GREEN='\033[0;32m'
