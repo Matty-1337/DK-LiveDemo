@@ -61,7 +61,9 @@ clientModule.getClient = function () {
     },
     async createScreen(ws, sid, body) {
       apiCalls.push({ fn: 'createScreen', ws, sid, name: body.name, len: { content: body.content.length, img: body.imageData.length } });
-      return { _id: oidScreen(), storyId: sid, workspaceId: ws, index: screenCounter - 1, type: 'Screen_Page', steps: [], customTransitions: [], name: body.name, imageUrl: 'https://s3.fake/placeholder.png', width: body.width, height: body.height, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      // Real backend auto-seeds a default popup step — verified by probe-v3.
+      const seededStep = { _id: oidStep(), index: undefined, view: { viewType: 'popup', content: '<p>Welcome to our StoryDemo!</p>', popup: { type: 'popup', title: 'Title', description: '<p>Description</p>', buttons: [] } }, createdAt: '', updatedAt: '' };
+      return { _id: oidScreen(), storyId: sid, workspaceId: ws, index: screenCounter - 1, type: 'Screen_Page', steps: [seededStep], customTransitions: [], name: body.name, imageUrl: 'https://s3.fake/placeholder.png', width: body.width, height: body.height, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     },
     async createStep(ws, sid, scid, body) {
       apiCalls.push({ fn: 'createStep', ws, sid, scid, body });

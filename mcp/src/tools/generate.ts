@@ -136,8 +136,16 @@ export async function runGenerate(input: GenerateInput): Promise<GenerateSuccess
   }
 
   // --- 4. Upload screens + 5. attach steps/popups ---
+  //
+  // Verified via discovery-probe-v3 (2026-04-24): POST /screens auto-seeds
+  // a default popup step at steps[0] with content="<p>Welcome to our
+  // StoryDemo!</p>", title="Title", description="<p>Description</p>",
+  // buttons=[]. We PATCH that step in place rather than POST-ing a new
+  // one — saves an API call per screen and avoids leaving orphaned
+  // placeholder steps in the tour.
   const uploadStart = Date.now();
-  const screenIds: string[] = [];
+  interface UploadedScreen { screenId: string; seededStepId: string | null }
+  const uploaded: UploadedScreen[] = [];
   const client = getClient();
   try {
     for (let i = 0; i < captured.screens.length; i++) {
@@ -149,29 +157,36 @@ export async function runGenerate(input: GenerateInput): Promise<GenerateSuccess
         width: s.width,
         height: s.height,
       });
-      screenIds.push(screen._id);
+      uploaded.push({
+        screenId: screen._id,
+        seededStepId: screen.steps?.[0]?._id ?? null,
+      });
     }
   } catch (err) {
     await softDeleteStory(workspaceId, storyId!);
     return toErr('upload', err, storyId);
   }
   const uploadMs = Date.now() - uploadStart;
+  const screenIds = uploaded.map((u) => u.screenId);
 
   const stepsStart = Date.now();
   try {
     for (const entry of mod.narrative) {
-      const screenId = screenIds[entry.screenIndex];
-      if (!screenId) {
-        // Narrative referenced a screen that wasn't captured; skip rather than fail.
-        continue;
-      }
+      const slot = uploaded[entry.screenIndex];
+      if (!slot) continue; // narrative references non-captured screen; skip
       const nextScreenId = screenIds[entry.screenIndex + 1];
-      const created = await client.createStep(workspaceId, storyId!, screenId, {
-        index: 0,
-        view: { viewType: 'popup' },
-      });
       const rendered = renderPopup(entry, prospect, defaults, nextScreenId);
-      await client.patchStep(workspaceId, storyId!, screenId, created._id, {
+
+      // Patch the auto-seeded step if present; otherwise create one.
+      let stepId = slot.seededStepId;
+      if (!stepId) {
+        const created = await client.createStep(workspaceId, storyId!, slot.screenId, {
+          index: 0,
+          view: { viewType: 'popup' },
+        });
+        stepId = created._id;
+      }
+      await client.patchStep(workspaceId, storyId!, slot.screenId, stepId, {
         view: {
           viewType: 'popup',
           popup: rendered as unknown as Record<string, unknown>,

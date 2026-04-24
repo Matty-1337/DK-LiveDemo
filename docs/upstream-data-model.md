@@ -207,26 +207,70 @@ discriminators: `Screen_Page`, `Screen_Screenshot`, `Screen_Video`.
 > `playbackRate`. The MCP does **not** currently need to distinguish them —
 > treat as one polymorphic collection.
 
-> ⚠ STILL UNVERIFIED — **populated screens.findOne() live capture**.
-> Attempted this session (2026-04-24, Strategy C phase 1) via direct
-> `POST /emptyStory` + `POST /screens` with a 1×1 placeholder PNG. Story
-> was created (ID `69eab570d1622a2b258fc350`, confirmed in Mongo) but
-> every `POST /screens` call returned 500 with backend log
-> `AuthorizationHeaderMalformed` — the S3 `uploadImage()` helper couldn't
-> authenticate to S3 before writing any Mongo doc. **The backend's
-> AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY are broken or stale.**
->
-> As a result `db.screens.count() == 0` — the collection holds zero docs,
-> so no live shape can be captured. The source-derived schema above is
-> the best we have until the S3 creds are rotated. See
-> `discovery-log.md` §Phase-4-followup and `docs/troubleshooting.md`.
->
-> To resume once AWS creds are fixed:
-> ```
-> railway service livedemo-backend
-> railway ssh "echo '$(base64 -w0 scripts/probe-v2.js)' | base64 -d | node"
-> # → full POST /screens round-trip succeeds, dumps Mongo shape
-> ```
+✅ **VERIFIED LIVE — populated screens doc captured 2026-04-24** via
+`discovery-probe-v3` after the backend was switched to
+`ghcr.io/matty-1337/dk-livedemo-backend:v1` (patched image with DK's
+S3 bucket). Two screens created under story
+`69ead984bd17ad58c2117777`; full raw output at
+`docs/_probe-v3-raw.json`. Shape of the persisted Screen_Page doc:
+
+```json
+{
+  "_id":         "69ead984bd17ad58c211777d",
+  "name":        "probe-screen-1",        // [validated]
+  "storyId":     "69ead984bd17ad58c2117777",  // [server-generated from URL]
+  "userId":      "69ea6d7d10a3c3c5d93195b3",  // [server-generated from auth]
+  "workspaceId": "69ea79a8d7a9e7a66f4a784c",  // [server-generated from URL]
+  "type":        "Screen_Page",           // [server-generated discriminator]
+  "index":       0,                       // [server-generated from story.screens.length]
+  "imageUrl":    "https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/<uuid>.png",
+                                          // [server-generated — S3 PUT result URL]
+  "contentPath": "/<storyId>/<screenId>.html",
+                                          // [server-generated — RELATIVE to STORIES_FOLDER]
+  "width":       1280,                    // [validated]
+  "height":      800,                     // [validated]
+  "customTransitions": [],                // [server-generated default `[]`]
+  "steps": [                              // ⚠ AUTO-SEEDED — see below
+    { /* default popup step, see schema in next section */ }
+  ],
+  "createdAt": "2026-04-24T02:46:28.935Z",
+  "updatedAt": "2026-04-24T02:46:28.935Z",
+  "__v": 0
+}
+```
+
+**⚠ Auto-seeded default step — critical for the MCP generator.**
+`postScreens.js` creates a default `ScreenStep` on **every new screen**:
+`view.viewType: "popup"`, `view.content: "<p>Welcome to our
+StoryDemo!</p>"`, `view.popup.title: "Title"`, `view.popup.description:
+"<p>Description</p>"`, `view.popup.buttons: []`. The current
+`mcp/src/tools/generate.ts` flow does `POST /steps` which creates a
+SECOND step. Fix: either (a) `PATCH` the auto-seeded `steps[0]`
+directly, or (b) `DELETE` the default step before creating a
+personalized one. Option (a) is simpler and is the recommended
+approach. Tracked as a follow-up TODO in `generate.ts`.
+
+**Field classifications (answers the "Joi vs player delta" question):**
+
+| Field | Source | Required for player? |
+|---|---|---|
+| `name` | `[validated]` | yes |
+| `content` (goes to disk as HTML file) | `[validated]` | read via `contentPath` |
+| `imageData` (goes to S3 as PNG) | `[validated]` | served via `imageUrl` |
+| `width`, `height` | `[validated]` | yes |
+| `_id`, `createdAt`, `updatedAt`, `__v` | `[server-generated]` | read-only |
+| `storyId`, `workspaceId`, `userId` | `[server-generated]` | joins/access |
+| `type` (discriminator) | `[server-generated]` | yes — player mode |
+| `index` | `[server-generated]` | yes — ordering |
+| `imageUrl` | `[server-generated]` | **yes** — the player renders this |
+| `contentPath` | `[server-generated]` | yes — HTML lookup |
+| `steps` | `[server-gen default]` then client-patched | yes — tutorial tour |
+| `customTransitions` | `[server-gen default `[]`]` | optional |
+
+**Conclusion:** the Joi validator's 5 fields (`name, content, imageData,
+width, height`) are the complete client-side contract. The MCP's
+browser service must produce exactly those. Every other field is
+server-generated and MUST NOT be sent.
 
 ---
 
@@ -422,6 +466,16 @@ After Strategy C Phase 1 probe (2026-04-24):
   **still 0** (screen creation blocked by S3 auth failure — see STILL UNVERIFIED
   note in §screens above)
 
+After Strategy C Phase 1 follow-up probe (2026-04-24, discovery-probe-v3,
+run against patched backend `ghcr.io/matty-1337/dk-livedemo-backend:v1`
+with DK-owned S3 bucket live):
+
+- `stories`: 3 → **5** (probe-v3 added `discovery-probe-v3` story id `69ead984bd17ad58c2117777`)
+- `screens`: 0 → **2** (two probe screens; first live populated-shape capture)
+- `links`: 1 → **2**
+- `authtokens`: 5 → **6** (probe-v3 auth)
+- `publishedlivedemos`, `livedemos`: **still 0** (see next §)
+
 ---
 
 ## Verification status
@@ -444,18 +498,27 @@ code (`postSteps.js`, `patchStep.js`) writes only to `screens.$.steps[]`
 embedded subdocs. The separate collections are vestigial and can be
 ignored — no code path reads or writes them.
 
-⚠ **STILL UNVERIFIED — populated `screens.findOne()`.** Blocked by
-broken AWS S3 credentials on `livedemo-backend`. See the "STILL
-UNVERIFIED" note inside §screens above, plus
-`docs/troubleshooting.md` §"Screen capture returns 500 /
-AuthorizationHeaderMalformed". Resolve the S3 creds, re-run
-`scripts/probe-v2.js`, and the source-derived schema above will be
-cross-checked against a live doc.
+✓ **Populated `screens.findOne()` — verified live 2026-04-24.** Full doc
+shape + field classifications captured in §screens above. The patched
+backend image successfully uploaded two screens to
+`dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/*`.
 
-⚠ **STILL UNVERIFIED — `publishedlivedemos` population trigger.** The
-probe published an empty story (0 screens) and `publishedlivedemos`
-remained count=0 three seconds after. This is expected (nothing to
-publish without screens), but we have not yet seen a populated row.
-Once the S3 creds are fixed and a story-with-screens is published,
-re-check `publishedlivedemos.findOne({storyId: <probe>})` to confirm
+⚠ **STILL UNVERIFIED — `publishedlivedemos` population trigger.** Even
+with real screens, publishing the story did NOT populate
+`publishedlivedemos` or `livedemos` (both count=0 three seconds after
+`POST /publish`). The public URL
+`https://demo.deltakinetics.io/livedemos/69ead984bd17ad58c2117777`
+nevertheless returns 200 — the frontend player reads directly from
+`stories.screens` + `screens.imageUrl`, not from `publishedlivedemos`.
+
+**Revised hypothesis:** `publishedlivedemos` and `livedemos` are NOT
+populated by `/publish` at all. They're used by a different feature
+— likely embedded/iframed demos served at a different URL pattern
+(`/l/<shortId>`? or a legacy livedemo player). Until we need that
+feature, treat both collections as inert. When we do need it, trace the
+population path by grep-ing source for `PublishedLiveDemo.create` /
+`LiveDemo.create`.
+
+Closed: what we care about for Strategy C — screens visible on the
+public demo URL — works via `/publish` alone.
 the insertion trigger and the final row shape.

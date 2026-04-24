@@ -1,0 +1,1736 @@
+STEP: auth
+STEP: emptyStory
+STEP: screen1
+STEP: screen2
+STEP: pre_publish_mongo
+STEP: publish
+STEP: post_publish_mongo
+STEP: api_get_story
+STEP: api_list_stories
+STEP: create_link
+{
+  "ok": true,
+  "steps": [
+    {
+      "label": "auth",
+      "at": "2026-04-24T02:46:28.494Z",
+      "data": {
+        "status": 200,
+        "tokenPreview": "8ec088b0...c557ef"
+      }
+    },
+    {
+      "label": "emptyStory",
+      "at": "2026-04-24T02:46:28.548Z",
+      "data": {
+        "status": 200,
+        "body": {
+          "_id": "69ead984bd17ad58c2117777"
+        }
+      }
+    },
+    {
+      "label": "screen1",
+      "at": "2026-04-24T02:46:28.969Z",
+      "data": {
+        "status": 200,
+        "body": {
+          "name": "probe-screen-1",
+          "storyId": "69ead984bd17ad58c2117777",
+          "userId": "69ea6d7d10a3c3c5d93195b3",
+          "workspaceId": "69ea79a8d7a9e7a66f4a784c",
+          "type": "Screen_Page",
+          "steps": [
+            {
+              "view": {
+                "viewType": "popup",
+                "content": "<p>Welcome to our StoryDemo!</p>",
+                "nextButtonText": "Next",
+                "showStepNumbers": true,
+                "pointer": {
+                  "selector": "",
+                  "selectorLocation": {
+                    "positionX": 200,
+                    "positionY": 200,
+                    "width": 150,
+                    "height": 50
+                  },
+                  "placement": "auto"
+                },
+                "hotspot": {
+                  "frameX": 200,
+                  "frameY": 200,
+                  "placement": "auto"
+                },
+                "popup": {
+                  "type": "popup",
+                  "formId": null,
+                  "showOverlay": false,
+                  "title": "Title",
+                  "description": "<p>Description</p>",
+                  "alignment": "center",
+                  "buttons": []
+                },
+                "showHeader": false,
+                "showFooter": false
+              },
+              "stepAudioId": null,
+              "elementData": {
+                "targetHTML": "",
+                "targetElementType": "element",
+                "targetText": ""
+              },
+              "autoPlayConfig": {
+                "enabled": false,
+                "type": "auto",
+                "delay": 2
+              },
+              "action": {
+                "actionType": "NextButton",
+                "selector": ""
+              },
+              "_id": "69ead984bd17ad58c211777f"
+            }
+          ],
+          "index": 0,
+          "imageUrl": "https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/c5be9a1b-600c-4040-a03e-5baf877e97f7.png",
+          "_id": "69ead984bd17ad58c211777d",
+          "contentPath": "/69ead984bd17ad58c2117777/69ead984bd17ad58c211777d.html",
+          "width": 1280,
+          "height": 800,
+          "customTransitions": [],
+          "createdAt": "2026-04-24T02:46:28.935Z",
+          "updatedAt": "2026-04-24T02:46:28.935Z",
+          "__v": 0
+        }
+      }
+    },
+    {
+      "label": "screen2",
+      "at": "2026-04-24T02:46:29.272Z",
+      "data": {
+        "status": 200,
+        "body": {
+          "name": "probe-screen-2",
+          "storyId": "69ead984bd17ad58c2117777",
+          "userId": "69ea6d7d10a3c3c5d93195b3",
+          "workspaceId": "69ea79a8d7a9e7a66f4a784c",
+          "type": "Screen_Page",
+          "steps": [
+            {
+              "view": {
+                "viewType": "popup",
+                "content": "<p>Welcome to our StoryDemo!</p>",
+                "nextButtonText": "Next",
+                "showStepNumbers": true,
+                "pointer": {
+                  "selector": "",
+                  "selectorLocation": {
+                    "positionX": 200,
+                    "positionY": 200,
+                    "width": 150,
+                    "height": 50
+                  },
+                  "placement": "auto"
+                },
+                "hotspot": {
+                  "frameX": 200,
+                  "frameY": 200,
+                  "placement": "auto"
+                },
+                "popup": {
+                  "type": "popup",
+                  "formId": null,
+                  "showOverlay": false,
+                  "title": "Title",
+                  "description": "<p>Description</p>",
+                  "alignment": "center",
+                  "buttons": []
+                },
+                "showHeader": false,
+                "showFooter": false
+              },
+              "stepAudioId": null,
+              "elementData": {
+                "targetHTML": "",
+                "targetElementType": "element",
+                "targetText": ""
+              },
+              "autoPlayConfig": {
+                "enabled": false,
+                "type": "auto",
+                "delay": 2
+              },
+              "action": {
+                "actionType": "NextButton",
+                "selector": ""
+              },
+              "_id": "69ead985bd17ad58c211778a"
+            }
+          ],
+          "index": 1,
+          "imageUrl": "https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/c648051d-c63c-45a9-87db-028f55cdab29.png",
+          "_id": "69ead984bd17ad58c2117788",
+          "contentPath": "/69ead984bd17ad58c2117777/69ead984bd17ad58c2117788.html",
+          "width": 1280,
+          "height": 800,
+          "customTransitions": [],
+          "createdAt": "2026-04-24T02:46:29.251Z",
+          "updatedAt": "2026-04-24T02:46:29.251Z",
+          "__v": 0
+        }
+      }
+    },
+    {
+      "label": "pre_publish_mongo",
+      "at": "2026-04-24T02:46:29.394Z",
+      "data": {
+        "story": {
+          "_id": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 217,
+              "3": 132,
+              "4": 189,
+              "5": 23,
+              "6": 173,
+              "7": 88,
+              "8": 194,
+              "9": 17,
+              "10": 119,
+              "11": 119
+            }
+          },
+          "name": "discovery-probe-v2",
+          "workspaceId": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 121,
+              "3": 168,
+              "4": 215,
+              "5": 169,
+              "6": 231,
+              "7": 166,
+              "8": 111,
+              "9": 74,
+              "10": 120,
+              "11": 76
+            }
+          },
+          "screens": [
+            {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 217,
+                "3": 132,
+                "4": 189,
+                "5": 23,
+                "6": 173,
+                "7": 88,
+                "8": 194,
+                "9": 17,
+                "10": 119,
+                "11": 125
+              }
+            },
+            {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 217,
+                "3": 132,
+                "4": 189,
+                "5": 23,
+                "6": 173,
+                "7": 88,
+                "8": 194,
+                "9": 17,
+                "10": 119,
+                "11": 136
+              }
+            }
+          ],
+          "filePath": "",
+          "status": "ready",
+          "isPublished": false,
+          "type": "web",
+          "capturedEvents": [],
+          "windowMeasures": {
+            "innerWidth": 1280,
+            "innerHeight": 800
+          },
+          "aspectRatio": "1.6",
+          "content": {
+            "contentStatus": ""
+          },
+          "custom": {
+            "header": {
+              "isActive": false,
+              "imageUrl": "",
+              "personName": "",
+              "text": ""
+            },
+            "theme": {
+              "watermarkConfig": {
+                "imageUrl": "",
+                "text": "",
+                "url": "",
+                "isActive": false
+              },
+              "isActive": false,
+              "stepBackgroundColor": "#1070ff",
+              "backgroundColor": "#FFFFFF",
+              "textColor": "#FFFFFF",
+              "buttonBackgroundColor": "#1070ff",
+              "buttonTextColor": "#FFFFFF",
+              "overlayBackgroundColor": "rgba(0,0,0,0.65)"
+            },
+            "misc": {
+              "isActive": false,
+              "confettiOnLastStep": true,
+              "isOmniBarDisabled": false,
+              "isLiveDemoWatermarkEnabled": true,
+              "isTabsEnabled": true
+            },
+            "background": {
+              "isActive": false,
+              "backgroundColor": "#FFFFFF",
+              "backgroundBlur": 0,
+              "backgroundType": "color",
+              "wallpaperImage": "",
+              "padding": 24
+            },
+            "variables": []
+          },
+          "thumbnailImageUrl": "",
+          "links": [],
+          "deletedAt": null,
+          "createdAt": {},
+          "updatedAt": {},
+          "__v": 0
+        },
+        "screens": [
+          {
+            "_id": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 217,
+                "3": 132,
+                "4": 189,
+                "5": 23,
+                "6": 173,
+                "7": 88,
+                "8": 194,
+                "9": 17,
+                "10": 119,
+                "11": 125
+              }
+            },
+            "name": "probe-screen-1",
+            "storyId": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 217,
+                "3": 132,
+                "4": 189,
+                "5": 23,
+                "6": 173,
+                "7": 88,
+                "8": 194,
+                "9": 17,
+                "10": 119,
+                "11": 119
+              }
+            },
+            "userId": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 109,
+                "3": 125,
+                "4": 16,
+                "5": 163,
+                "6": 195,
+                "7": 197,
+                "8": 217,
+                "9": 49,
+                "10": 149,
+                "11": 179
+              }
+            },
+            "workspaceId": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 121,
+                "3": 168,
+                "4": 215,
+                "5": 169,
+                "6": 231,
+                "7": 166,
+                "8": 111,
+                "9": 74,
+                "10": 120,
+                "11": 76
+              }
+            },
+            "type": "Screen_Page",
+            "steps": [
+              {
+                "view": {
+                  "viewType": "popup",
+                  "content": "<p>Welcome to our StoryDemo!</p>",
+                  "nextButtonText": "Next",
+                  "showStepNumbers": true,
+                  "pointer": {
+                    "selector": "",
+                    "selectorLocation": {
+                      "positionX": 200,
+                      "positionY": 200,
+                      "width": 150,
+                      "height": 50
+                    },
+                    "placement": "auto"
+                  },
+                  "hotspot": {
+                    "frameX": 200,
+                    "frameY": 200,
+                    "placement": "auto"
+                  },
+                  "popup": {
+                    "type": "popup",
+                    "formId": null,
+                    "showOverlay": false,
+                    "title": "Title",
+                    "description": "<p>Description</p>",
+                    "alignment": "center",
+                    "buttons": []
+                  },
+                  "showHeader": false,
+                  "showFooter": false
+                },
+                "stepAudioId": null,
+                "elementData": {
+                  "targetHTML": "",
+                  "targetElementType": "element",
+                  "targetText": ""
+                },
+                "autoPlayConfig": {
+                  "enabled": false,
+                  "type": "auto",
+                  "delay": 2
+                },
+                "action": {
+                  "actionType": "NextButton",
+                  "selector": ""
+                },
+                "_id": {
+                  "buffer": {
+                    "0": 105,
+                    "1": 234,
+                    "2": 217,
+                    "3": 132,
+                    "4": 189,
+                    "5": 23,
+                    "6": 173,
+                    "7": 88,
+                    "8": 194,
+                    "9": 17,
+                    "10": 119,
+                    "11": 127
+                  }
+                }
+              }
+            ],
+            "index": 0,
+            "imageUrl": "https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/c5be9a1b-600c-4040-a03e-5baf877e97f7.png",
+            "contentPath": "/69ead984bd17ad58c2117777/69ead984bd17ad58c211777d.html",
+            "width": 1280,
+            "height": 800,
+            "customTransitions": [],
+            "createdAt": {},
+            "updatedAt": {},
+            "__v": 0
+          },
+          {
+            "_id": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 217,
+                "3": 132,
+                "4": 189,
+                "5": 23,
+                "6": 173,
+                "7": 88,
+                "8": 194,
+                "9": 17,
+                "10": 119,
+                "11": 136
+              }
+            },
+            "name": "probe-screen-2",
+            "storyId": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 217,
+                "3": 132,
+                "4": 189,
+                "5": 23,
+                "6": 173,
+                "7": 88,
+                "8": 194,
+                "9": 17,
+                "10": 119,
+                "11": 119
+              }
+            },
+            "userId": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 109,
+                "3": 125,
+                "4": 16,
+                "5": 163,
+                "6": 195,
+                "7": 197,
+                "8": 217,
+                "9": 49,
+                "10": 149,
+                "11": 179
+              }
+            },
+            "workspaceId": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 121,
+                "3": 168,
+                "4": 215,
+                "5": 169,
+                "6": 231,
+                "7": 166,
+                "8": 111,
+                "9": 74,
+                "10": 120,
+                "11": 76
+              }
+            },
+            "type": "Screen_Page",
+            "steps": [
+              {
+                "view": {
+                  "viewType": "popup",
+                  "content": "<p>Welcome to our StoryDemo!</p>",
+                  "nextButtonText": "Next",
+                  "showStepNumbers": true,
+                  "pointer": {
+                    "selector": "",
+                    "selectorLocation": {
+                      "positionX": 200,
+                      "positionY": 200,
+                      "width": 150,
+                      "height": 50
+                    },
+                    "placement": "auto"
+                  },
+                  "hotspot": {
+                    "frameX": 200,
+                    "frameY": 200,
+                    "placement": "auto"
+                  },
+                  "popup": {
+                    "type": "popup",
+                    "formId": null,
+                    "showOverlay": false,
+                    "title": "Title",
+                    "description": "<p>Description</p>",
+                    "alignment": "center",
+                    "buttons": []
+                  },
+                  "showHeader": false,
+                  "showFooter": false
+                },
+                "stepAudioId": null,
+                "elementData": {
+                  "targetHTML": "",
+                  "targetElementType": "element",
+                  "targetText": ""
+                },
+                "autoPlayConfig": {
+                  "enabled": false,
+                  "type": "auto",
+                  "delay": 2
+                },
+                "action": {
+                  "actionType": "NextButton",
+                  "selector": ""
+                },
+                "_id": {
+                  "buffer": {
+                    "0": 105,
+                    "1": 234,
+                    "2": 217,
+                    "3": 133,
+                    "4": 189,
+                    "5": 23,
+                    "6": 173,
+                    "7": 88,
+                    "8": 194,
+                    "9": 17,
+                    "10": 119,
+                    "11": 138
+                  }
+                }
+              }
+            ],
+            "index": 1,
+            "imageUrl": "https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/c648051d-c63c-45a9-87db-028f55cdab29.png",
+            "contentPath": "/69ead984bd17ad58c2117777/69ead984bd17ad58c2117788.html",
+            "width": 1280,
+            "height": 800,
+            "customTransitions": [],
+            "createdAt": {},
+            "updatedAt": {},
+            "__v": 0
+          }
+        ],
+        "publishedLiveDemo": null,
+        "workspace": {
+          "_id": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 121,
+              "3": 168,
+              "4": 215,
+              "5": 169,
+              "6": 231,
+              "7": 166,
+              "8": 111,
+              "9": 74,
+              "10": 120,
+              "11": 76
+            }
+          },
+          "name": "DK CoreTAP Demos",
+          "type": "empty",
+          "integrations": {
+            "hubspot": false
+          },
+          "adminUser": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 109,
+              "3": 125,
+              "4": 16,
+              "5": 163,
+              "6": 195,
+              "7": 197,
+              "8": 217,
+              "9": 49,
+              "10": 149,
+              "11": 179
+            }
+          },
+          "users": [
+            {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 109,
+                "3": 125,
+                "4": 16,
+                "5": 163,
+                "6": 195,
+                "7": 197,
+                "8": 217,
+                "9": 49,
+                "10": 149,
+                "11": 179
+              }
+            }
+          ],
+          "subscriptions": [],
+          "liveDemos": [],
+          "invitedEmails": [],
+          "library": {
+            "pages": [
+              {
+                "buffer": {
+                  "0": 105,
+                  "1": 234,
+                  "2": 217,
+                  "3": 132,
+                  "4": 189,
+                  "5": 23,
+                  "6": 173,
+                  "7": 88,
+                  "8": 194,
+                  "9": 17,
+                  "10": 119,
+                  "11": 125
+                }
+              },
+              {
+                "buffer": {
+                  "0": 105,
+                  "1": 234,
+                  "2": 217,
+                  "3": 132,
+                  "4": 189,
+                  "5": 23,
+                  "6": 173,
+                  "7": 88,
+                  "8": 194,
+                  "9": 17,
+                  "10": 119,
+                  "11": 136
+                }
+              }
+            ],
+            "screenshots": [],
+            "videos": []
+          },
+          "createdAt": {},
+          "updatedAt": {},
+          "__v": 0
+        },
+        "sampleAuthToken": {
+          "_id": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 109,
+              "3": 125,
+              "4": 16,
+              "5": 163,
+              "6": 195,
+              "7": 197,
+              "8": 217,
+              "9": 49,
+              "10": 149,
+              "11": 185
+            }
+          },
+          "token": "d1c1bd94...933313",
+          "type": "AuthToken_User",
+          "status": "active",
+          "clientId": "publicClient",
+          "authorizedInstances": [],
+          "scopes": [],
+          "userId": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 109,
+              "3": 125,
+              "4": 16,
+              "5": 163,
+              "6": 195,
+              "7": 197,
+              "8": 217,
+              "9": 49,
+              "10": 149,
+              "11": 179
+            }
+          },
+          "createdAt": {},
+          "updatedAt": {},
+          "__v": 0
+        },
+        "indexes": {
+          "stories": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "screens": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "authtokens": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            },
+            {
+              "v": 2,
+              "key": {
+                "token": 1
+              },
+              "name": "token_1",
+              "unique": true
+            }
+          ],
+          "workspaces": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "publishedlivedemos": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "livedemos": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "forms": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "links": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "leads": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "sessions": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ]
+        },
+        "collectionsList": [
+          "audios",
+          "authtokens",
+          "autorecordingevents",
+          "autorecordings",
+          "cards",
+          "charges",
+          "configs",
+          "contents",
+          "cursorpositions",
+          "demoactivityevents",
+          "demosuggestions",
+          "emails",
+          "forms",
+          "hubspottokens",
+          "jobs",
+          "jobs-monq",
+          "leads",
+          "links",
+          "livedemos",
+          "monq_resume_tokens",
+          "publishedlivedemos",
+          "requests",
+          "screens",
+          "screensteps",
+          "screentransitions",
+          "scripts",
+          "sessionevents",
+          "sessions",
+          "stepaudios",
+          "steps",
+          "stories",
+          "storycontents",
+          "subscriptions",
+          "tours",
+          "tutorials",
+          "users",
+          "workspacemembers",
+          "workspaces",
+          "zoomspanscreenshots",
+          "zoomspanvideos"
+        ]
+      }
+    },
+    {
+      "label": "publish",
+      "at": "2026-04-24T02:46:29.449Z",
+      "data": {
+        "status": 200,
+        "body": {
+          "content": {
+            "contentStatus": ""
+          },
+          "custom": {
+            "header": {
+              "isActive": false,
+              "imageUrl": "",
+              "personName": "",
+              "text": ""
+            },
+            "theme": {
+              "watermarkConfig": {
+                "imageUrl": "",
+                "text": "",
+                "url": "",
+                "isActive": false
+              },
+              "isActive": false,
+              "stepBackgroundColor": "#1070ff",
+              "backgroundColor": "#FFFFFF",
+              "textColor": "#FFFFFF",
+              "buttonBackgroundColor": "#1070ff",
+              "buttonTextColor": "#FFFFFF",
+              "overlayBackgroundColor": "rgba(0,0,0,0.65)"
+            },
+            "misc": {
+              "isActive": false,
+              "confettiOnLastStep": true,
+              "isOmniBarDisabled": false,
+              "isLiveDemoWatermarkEnabled": true,
+              "isTabsEnabled": true
+            },
+            "background": {
+              "isActive": false,
+              "backgroundColor": "#FFFFFF",
+              "backgroundBlur": 0,
+              "backgroundType": "color",
+              "wallpaperImage": "",
+              "padding": 24
+            },
+            "variables": []
+          },
+          "_id": "69ead984bd17ad58c2117777",
+          "name": "discovery-probe-v2",
+          "workspaceId": "69ea79a8d7a9e7a66f4a784c",
+          "screens": [
+            {
+              "_id": "69ead984bd17ad58c211777d",
+              "name": "probe-screen-1",
+              "type": "Screen_Page",
+              "steps": [
+                {
+                  "view": {
+                    "pointer": {
+                      "selectorLocation": {
+                        "positionX": 200,
+                        "positionY": 200,
+                        "width": 150,
+                        "height": 50
+                      },
+                      "selector": "",
+                      "placement": "auto"
+                    },
+                    "hotspot": {
+                      "frameX": 200,
+                      "frameY": 200,
+                      "placement": "auto"
+                    },
+                    "popup": {
+                      "type": "popup",
+                      "formId": null,
+                      "showOverlay": false,
+                      "title": "Title",
+                      "description": "<p>Description</p>",
+                      "alignment": "center",
+                      "buttons": []
+                    },
+                    "viewType": "popup",
+                    "content": "<p>Welcome to our StoryDemo!</p>",
+                    "nextButtonText": "Next",
+                    "showStepNumbers": true,
+                    "showHeader": false,
+                    "showFooter": false
+                  },
+                  "elementData": {
+                    "targetHTML": "",
+                    "targetElementType": "element",
+                    "targetText": ""
+                  },
+                  "autoPlayConfig": {
+                    "enabled": false,
+                    "type": "auto",
+                    "delay": 2
+                  },
+                  "action": {
+                    "actionType": "NextButton",
+                    "selector": ""
+                  },
+                  "stepAudioId": null,
+                  "_id": "69ead984bd17ad58c211777f"
+                }
+              ],
+              "index": 0,
+              "imageUrl": "https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/c5be9a1b-600c-4040-a03e-5baf877e97f7.png",
+              "customTransitions": []
+            },
+            {
+              "_id": "69ead984bd17ad58c2117788",
+              "name": "probe-screen-2",
+              "type": "Screen_Page",
+              "steps": [
+                {
+                  "view": {
+                    "pointer": {
+                      "selectorLocation": {
+                        "positionX": 200,
+                        "positionY": 200,
+                        "width": 150,
+                        "height": 50
+                      },
+                      "selector": "",
+                      "placement": "auto"
+                    },
+                    "hotspot": {
+                      "frameX": 200,
+                      "frameY": 200,
+                      "placement": "auto"
+                    },
+                    "popup": {
+                      "type": "popup",
+                      "formId": null,
+                      "showOverlay": false,
+                      "title": "Title",
+                      "description": "<p>Description</p>",
+                      "alignment": "center",
+                      "buttons": []
+                    },
+                    "viewType": "popup",
+                    "content": "<p>Welcome to our StoryDemo!</p>",
+                    "nextButtonText": "Next",
+                    "showStepNumbers": true,
+                    "showHeader": false,
+                    "showFooter": false
+                  },
+                  "elementData": {
+                    "targetHTML": "",
+                    "targetElementType": "element",
+                    "targetText": ""
+                  },
+                  "autoPlayConfig": {
+                    "enabled": false,
+                    "type": "auto",
+                    "delay": 2
+                  },
+                  "action": {
+                    "actionType": "NextButton",
+                    "selector": ""
+                  },
+                  "stepAudioId": null,
+                  "_id": "69ead985bd17ad58c211778a"
+                }
+              ],
+              "index": 1,
+              "imageUrl": "https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/c648051d-c63c-45a9-87db-028f55cdab29.png",
+              "customTransitions": []
+            }
+          ],
+          "filePath": "",
+          "status": "ready",
+          "isPublished": true,
+          "type": "web",
+          "capturedEvents": [],
+          "windowMeasures": {
+            "innerWidth": 1280,
+            "innerHeight": 800
+          },
+          "aspectRatio": "1.6",
+          "thumbnailImageUrl": "",
+          "links": [],
+          "deletedAt": null,
+          "createdAt": "2026-04-24T02:46:28.533Z",
+          "updatedAt": "2026-04-24T02:46:29.412Z",
+          "__v": 0
+        }
+      }
+    },
+    {
+      "label": "post_publish_mongo",
+      "at": "2026-04-24T02:46:32.466Z",
+      "data": {
+        "story": {
+          "_id": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 217,
+              "3": 132,
+              "4": 189,
+              "5": 23,
+              "6": 173,
+              "7": 88,
+              "8": 194,
+              "9": 17,
+              "10": 119,
+              "11": 119
+            }
+          },
+          "name": "discovery-probe-v2",
+          "workspaceId": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 121,
+              "3": 168,
+              "4": 215,
+              "5": 169,
+              "6": 231,
+              "7": 166,
+              "8": 111,
+              "9": 74,
+              "10": 120,
+              "11": 76
+            }
+          },
+          "screens": [
+            {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 217,
+                "3": 132,
+                "4": 189,
+                "5": 23,
+                "6": 173,
+                "7": 88,
+                "8": 194,
+                "9": 17,
+                "10": 119,
+                "11": 125
+              }
+            },
+            {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 217,
+                "3": 132,
+                "4": 189,
+                "5": 23,
+                "6": 173,
+                "7": 88,
+                "8": 194,
+                "9": 17,
+                "10": 119,
+                "11": 136
+              }
+            }
+          ],
+          "filePath": "",
+          "status": "ready",
+          "isPublished": true,
+          "type": "web",
+          "capturedEvents": [],
+          "windowMeasures": {
+            "innerWidth": 1280,
+            "innerHeight": 800
+          },
+          "aspectRatio": "1.6",
+          "content": {
+            "contentStatus": ""
+          },
+          "custom": {
+            "header": {
+              "isActive": false,
+              "imageUrl": "",
+              "personName": "",
+              "text": ""
+            },
+            "theme": {
+              "watermarkConfig": {
+                "imageUrl": "",
+                "text": "",
+                "url": "",
+                "isActive": false
+              },
+              "isActive": false,
+              "stepBackgroundColor": "#1070ff",
+              "backgroundColor": "#FFFFFF",
+              "textColor": "#FFFFFF",
+              "buttonBackgroundColor": "#1070ff",
+              "buttonTextColor": "#FFFFFF",
+              "overlayBackgroundColor": "rgba(0,0,0,0.65)"
+            },
+            "misc": {
+              "isActive": false,
+              "confettiOnLastStep": true,
+              "isOmniBarDisabled": false,
+              "isLiveDemoWatermarkEnabled": true,
+              "isTabsEnabled": true
+            },
+            "background": {
+              "isActive": false,
+              "backgroundColor": "#FFFFFF",
+              "backgroundBlur": 0,
+              "backgroundType": "color",
+              "wallpaperImage": "",
+              "padding": 24
+            },
+            "variables": []
+          },
+          "thumbnailImageUrl": "",
+          "links": [],
+          "deletedAt": null,
+          "createdAt": {},
+          "updatedAt": {},
+          "__v": 0
+        },
+        "screens": [
+          {
+            "_id": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 217,
+                "3": 132,
+                "4": 189,
+                "5": 23,
+                "6": 173,
+                "7": 88,
+                "8": 194,
+                "9": 17,
+                "10": 119,
+                "11": 125
+              }
+            },
+            "name": "probe-screen-1",
+            "storyId": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 217,
+                "3": 132,
+                "4": 189,
+                "5": 23,
+                "6": 173,
+                "7": 88,
+                "8": 194,
+                "9": 17,
+                "10": 119,
+                "11": 119
+              }
+            },
+            "userId": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 109,
+                "3": 125,
+                "4": 16,
+                "5": 163,
+                "6": 195,
+                "7": 197,
+                "8": 217,
+                "9": 49,
+                "10": 149,
+                "11": 179
+              }
+            },
+            "workspaceId": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 121,
+                "3": 168,
+                "4": 215,
+                "5": 169,
+                "6": 231,
+                "7": 166,
+                "8": 111,
+                "9": 74,
+                "10": 120,
+                "11": 76
+              }
+            },
+            "type": "Screen_Page",
+            "steps": [
+              {
+                "view": {
+                  "viewType": "popup",
+                  "content": "<p>Welcome to our StoryDemo!</p>",
+                  "nextButtonText": "Next",
+                  "showStepNumbers": true,
+                  "pointer": {
+                    "selector": "",
+                    "selectorLocation": {
+                      "positionX": 200,
+                      "positionY": 200,
+                      "width": 150,
+                      "height": 50
+                    },
+                    "placement": "auto"
+                  },
+                  "hotspot": {
+                    "frameX": 200,
+                    "frameY": 200,
+                    "placement": "auto"
+                  },
+                  "popup": {
+                    "type": "popup",
+                    "formId": null,
+                    "showOverlay": false,
+                    "title": "Title",
+                    "description": "<p>Description</p>",
+                    "alignment": "center",
+                    "buttons": []
+                  },
+                  "showHeader": false,
+                  "showFooter": false
+                },
+                "stepAudioId": null,
+                "elementData": {
+                  "targetHTML": "",
+                  "targetElementType": "element",
+                  "targetText": ""
+                },
+                "autoPlayConfig": {
+                  "enabled": false,
+                  "type": "auto",
+                  "delay": 2
+                },
+                "action": {
+                  "actionType": "NextButton",
+                  "selector": ""
+                },
+                "_id": {
+                  "buffer": {
+                    "0": 105,
+                    "1": 234,
+                    "2": 217,
+                    "3": 132,
+                    "4": 189,
+                    "5": 23,
+                    "6": 173,
+                    "7": 88,
+                    "8": 194,
+                    "9": 17,
+                    "10": 119,
+                    "11": 127
+                  }
+                }
+              }
+            ],
+            "index": 0,
+            "imageUrl": "https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/c5be9a1b-600c-4040-a03e-5baf877e97f7.png",
+            "contentPath": "/69ead984bd17ad58c2117777/69ead984bd17ad58c211777d.html",
+            "width": 1280,
+            "height": 800,
+            "customTransitions": [],
+            "createdAt": {},
+            "updatedAt": {},
+            "__v": 0
+          },
+          {
+            "_id": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 217,
+                "3": 132,
+                "4": 189,
+                "5": 23,
+                "6": 173,
+                "7": 88,
+                "8": 194,
+                "9": 17,
+                "10": 119,
+                "11": 136
+              }
+            },
+            "name": "probe-screen-2",
+            "storyId": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 217,
+                "3": 132,
+                "4": 189,
+                "5": 23,
+                "6": 173,
+                "7": 88,
+                "8": 194,
+                "9": 17,
+                "10": 119,
+                "11": 119
+              }
+            },
+            "userId": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 109,
+                "3": 125,
+                "4": 16,
+                "5": 163,
+                "6": 195,
+                "7": 197,
+                "8": 217,
+                "9": 49,
+                "10": 149,
+                "11": 179
+              }
+            },
+            "workspaceId": {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 121,
+                "3": 168,
+                "4": 215,
+                "5": 169,
+                "6": 231,
+                "7": 166,
+                "8": 111,
+                "9": 74,
+                "10": 120,
+                "11": 76
+              }
+            },
+            "type": "Screen_Page",
+            "steps": [
+              {
+                "view": {
+                  "viewType": "popup",
+                  "content": "<p>Welcome to our StoryDemo!</p>",
+                  "nextButtonText": "Next",
+                  "showStepNumbers": true,
+                  "pointer": {
+                    "selector": "",
+                    "selectorLocation": {
+                      "positionX": 200,
+                      "positionY": 200,
+                      "width": 150,
+                      "height": 50
+                    },
+                    "placement": "auto"
+                  },
+                  "hotspot": {
+                    "frameX": 200,
+                    "frameY": 200,
+                    "placement": "auto"
+                  },
+                  "popup": {
+                    "type": "popup",
+                    "formId": null,
+                    "showOverlay": false,
+                    "title": "Title",
+                    "description": "<p>Description</p>",
+                    "alignment": "center",
+                    "buttons": []
+                  },
+                  "showHeader": false,
+                  "showFooter": false
+                },
+                "stepAudioId": null,
+                "elementData": {
+                  "targetHTML": "",
+                  "targetElementType": "element",
+                  "targetText": ""
+                },
+                "autoPlayConfig": {
+                  "enabled": false,
+                  "type": "auto",
+                  "delay": 2
+                },
+                "action": {
+                  "actionType": "NextButton",
+                  "selector": ""
+                },
+                "_id": {
+                  "buffer": {
+                    "0": 105,
+                    "1": 234,
+                    "2": 217,
+                    "3": 133,
+                    "4": 189,
+                    "5": 23,
+                    "6": 173,
+                    "7": 88,
+                    "8": 194,
+                    "9": 17,
+                    "10": 119,
+                    "11": 138
+                  }
+                }
+              }
+            ],
+            "index": 1,
+            "imageUrl": "https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/c648051d-c63c-45a9-87db-028f55cdab29.png",
+            "contentPath": "/69ead984bd17ad58c2117777/69ead984bd17ad58c2117788.html",
+            "width": 1280,
+            "height": 800,
+            "customTransitions": [],
+            "createdAt": {},
+            "updatedAt": {},
+            "__v": 0
+          }
+        ],
+        "publishedLiveDemo": null,
+        "liveDemoSample": null
+      }
+    },
+    {
+      "label": "api_get_story",
+      "at": "2026-04-24T02:46:32.493Z",
+      "data": {
+        "status": 200,
+        "body": {
+          "content": {
+            "contentStatus": ""
+          },
+          "custom": {
+            "header": {
+              "isActive": false,
+              "imageUrl": "",
+              "personName": "",
+              "text": ""
+            },
+            "theme": {
+              "watermarkConfig": {
+                "imageUrl": "",
+                "text": "",
+                "url": "",
+                "isActive": false
+              },
+              "isActive": false,
+              "stepBackgroundColor": "#1070ff",
+              "backgroundColor": "#FFFFFF",
+              "textColor": "#FFFFFF",
+              "buttonBackgroundColor": "#1070ff",
+              "buttonTextColor": "#FFFFFF",
+              "overlayBackgroundColor": "rgba(0,0,0,0.65)"
+            },
+            "misc": {
+              "isActive": false,
+              "confettiOnLastStep": true,
+              "isOmniBarDisabled": false,
+              "isLiveDemoWatermarkEnabled": true,
+              "isTabsEnabled": true
+            },
+            "background": {
+              "isActive": false,
+              "backgroundColor": "#FFFFFF",
+              "backgroundBlur": 0,
+              "backgroundType": "color",
+              "wallpaperImage": "",
+              "padding": 24
+            },
+            "variables": []
+          },
+          "_id": "69ead984bd17ad58c2117777",
+          "name": "discovery-probe-v2",
+          "workspaceId": "69ea79a8d7a9e7a66f4a784c",
+          "screens": [
+            {
+              "_id": "69ead984bd17ad58c211777d",
+              "name": "probe-screen-1",
+              "type": "Screen_Page",
+              "steps": [
+                {
+                  "view": {
+                    "pointer": {
+                      "selectorLocation": {
+                        "positionX": 200,
+                        "positionY": 200,
+                        "width": 150,
+                        "height": 50
+                      },
+                      "selector": "",
+                      "placement": "auto"
+                    },
+                    "hotspot": {
+                      "frameX": 200,
+                      "frameY": 200,
+                      "placement": "auto"
+                    },
+                    "popup": {
+                      "type": "popup",
+                      "formId": null,
+                      "showOverlay": false,
+                      "title": "Title",
+                      "description": "<p>Description</p>",
+                      "alignment": "center",
+                      "buttons": []
+                    },
+                    "viewType": "popup",
+                    "content": "<p>Welcome to our StoryDemo!</p>",
+                    "nextButtonText": "Next",
+                    "showStepNumbers": true,
+                    "showHeader": false,
+                    "showFooter": false
+                  },
+                  "elementData": {
+                    "targetHTML": "",
+                    "targetElementType": "element",
+                    "targetText": ""
+                  },
+                  "autoPlayConfig": {
+                    "enabled": false,
+                    "type": "auto",
+                    "delay": 2
+                  },
+                  "action": {
+                    "actionType": "NextButton",
+                    "selector": ""
+                  },
+                  "stepAudioId": null,
+                  "_id": "69ead984bd17ad58c211777f"
+                }
+              ],
+              "index": 0,
+              "imageUrl": "https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/c5be9a1b-600c-4040-a03e-5baf877e97f7.png",
+              "width": 1280,
+              "height": 800,
+              "customTransitions": []
+            },
+            {
+              "_id": "69ead984bd17ad58c2117788",
+              "name": "probe-screen-2",
+              "type": "Screen_Page",
+              "steps": [
+                {
+                  "view": {
+                    "pointer": {
+                      "selectorLocation": {
+                        "positionX": 200,
+                        "positionY": 200,
+                        "width": 150,
+                        "height": 50
+                      },
+                      "selector": "",
+                      "placement": "auto"
+                    },
+                    "hotspot": {
+                      "frameX": 200,
+                      "frameY": 200,
+                      "placement": "auto"
+                    },
+                    "popup": {
+                      "type": "popup",
+                      "formId": null,
+                      "showOverlay": false,
+                      "title": "Title",
+                      "description": "<p>Description</p>",
+                      "alignment": "center",
+                      "buttons": []
+                    },
+                    "viewType": "popup",
+                    "content": "<p>Welcome to our StoryDemo!</p>",
+                    "nextButtonText": "Next",
+                    "showStepNumbers": true,
+                    "showHeader": false,
+                    "showFooter": false
+                  },
+                  "elementData": {
+                    "targetHTML": "",
+                    "targetElementType": "element",
+                    "targetText": ""
+                  },
+                  "autoPlayConfig": {
+                    "enabled": false,
+                    "type": "auto",
+                    "delay": 2
+                  },
+                  "action": {
+                    "actionType": "NextButton",
+                    "selector": ""
+                  },
+                  "stepAudioId": null,
+                  "_id": "69ead985bd17ad58c211778a"
+                }
+              ],
+              "index": 1,
+              "imageUrl": "https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/c648051d-c63c-45a9-87db-028f55cdab29.png",
+              "width": 1280,
+              "height": 800,
+              "customTransitions": []
+            }
+          ],
+          "filePath": "",
+          "status": "ready",
+          "isPublished": true,
+          "type": "web",
+          "capturedEvents": [],
+          "windowMeasures": {
+            "innerWidth": 1280,
+            "innerHeight": 800
+          },
+          "aspectRatio": "1.6",
+          "thumbnailImageUrl": "",
+          "links": [],
+          "deletedAt": null,
+          "createdAt": "2026-04-24T02:46:28.533Z",
+          "updatedAt": "2026-04-24T02:46:29.412Z",
+          "__v": 0,
+          "cursorPositions": []
+        }
+      }
+    },
+    {
+      "label": "api_list_stories",
+      "at": "2026-04-24T02:46:32.516Z",
+      "data": {
+        "status": 200,
+        "count": 2
+      }
+    },
+    {
+      "label": "create_link",
+      "at": "2026-04-24T02:46:32.558Z",
+      "data": {
+        "status": 200,
+        "body": {
+          "name": "probe-v2-link",
+          "workspaceId": "69ea79a8d7a9e7a66f4a784c",
+          "storyId": "69ead984bd17ad58c2117777",
+          "variables": [],
+          "_id": "6AF1imjNxEm5jaEn6Q1m4u",
+          "createdAt": "2026-04-24T02:46:32.537Z",
+          "updatedAt": "2026-04-24T02:46:32.537Z",
+          "__v": 0
+        }
+      }
+    }
+  ],
+  "storyId": "69ead984bd17ad58c2117777",
+  "workspaceId": "69ea79a8d7a9e7a66f4a784c"
+}
