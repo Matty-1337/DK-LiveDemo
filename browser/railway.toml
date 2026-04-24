@@ -1,0 +1,30 @@
+# railway.toml for livedemo-browser
+# =============================================================
+# Internal-only service, no public domain. Port 3200.
+
+[build]
+  builder = "DOCKERFILE"
+  dockerfilePath = "browser/Dockerfile"
+
+[deploy]
+  restartPolicyType = "ON_FAILURE"
+  restartPolicyMaxRetries = 3
+
+[deploy.healthcheck]
+  path = "/health"
+  port = 3200
+  timeout = 30
+
+# ----------------------------------------------------------------
+# Required env vars (pulled from Infisical):
+#   INFISICAL_TOKEN      — service token, read-only, path-scoped
+#   INFISICAL_PROJECT_ID — 9df34929-a28d-4dc2-99a5-06f55da7d963
+#   INFISICAL_ENV        — prod
+#   INFISICAL_HOST       — infisicalinfisicallatest-postgres-production-d8ab.up.railway.app
+#
+# Required secrets at INFISICAL_HOST (project dk-livedemo, env prod):
+#   CORETAP_LOGIN_URL
+#   CORETAP_DEMO_BOT_EMAIL
+#   CORETAP_DEMO_BOT_PASSWORD
+#   CORETAP_DEMO_TENANT_ID  (optional; provided to auth fn if set)
+# ----------------------------------------------------------------
