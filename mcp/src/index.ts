@@ -11,10 +11,17 @@ import { zodToJsonSchema } from './lib/tool.js';
 import { demoTools } from './tools/demos.js';
 import { stepTools } from './tools/steps.js';
 import { analyticsTools } from './tools/analytics.js';
-
-// Phase 6 tools (catalog / generate / status) registered in a later commit.
+import { catalogTools } from './tools/catalog.js';
+import { statusTools } from './tools/status.js';
+import { generateTools } from './tools/generate.js';
 
 const ALL_TOOLS: McpTool[] = [
+  // Strategy C primary surface — put these first so they show up first
+  // in tools/list responses.
+  ...generateTools,
+  ...catalogTools,
+  ...statusTools,
+  // CRUD/analytics surface for direct manipulation + observability.
   ...demoTools,
   ...stepTools,
   ...analyticsTools,
