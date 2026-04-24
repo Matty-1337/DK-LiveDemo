@@ -1,0 +1,758 @@
+STEP: auth
+STEP: mongo_pre_publish
+STEP: publish
+STEP: mongo_post_publish
+STEP: api_get_story
+STEP: create_link
+STEP: public_url
+{
+  "ok": true,
+  "steps": [
+    {
+      "label": "auth",
+      "at": "2026-04-24T00:14:03.344Z",
+      "data": {
+        "status": 200
+      }
+    },
+    {
+      "label": "mongo_pre_publish",
+      "at": "2026-04-24T00:14:03.520Z",
+      "data": {
+        "story": {
+          "_id": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 181,
+              "3": 112,
+              "4": 209,
+              "5": 98,
+              "6": 42,
+              "7": 43,
+              "8": 37,
+              "9": 143,
+              "10": 195,
+              "11": 80
+            }
+          },
+          "name": "discovery-probe-v2",
+          "workspaceId": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 121,
+              "3": 168,
+              "4": 215,
+              "5": 169,
+              "6": 231,
+              "7": 166,
+              "8": 111,
+              "9": 74,
+              "10": 120,
+              "11": 76
+            }
+          },
+          "screens": [],
+          "filePath": "",
+          "status": "ready",
+          "isPublished": false,
+          "type": "web",
+          "capturedEvents": [],
+          "windowMeasures": {
+            "innerWidth": 1280,
+            "innerHeight": 800
+          },
+          "aspectRatio": "1.6",
+          "content": {
+            "contentStatus": ""
+          },
+          "custom": {
+            "header": {
+              "isActive": false,
+              "imageUrl": "",
+              "personName": "",
+              "text": ""
+            },
+            "theme": {
+              "watermarkConfig": {
+                "imageUrl": "",
+                "text": "",
+                "url": "",
+                "isActive": false
+              },
+              "isActive": false,
+              "stepBackgroundColor": "#1070ff",
+              "backgroundColor": "#FFFFFF",
+              "textColor": "#FFFFFF",
+              "buttonBackgroundColor": "#1070ff",
+              "buttonTextColor": "#FFFFFF",
+              "overlayBackgroundColor": "rgba(0,0,0,0.65)"
+            },
+            "misc": {
+              "isActive": false,
+              "confettiOnLastStep": true,
+              "isOmniBarDisabled": false,
+              "isLiveDemoWatermarkEnabled": true,
+              "isTabsEnabled": true
+            },
+            "background": {
+              "isActive": false,
+              "backgroundColor": "#FFFFFF",
+              "backgroundBlur": 0,
+              "backgroundType": "color",
+              "wallpaperImage": "",
+              "padding": 24
+            },
+            "variables": []
+          },
+          "thumbnailImageUrl": "",
+          "links": [],
+          "deletedAt": null,
+          "createdAt": {},
+          "updatedAt": {},
+          "__v": 0
+        },
+        "screens": [],
+        "publishedLiveDemo": null,
+        "workspace": {
+          "_id": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 121,
+              "3": 168,
+              "4": 215,
+              "5": 169,
+              "6": 231,
+              "7": 166,
+              "8": 111,
+              "9": 74,
+              "10": 120,
+              "11": 76
+            }
+          },
+          "name": "DK CoreTAP Demos",
+          "type": "empty",
+          "integrations": {
+            "hubspot": false
+          },
+          "adminUser": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 109,
+              "3": 125,
+              "4": 16,
+              "5": 163,
+              "6": 195,
+              "7": 197,
+              "8": 217,
+              "9": 49,
+              "10": 149,
+              "11": 179
+            }
+          },
+          "users": [
+            {
+              "buffer": {
+                "0": 105,
+                "1": 234,
+                "2": 109,
+                "3": 125,
+                "4": 16,
+                "5": 163,
+                "6": 195,
+                "7": 197,
+                "8": 217,
+                "9": 49,
+                "10": 149,
+                "11": 179
+              }
+            }
+          ],
+          "subscriptions": [],
+          "liveDemos": [],
+          "invitedEmails": [],
+          "library": {
+            "pages": [],
+            "screenshots": [],
+            "videos": []
+          },
+          "createdAt": {},
+          "updatedAt": {},
+          "__v": 0
+        },
+        "sampleAuthToken": {
+          "_id": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 109,
+              "3": 125,
+              "4": 16,
+              "5": 163,
+              "6": 195,
+              "7": 197,
+              "8": 217,
+              "9": 49,
+              "10": 149,
+              "11": 185
+            }
+          },
+          "token": "d1c1bd94...933313",
+          "type": "AuthToken_User",
+          "status": "active",
+          "clientId": "publicClient",
+          "authorizedInstances": [],
+          "scopes": [],
+          "userId": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 109,
+              "3": 125,
+              "4": 16,
+              "5": 163,
+              "6": 195,
+              "7": 197,
+              "8": 217,
+              "9": 49,
+              "10": 149,
+              "11": 179
+            }
+          },
+          "createdAt": {},
+          "updatedAt": {},
+          "__v": 0
+        },
+        "collectionsList": [
+          "audios",
+          "authtokens",
+          "autorecordingevents",
+          "autorecordings",
+          "cards",
+          "charges",
+          "configs",
+          "contents",
+          "cursorpositions",
+          "demoactivityevents",
+          "demosuggestions",
+          "emails",
+          "forms",
+          "hubspottokens",
+          "jobs",
+          "jobs-monq",
+          "leads",
+          "links",
+          "livedemos",
+          "monq_resume_tokens",
+          "publishedlivedemos",
+          "requests",
+          "screens",
+          "screensteps",
+          "screentransitions",
+          "scripts",
+          "sessionevents",
+          "sessions",
+          "stepaudios",
+          "steps",
+          "stories",
+          "storycontents",
+          "subscriptions",
+          "tours",
+          "tutorials",
+          "users",
+          "workspacemembers",
+          "workspaces",
+          "zoomspanscreenshots",
+          "zoomspanvideos"
+        ],
+        "collectionCounts": {
+          "audios": 0,
+          "authtokens": 5,
+          "autorecordingevents": 0,
+          "autorecordings": 0,
+          "cards": 0,
+          "charges": 0,
+          "configs": 0,
+          "contents": 0,
+          "cursorpositions": 0,
+          "demoactivityevents": 0,
+          "demosuggestions": 0,
+          "emails": 0,
+          "forms": 0,
+          "hubspottokens": 0,
+          "jobs": 0,
+          "jobs-monq": 0,
+          "leads": 0,
+          "links": 0,
+          "livedemos": 0,
+          "monq_resume_tokens": 0,
+          "publishedlivedemos": 0,
+          "requests": 0,
+          "screens": 0,
+          "screensteps": 0,
+          "screentransitions": 0,
+          "scripts": 0,
+          "sessionevents": 0,
+          "sessions": 0,
+          "stepaudios": 0,
+          "steps": 0,
+          "stories": 3,
+          "storycontents": 0,
+          "subscriptions": 0,
+          "tours": 0,
+          "tutorials": 0,
+          "users": 1,
+          "workspacemembers": 0,
+          "workspaces": 3,
+          "zoomspanscreenshots": 0,
+          "zoomspanvideos": 0
+        },
+        "indexes": {
+          "users": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            },
+            {
+              "v": 2,
+              "key": {
+                "email": 1
+              },
+              "name": "email_1",
+              "unique": true
+            }
+          ],
+          "authtokens": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            },
+            {
+              "v": 2,
+              "key": {
+                "token": 1
+              },
+              "name": "token_1",
+              "unique": true
+            }
+          ],
+          "workspaces": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "stories": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "screens": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "forms": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "leads": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "sessions": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "sessionevents": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "links": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "publishedlivedemos": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "livedemos": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "demoactivityevents": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "audios": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ],
+          "cursorpositions": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            },
+            {
+              "v": 2,
+              "key": {
+                "storyId": 1
+              },
+              "name": "storyId_1"
+            }
+          ],
+          "autorecordings": [
+            {
+              "v": 2,
+              "key": {
+                "_id": 1
+              },
+              "name": "_id_"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "label": "publish",
+      "at": "2026-04-24T00:14:03.550Z",
+      "data": {
+        "status": 200,
+        "body": {
+          "content": {
+            "contentStatus": ""
+          },
+          "custom": {
+            "header": {
+              "isActive": false,
+              "imageUrl": "",
+              "personName": "",
+              "text": ""
+            },
+            "theme": {
+              "watermarkConfig": {
+                "imageUrl": "",
+                "text": "",
+                "url": "",
+                "isActive": false
+              },
+              "isActive": false,
+              "stepBackgroundColor": "#1070ff",
+              "backgroundColor": "#FFFFFF",
+              "textColor": "#FFFFFF",
+              "buttonBackgroundColor": "#1070ff",
+              "buttonTextColor": "#FFFFFF",
+              "overlayBackgroundColor": "rgba(0,0,0,0.65)"
+            },
+            "misc": {
+              "isActive": false,
+              "confettiOnLastStep": true,
+              "isOmniBarDisabled": false,
+              "isLiveDemoWatermarkEnabled": true,
+              "isTabsEnabled": true
+            },
+            "background": {
+              "isActive": false,
+              "backgroundColor": "#FFFFFF",
+              "backgroundBlur": 0,
+              "backgroundType": "color",
+              "wallpaperImage": "",
+              "padding": 24
+            },
+            "variables": []
+          },
+          "_id": "69eab570d1622a2b258fc350",
+          "name": "discovery-probe-v2",
+          "workspaceId": "69ea79a8d7a9e7a66f4a784c",
+          "screens": [],
+          "filePath": "",
+          "status": "ready",
+          "isPublished": true,
+          "type": "web",
+          "capturedEvents": [],
+          "windowMeasures": {
+            "innerWidth": 1280,
+            "innerHeight": 800
+          },
+          "aspectRatio": "1.6",
+          "thumbnailImageUrl": "",
+          "links": [],
+          "deletedAt": null,
+          "createdAt": "2026-04-24T00:12:32.894Z",
+          "updatedAt": "2026-04-24T00:14:03.534Z",
+          "__v": 0
+        }
+      }
+    },
+    {
+      "label": "mongo_post_publish",
+      "at": "2026-04-24T00:14:06.555Z",
+      "data": {
+        "story": {
+          "_id": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 181,
+              "3": 112,
+              "4": 209,
+              "5": 98,
+              "6": 42,
+              "7": 43,
+              "8": 37,
+              "9": 143,
+              "10": 195,
+              "11": 80
+            }
+          },
+          "name": "discovery-probe-v2",
+          "workspaceId": {
+            "buffer": {
+              "0": 105,
+              "1": 234,
+              "2": 121,
+              "3": 168,
+              "4": 215,
+              "5": 169,
+              "6": 231,
+              "7": 166,
+              "8": 111,
+              "9": 74,
+              "10": 120,
+              "11": 76
+            }
+          },
+          "screens": [],
+          "filePath": "",
+          "status": "ready",
+          "isPublished": true,
+          "type": "web",
+          "capturedEvents": [],
+          "windowMeasures": {
+            "innerWidth": 1280,
+            "innerHeight": 800
+          },
+          "aspectRatio": "1.6",
+          "content": {
+            "contentStatus": ""
+          },
+          "custom": {
+            "header": {
+              "isActive": false,
+              "imageUrl": "",
+              "personName": "",
+              "text": ""
+            },
+            "theme": {
+              "watermarkConfig": {
+                "imageUrl": "",
+                "text": "",
+                "url": "",
+                "isActive": false
+              },
+              "isActive": false,
+              "stepBackgroundColor": "#1070ff",
+              "backgroundColor": "#FFFFFF",
+              "textColor": "#FFFFFF",
+              "buttonBackgroundColor": "#1070ff",
+              "buttonTextColor": "#FFFFFF",
+              "overlayBackgroundColor": "rgba(0,0,0,0.65)"
+            },
+            "misc": {
+              "isActive": false,
+              "confettiOnLastStep": true,
+              "isOmniBarDisabled": false,
+              "isLiveDemoWatermarkEnabled": true,
+              "isTabsEnabled": true
+            },
+            "background": {
+              "isActive": false,
+              "backgroundColor": "#FFFFFF",
+              "backgroundBlur": 0,
+              "backgroundType": "color",
+              "wallpaperImage": "",
+              "padding": 24
+            },
+            "variables": []
+          },
+          "thumbnailImageUrl": "",
+          "links": [],
+          "deletedAt": null,
+          "createdAt": {},
+          "updatedAt": {},
+          "__v": 0
+        },
+        "publishedLiveDemo": null,
+        "liveDemo": null
+      }
+    },
+    {
+      "label": "api_get_story",
+      "at": "2026-04-24T00:14:06.568Z",
+      "data": {
+        "status": 200,
+        "body": {
+          "content": {
+            "contentStatus": ""
+          },
+          "custom": {
+            "header": {
+              "isActive": false,
+              "imageUrl": "",
+              "personName": "",
+              "text": ""
+            },
+            "theme": {
+              "watermarkConfig": {
+                "imageUrl": "",
+                "text": "",
+                "url": "",
+                "isActive": false
+              },
+              "isActive": false,
+              "stepBackgroundColor": "#1070ff",
+              "backgroundColor": "#FFFFFF",
+              "textColor": "#FFFFFF",
+              "buttonBackgroundColor": "#1070ff",
+              "buttonTextColor": "#FFFFFF",
+              "overlayBackgroundColor": "rgba(0,0,0,0.65)"
+            },
+            "misc": {
+              "isActive": false,
+              "confettiOnLastStep": true,
+              "isOmniBarDisabled": false,
+              "isLiveDemoWatermarkEnabled": true,
+              "isTabsEnabled": true
+            },
+            "background": {
+              "isActive": false,
+              "backgroundColor": "#FFFFFF",
+              "backgroundBlur": 0,
+              "backgroundType": "color",
+              "wallpaperImage": "",
+              "padding": 24
+            },
+            "variables": []
+          },
+          "_id": "69eab570d1622a2b258fc350",
+          "name": "discovery-probe-v2",
+          "workspaceId": "69ea79a8d7a9e7a66f4a784c",
+          "screens": [],
+          "filePath": "",
+          "status": "ready",
+          "isPublished": true,
+          "type": "web",
+          "capturedEvents": [],
+          "windowMeasures": {
+            "innerWidth": 1280,
+            "innerHeight": 800
+          },
+          "aspectRatio": "1.6",
+          "thumbnailImageUrl": "",
+          "links": [],
+          "deletedAt": null,
+          "createdAt": "2026-04-24T00:12:32.894Z",
+          "updatedAt": "2026-04-24T00:14:03.534Z",
+          "__v": 0,
+          "cursorPositions": []
+        }
+      }
+    },
+    {
+      "label": "create_link",
+      "at": "2026-04-24T00:14:06.591Z",
+      "data": {
+        "status": 200,
+        "body": {
+          "name": "probe-v2-link",
+          "workspaceId": "69ea79a8d7a9e7a66f4a784c",
+          "storyId": "69eab570d1622a2b258fc350",
+          "variables": [],
+          "_id": "bBjyadP5PqbeXAxLyFR798",
+          "createdAt": "2026-04-24T00:14:06.579Z",
+          "updatedAt": "2026-04-24T00:14:06.579Z",
+          "__v": 0
+        }
+      }
+    },
+    {
+      "label": "public_url",
+      "at": "2026-04-24T00:14:06.790Z",
+      "data": {
+        "url": "https://demo.deltakinetics.io/livedemos/69eab570d1622a2b258fc350",
+        "status": 404
+      }
+    }
+  ],
+  "storyId": "69eab570d1622a2b258fc350",
+  "workspaceId": "69ea79a8d7a9e7a66f4a784c",
+  "publicUrl": "https://demo.deltakinetics.io/livedemos/69eab570d1622a2b258fc350"
+}

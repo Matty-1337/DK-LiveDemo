@@ -1,0 +1,36 @@
+STEP: auth
+STEP: emptyStory
+STEP: screen1
+{
+  "ok": false,
+  "steps": [
+    {
+      "label": "auth",
+      "at": "2026-04-24T00:12:32.879Z",
+      "data": {
+        "status": 200,
+        "tokenPreview": "8688412a...201648"
+      }
+    },
+    {
+      "label": "emptyStory",
+      "at": "2026-04-24T00:12:32.898Z",
+      "data": {
+        "status": 200,
+        "body": {
+          "_id": "69eab570d1622a2b258fc350"
+        }
+      }
+    },
+    {
+      "label": "screen1",
+      "at": "2026-04-24T00:12:33.151Z",
+      "data": {
+        "status": 500,
+        "body": null
+      }
+    }
+  ],
+  "error": "screen1 failed status=500",
+  "stack": "Error: screen1 failed status=500\n    at [stdin]:108:33\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+}

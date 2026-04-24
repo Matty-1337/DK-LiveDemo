@@ -99,9 +99,13 @@ Strict, timestamps on, discriminator key `type`.
 **No `expiresAt` field. No TTL index in source.** Tokens never expire unless
 their status is flipped to `'expired'` by `postLogout.js`.
 
-> ⚠ UNVERIFIED: live index list for `authtokens` not captured this session.
-> Expect at least the unique index on `token`. No TTL is defined in Mongoose,
-> but a DB admin could have added one manually.
+**Indexes (verified live on 2026-04-24):**
+- `_id_`
+- `token_1` **unique**
+
+**No TTL index exists.** `authtokens.indexes()` returns exactly the two
+above — no `expireAfterSeconds` anywhere. Tokens are long-lived until
+their `status` flips to `'expired'` (see `auth-model.md`).
 
 ---
 
@@ -203,16 +207,26 @@ discriminators: `Screen_Page`, `Screen_Screenshot`, `Screen_Video`.
 > `playbackRate`. The MCP does **not** currently need to distinguish them —
 > treat as one polymorphic collection.
 
-> ⚠ UNVERIFIED — **high priority**: No live `findOne()` against the `screens`
-> collection was captured this session because (a) the backend kept going
-> idle between probes, (b) the dk-livedemo-mcp workspace has no published
-> demos yet. The step schema below is **source-derived only**. Before the
-> rewrite, run:
+> ⚠ STILL UNVERIFIED — **populated screens.findOne() live capture**.
+> Attempted this session (2026-04-24, Strategy C phase 1) via direct
+> `POST /emptyStory` + `POST /screens` with a 1×1 placeholder PNG. Story
+> was created (ID `69eab570d1622a2b258fc350`, confirmed in Mongo) but
+> every `POST /screens` call returned 500 with backend log
+> `AuthorizationHeaderMalformed` — the S3 `uploadImage()` helper couldn't
+> authenticate to S3 before writing any Mongo doc. **The backend's
+> AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY are broken or stale.**
+>
+> As a result `db.screens.count() == 0` — the collection holds zero docs,
+> so no live shape can be captured. The source-derived schema above is
+> the best we have until the S3 creds are rotated. See
+> `discovery-log.md` §Phase-4-followup and `docs/troubleshooting.md`.
+>
+> To resume once AWS creds are fixed:
 > ```
-> db.screens.findOne({workspaceId: ObjectId('69ea79a8d7a9e7a66f4a784c')})
-> db.screens.findOne({})   // any workspace, sanity check
+> railway service livedemo-backend
+> railway ssh "echo '$(base64 -w0 scripts/probe-v2.js)' | base64 -d | node"
+> # → full POST /screens round-trip succeeds, dumps Mongo shape
 > ```
-> and append the raw output to `discovery-log.md` §Phase-4.
 
 ---
 
@@ -397,40 +411,51 @@ After bootstrap:
 - `stories`, `screens`, `forms`, `leads`, `sessions`: **0** as of bootstrap
   completion.
 
+After Strategy C Phase 1 probe (2026-04-24):
+- `users`: 1 (unchanged)
+- `workspaces`: 3 (unchanged)
+- `authtokens`: **5** (4 new tokens issued during probe/test flows)
+- `stories`: **3** — includes `discovery-probe-v2` (`_id = 69eab570d1622a2b258fc350`),
+  an empty story left published for reference.
+- `links`: 0 → 1 (one story link created for probe story)
+- `screens`, `forms`, `leads`, `sessions`, `publishedlivedemos`, `livedemos`:
+  **still 0** (screen creation blocked by S3 auth failure — see STILL UNVERIFIED
+  note in §screens above)
+
 ---
 
-## UNVERIFIED blocks
+## Verification status
 
-> ⚠ UNVERIFIED — **screens.findOne() live capture**. The most important
-> schema — the one whose wrongness broke the prior MCP sessions — was
-> not captured from a living document. To capture:
-> 1. Have Matty log into https://demo.deltakinetics.io as
->    `mcp@deltakinetics.io` (password at Infisical key
->    `LIVEDEMO_MCP_PASSWORD`), record any 2-step demo of any public page
->    (name it `discovery-probe-1`), publish it.
-> 2. Then run:
->    ```
->    railway redeploy --yes --service livedemo-backend
->    # wait until railway ssh works
->    railway ssh --service livedemo-backend
->    node -e 'const {MongoClient}=require("mongodb"); (async()=>{const c=new MongoClient(process.env.MONGO_URI); await c.connect(); const s=await c.db().collection("screens").findOne({}); console.log(JSON.stringify(s,null,2)); await c.close()})()'
->    ```
-> 3. Paste the output into `discovery-log.md` under a new "Phase 4
->    follow-up" section.
+✓ **Indexes for every collection of interest — verified live 2026-04-24.**
+Captured via `db.<name>.indexes()` inside the livedemo-backend container.
+Results inlined in the relevant sections above; full dump in
+`discovery-log.md` §Phase-4-followup. Short version:
 
-> ⚠ UNVERIFIED — **all collection index lists**. None were captured live.
-> For each collection of interest (`authtokens`, `users`, `workspaces`,
-> `stories`, `screens`, `forms`, `leads`, `sessions`, `sessionevents`,
-> `links`), run:
-> ```
-> db.<collection>.getIndexes()
-> ```
-> inside mongosh. Expect at least the auto `_id_` index and the unique
-> indexes declared in Mongoose (`users.email`, `authtokens.token`).
+| Collection | Non-default indexes |
+|---|---|
+| `users` | `email_1` **unique** |
+| `authtokens` | `token_1` **unique**, **no TTL** |
+| `cursorpositions` | `storyId_1` |
+| everything else | none beyond `_id_` |
 
-> ⚠ UNVERIFIED — **legacy/unused collections**. The `steps` collection and
-> the `oldModels/` directory in `src/models/` suggest an earlier schema
-> where steps were stored separately. If `db.steps.countDocuments() > 0`,
-> the backend may still read from it in some code paths — flag for
-> investigation. Currently `postSteps.js` writes to `screens.$.steps[]`
-> only.
+✓ **Legacy/unused collections — verified empty.** Both `steps` and
+`screensteps` collections exist in Mongo but both have count 0. Source
+code (`postSteps.js`, `patchStep.js`) writes only to `screens.$.steps[]`
+embedded subdocs. The separate collections are vestigial and can be
+ignored — no code path reads or writes them.
+
+⚠ **STILL UNVERIFIED — populated `screens.findOne()`.** Blocked by
+broken AWS S3 credentials on `livedemo-backend`. See the "STILL
+UNVERIFIED" note inside §screens above, plus
+`docs/troubleshooting.md` §"Screen capture returns 500 /
+AuthorizationHeaderMalformed". Resolve the S3 creds, re-run
+`scripts/probe-v2.js`, and the source-derived schema above will be
+cross-checked against a live doc.
+
+⚠ **STILL UNVERIFIED — `publishedlivedemos` population trigger.** The
+probe published an empty story (0 screens) and `publishedlivedemos`
+remained count=0 three seconds after. This is expected (nothing to
+publish without screens), but we have not yet seen a populated row.
+Once the S3 creds are fixed and a story-with-screens is published,
+re-check `publishedlivedemos.findOne({storyId: <probe>})` to confirm
+the insertion trigger and the final row shape.
