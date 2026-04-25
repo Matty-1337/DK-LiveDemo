@@ -1,22 +1,29 @@
 // CoreTAP login flow.
 //
-// Gating: requires the following Infisical secrets (loaded by
-// src/lib/infisical.ts):
-//   - CORETAP_LOGIN_URL         e.g. https://app.htxtap.com/login
-//   - CORETAP_DEMO_BOT_EMAIL    demo-bot@deltakinetics.io
-//   - CORETAP_DEMO_BOT_PASSWORD (generated)
-//   - CORETAP_DEMO_TENANT_ID    (optional; used for post-login tenant switch)
+// DOM inspected against https://coretap.deltakinetics.io/login on
+// 2026-04-25 via browser/src/scripts/inspect-coretap-login.ts. The
+// selectors below are the empirically-confirmed primary chains; the
+// fallbacks accommodate future markup churn.
 //
-// The actual selectors below are placeholders aligned with common SaaS
-// login patterns. They will need adjustment once Matty provides access
-// to the demo tenant and we can inspect app.htxtap.com/login's DOM.
+// Login is a React SPA — `networkidle` returns before the client-side
+// route transition completes. We wait for the URL path to leave
+// /login before considering auth done. Post-login lands on /dashboard;
+// the demo-bot's tenant scope (Keval's "The Miami Beach Club", numeric
+// id 8) is enforced server-side, so no client-side tenant switch is
+// needed. CORETAP_DEMO_TENANT_ID is recorded for documentation only.
+//
+// Required Infisical secrets (loaded via src/lib/infisical.ts):
+//   - CORETAP_LOGIN_URL         https://coretap.deltakinetics.io/login
+//   - CORETAP_DEMO_BOT_EMAIL    demo-bot@deltakinetics.io
+//   - CORETAP_DEMO_BOT_PASSWORD <32 hex chars, in Infisical>
 
-import type { BrowserContext, Page } from 'playwright';
+import type { BrowserContext, Locator, Page } from 'playwright';
 import { requireSecret, getSecret } from '../lib/infisical.js';
 import { log } from '../lib/logger.js';
 import { AuthError } from './registry.js';
 
 const DEFAULT_TIMEOUT_MS = 30_000;
+const POST_SUBMIT_BUDGET_MS = 20_000;
 
 export async function coretapAuth(ctx: BrowserContext): Promise<Page> {
   const loginUrl = requireSecret('CORETAP_LOGIN_URL');
@@ -28,64 +35,82 @@ export async function coretapAuth(ctx: BrowserContext): Promise<Page> {
   page.setDefaultTimeout(DEFAULT_TIMEOUT_MS);
 
   log.info('coretap: navigating to login', { loginUrl: redactUrl(loginUrl) });
-  await page.goto(loginUrl, { waitUntil: 'networkidle' });
+  await page.goto(loginUrl, { waitUntil: 'domcontentloaded' });
 
-  // Fill email — tries multiple common selectors; adjust after real DOM inspection.
   const emailField = await firstPresent(page, [
+    'input[type="email"]',           // primary — confirmed 2026-04-25
+    '#email',                         // primary — confirmed 2026-04-25
+    'input[autocomplete="email"]',    // primary — confirmed 2026-04-25
+    'input[autocomplete="username"]',
     'input[name="email"]',
-    'input[type="email"]',
-    '#email',
     '[data-testid="login-email"]',
   ]);
   if (!emailField) throw new AuthError('coretap: email input not found');
   await emailField.fill(email);
 
   const passwordField = await firstPresent(page, [
+    'input[type="password"]',                    // primary — confirmed 2026-04-25
+    '#password',                                  // primary — confirmed 2026-04-25
+    'input[autocomplete="current-password"]',    // primary — confirmed 2026-04-25
     'input[name="password"]',
-    'input[type="password"]',
-    '#password',
     '[data-testid="login-password"]',
   ]);
   if (!passwordField) throw new AuthError('coretap: password input not found');
   await passwordField.fill(password);
 
   const submitButton = await firstPresent(page, [
-    'button[type="submit"]',
+    'button[type="submit"]',          // primary — confirmed 2026-04-25
+    'button:has-text("Sign in")',     // primary — confirmed 2026-04-25
     'button:has-text("Log in")',
-    'button:has-text("Sign in")',
+    'button:has-text("Login")',
+    'input[type="submit"]',
     '[data-testid="login-submit"]',
   ]);
   if (!submitButton) throw new AuthError('coretap: submit button not found');
 
-  await Promise.all([
-    page.waitForLoadState('networkidle', { timeout: DEFAULT_TIMEOUT_MS }),
-    submitButton.click(),
-  ]);
+  await submitButton.click();
 
-  // Heuristic: if the URL path still contains /login after submit, assume
-  // credentials were rejected. Real integration may require a better
-  // signal (e.g. waiting for a /dashboard URL or a data-testid).
-  const postUrl = new URL(page.url());
-  if (postUrl.pathname.includes('/login') || postUrl.pathname.includes('/signin')) {
-    const bodyText = await page.textContent('body').catch(() => null);
+  // Wait for the SPA route transition off /login. If we hit the timeout
+  // budget without a redirect, capture in-page error text for the error
+  // message and throw — that's almost always wrong creds or rate limit.
+  try {
+    await page.waitForURL(
+      (url) => !url.pathname.includes('/login') && !url.pathname.includes('/signin'),
+      { timeout: POST_SUBMIT_BUDGET_MS },
+    );
+  } catch {
+    const errorTexts = (await page.evaluate(`(() => {
+      var nodes = Array.from(document.querySelectorAll('[role=alert], .error, .text-red-500, .text-red-600, [class*="error"]'));
+      return nodes.map(function(n){return (n.textContent||'').trim();}).filter(Boolean).slice(0, 5);
+    })()`)) as string[];
     throw new AuthError(
-      `coretap: still on login page after submit (url=${postUrl.pathname}); ` +
-        `body excerpt="${(bodyText ?? '').slice(0, 200)}"`,
+      `coretap: login did not redirect within ${POST_SUBMIT_BUDGET_MS}ms; ` +
+        `errors_visible=${JSON.stringify(errorTexts)} url=${page.url()}`,
     );
   }
 
-  // Optional tenant switch — if the product surfaces a tenant picker and
-  // we know which tenant we want, navigate or click through to it here.
-  if (tenantId) {
-    // Placeholder — actual tenant-switch URL/flow TBD post-provisioning.
-    log.info('coretap: tenant switch pending DOM inspection', { tenantId: '<set>' });
-  }
+  const landingPath = new URL(page.url()).pathname;
+  log.info('coretap: authenticated', {
+    landingPath,
+    tenantConfigured: tenantId ? '[set]' : '[unset]',
+  });
 
-  log.info('coretap: authenticated', { landingPath: postUrl.pathname });
+  // Wait for the dashboard's loading skeleton to clear — captures taken
+  // immediately after redirect catch the skeleton state. Inspected
+  // 2026-04-25: the page renders "Loading..." text inside h2 while data
+  // streams in.
+  await page
+    .waitForFunction(
+      `!Array.from(document.querySelectorAll('h2, [class*="skeleton"]')).some(function(n){return /loading/i.test((n.textContent||'').trim());})`,
+      undefined,
+      { timeout: 15_000 },
+    )
+    .catch(() => undefined);
+
   return page;
 }
 
-async function firstPresent(page: Page, selectors: string[]) {
+async function firstPresent(page: Page, selectors: string[]): Promise<Locator | null> {
   for (const sel of selectors) {
     const loc = page.locator(sel);
     if ((await loc.count().catch(() => 0)) > 0) return loc.first();

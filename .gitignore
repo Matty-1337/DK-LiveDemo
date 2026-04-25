@@ -53,3 +53,4 @@ infisical-config.json
 
 # Docker
 *.tar
+browser/src/scripts/output/

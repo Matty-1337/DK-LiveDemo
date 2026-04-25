@@ -40,13 +40,23 @@ function getEnv(name: string): string | undefined {
 }
 
 async function loadFromInfisical(): Promise<SecretMap | null> {
+  // Two auth paths — the runtime picks whichever set of vars is populated:
+  //   (A) Win32-style universal-auth: INFISICAL_UNIVERSAL_AUTH_CLIENT_ID +
+  //       INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET. Recommended on this host.
+  //   (B) Pre-minted access token: INFISICAL_TOKEN. Useful in CI.
+  // Either way, we also need INFISICAL_PROJECT_ID and INFISICAL_API_URL
+  // (alias INFISICAL_HOST for legacy compatibility).
   const token = getEnv('INFISICAL_TOKEN');
+  const clientId = getEnv('INFISICAL_UNIVERSAL_AUTH_CLIENT_ID');
+  const clientSecret = getEnv('INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET');
   const projectId = getEnv('INFISICAL_PROJECT_ID');
   const env = getEnv('INFISICAL_ENV') ?? 'prod';
-  const host = getEnv('INFISICAL_HOST');
+  const host = getEnv('INFISICAL_API_URL') ?? getEnv('INFISICAL_HOST');
 
-  if (!token || !projectId || !host) {
-    log.warn('infisical: missing INFISICAL_TOKEN/PROJECT_ID/HOST — falling back to process.env');
+  const havePathA = !!(clientId && clientSecret);
+  const havePathB = !!token;
+  if ((!havePathA && !havePathB) || !projectId || !host) {
+    log.warn('infisical: missing auth (need universal-auth client_id+secret OR access token) and PROJECT_ID + API_URL/HOST — falling back to process.env');
     return null;
   }
 
@@ -61,9 +71,7 @@ async function loadFromInfisical(): Promise<SecretMap | null> {
     }
     const siteUrl = host.startsWith('http') ? host : `https://${host}`;
     const client = new mod.InfisicalSDK({ siteUrl });
-    // Universal-auth / service-token flow. The exact method name varies
-    // across SDK versions; we try common shapes in sequence.
-    await authenticate(client, token);
+    await authenticate(client, { clientId, clientSecret, token });
 
     const list = await client.secrets().listSecrets({
       projectId,
@@ -72,7 +80,11 @@ async function loadFromInfisical(): Promise<SecretMap | null> {
 
     const map: SecretMap = {};
     for (const s of list.secrets ?? []) map[s.secretKey] = s.secretValue;
-    log.info('infisical: loaded secrets', { count: Object.keys(map).length, env });
+    log.info('infisical: loaded secrets', {
+      count: Object.keys(map).length,
+      env,
+      authMethod: havePathA ? 'universal-auth' : 'access-token',
+    });
     return map;
   } catch (err) {
     log.warn('infisical: load failed, falling back to process.env', {
@@ -92,19 +104,22 @@ interface InfisicalSDKLike {
   };
 }
 
-async function authenticate(client: InfisicalSDKLike, token: string): Promise<void> {
+async function authenticate(
+  client: InfisicalSDKLike,
+  creds: { clientId?: string; clientSecret?: string; token?: string },
+): Promise<void> {
   const auth = client.auth();
-  if (typeof auth.accessToken === 'function') {
-    await auth.accessToken(token);
+  // Prefer universal-auth (the Win32-style flow) when credentials are present.
+  if (creds.clientId && creds.clientSecret && auth.universalAuth) {
+    await auth.universalAuth.login({ clientId: creds.clientId, clientSecret: creds.clientSecret });
     return;
   }
-  // Universal-auth fallback — token formatted as "clientId:clientSecret"
-  if (auth.universalAuth && token.includes(':')) {
-    const [clientId, clientSecret] = token.split(':', 2);
-    await auth.universalAuth.login({ clientId: clientId!, clientSecret: clientSecret! });
+  // Fall back to access token.
+  if (creds.token && typeof auth.accessToken === 'function') {
+    await auth.accessToken(creds.token);
     return;
   }
-  throw new Error('infisical: no compatible auth method on SDK');
+  throw new Error('infisical: no compatible auth method on SDK for the credentials provided');
 }
 
 export async function loadSecrets(): Promise<void> {

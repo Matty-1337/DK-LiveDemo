@@ -17,8 +17,9 @@
   "coretap": {
     "name": "CoreTAP",
     "productId": "coretap",
-    "baseUrl": "https://app.htxtap.com",
+    "baseUrl": "https://coretap.deltakinetics.io",
     "authFn": "coretap",
+    "tenantNote": "demo-bot owns tenant id 8 ('The Miami Beach Club'). Static seed: 200 orders, 8 staff, 30 days. Reviews/weather/YoY widgets blank. Revenue flat Mon-Sun.",
     "tiers": {
       "monitor": { "price": 449, "priceDisplay": "$449/mo" },
       "execute": { "price": 599, "priceDisplay": "$599/mo" },
@@ -32,11 +33,11 @@
         "estimatedDurationMinutes": 4,
         "navigationPlan": [
           { "path": "/dashboard", "waitFor": "networkidle", "note": "Main dashboard landing — KPI widgets" },
-          { "path": "/dashboard?view=revenue", "waitFor": "networkidle", "note": "Revenue Pulse widget emphasis" },
-          { "path": "/dashboard?view=golden-hours", "waitFor": "networkidle", "note": "Golden Hours heatmap" },
-          { "path": "/dashboard?view=voids", "waitFor": "networkidle", "note": "Active voids alert" },
-          { "path": "/dashboard?view=staff", "waitFor": "networkidle", "note": "Staff performance ring" },
-          { "path": "/dashboard?view=quick-wins", "waitFor": "networkidle", "note": "Quick Wins action feed" }
+          { "path": "/pulse-live", "waitFor": "networkidle", "note": "Pulse Live — real-time revenue / activity feed" },
+          { "path": "/team", "waitFor": "networkidle", "note": "Staff performance grid" },
+          { "path": "/actions", "waitFor": "networkidle", "note": "Action items / alerts" },
+          { "path": "/menu", "waitFor": "networkidle", "note": "Menu health" },
+          { "path": "/dashboard", "waitFor": "networkidle", "note": "Closing — back to dashboard for CTA" }
         ],
         "narrative": [
           {
