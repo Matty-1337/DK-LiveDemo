@@ -54,7 +54,10 @@
 			header_up X-Forwarded-Proto {scheme}
 			header_down -Server
 		}
-		replace "</head>" "<link rel=\"stylesheet\" href=\"/dk-brand.css\" />\n</head>"
+		# NOTE: `replace` is intentionally omitted here. The backend's
+		# /livedemos/:storyId page is its own self-contained HTML —
+		# the player loads its own asset bundle. DK branding lives on
+		# the frontend SPA's catch-all handler below.
 	}
 
 	# ── Frontend SPA (catch-all) with HTML head injection ───────
