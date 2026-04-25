@@ -1,0 +1,53 @@
+loading secrets from Infisical...
+  BACKEND=http://livedemo-backend.railway.internal:3005
+  BROWSER=http://livedemo-browser.railway.internal:3200
+  WS=69ea79a8d7a9e7a66f4a784c
+  EMAIL=mcp@deltakinetics.io
+  PWD=[15 chars]
+
+[0s] 1/7  capture screens via livedemo-browser
+  ✓ 6 screens captured (auth=3887ms total=40226ms)
+    [0] /dashboard  title="CoreTAP"  1280x800  png=661KB  html=96KB
+    [1] /pulse-live  title="CoreTAP — Real-Time Bar Execution Intelligence"  1280x800  png=669KB  html=106KB
+    [2] /team  title="CoreTAP"  1280x800  png=320KB  html=58KB
+    [3] /actions  title="CoreTAP"  1280x800  png=239KB  html=60KB
+    [4] /menu  title="CoreTAP"  1280x800  png=1006KB  html=69KB
+    [5] /dashboard  title="CoreTAP"  1280x800  png=661KB  html=96KB
+
+[41s] 2/7  authenticate to backend
+  ✓ token acquired (preview 2c083acd…186b85)
+
+[41s] 3/7  POST /emptyStory
+  ✓ story 69ec68ec3f18e64100767017
+
+[41s] 4/7  upload screens + patch seeded steps
+  ✓ screen[0] 69ec68ec3f18e6410076701d  seededStep=69ec68ed3f18e6410076701f  imageUrl=https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/e5d4e3da-47e6-40…
+    ✓ popup: "Welcome to Smoke Test Bar's CoreTAP Dashboard…"
+  ✓ screen[1] 69ec68ed3f18e64100767031  seededStep=69ec68ee3f18e64100767033  imageUrl=https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/99e908ef-13ad-48…
+    ✓ popup: "Pulse Live — Revenue Without the Lag…"
+  ✓ screen[2] 69ec68ee3f18e64100767045  seededStep=69ec68ef3f18e64100767047  imageUrl=https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/68f383fe-481c-4a…
+    ✓ popup: "Staff Performance — A Through D, Every Shift…"
+  ✓ screen[3] 69ec68ef3f18e64100767059  seededStep=69ec68ef3f18e6410076705b  imageUrl=https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/72afce8a-8fc6-40…
+    ✓ popup: "Actions — What to Do, Not Just What's Wrong…"
+  ✓ screen[4] 69ec68f03f18e6410076706d  seededStep=69ec68f03f18e6410076706f  imageUrl=https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/98e8e266-17b2-4e…
+    ✓ popup: "Menu Health — Where Margin Hides…"
+  ✓ screen[5] 69ec68f03f18e64100767081  seededStep=69ec68f13f18e64100767083  imageUrl=https://dk-livedemo-cdn.s3.us-east-1.amazonaws.com/story-images/a506b46f-1311-44…
+    ✓ popup: "See What CoreTAP Finds in Smoke Test Bar…"
+
+[46s] 5/7  POST /publish
+  ✓ isPublished=true
+
+[46s] 6/7  POST /links
+  ✓ link _id=w36jy8N9t46xTDP13hL426
+
+[46s] 7/7  smoke-check public URL
+  ✗ https://demo.deltakinetics.io/livedemos/69ec68ec3f18e64100767017 -> 404
+
+=== RESULT ===
+storyId:   69ec68ec3f18e64100767017
+publicUrl: https://demo.deltakinetics.io/livedemos/69ec68ec3f18e64100767017
+shareUrl:  https://demo.deltakinetics.io/l/w36jy8N9t46xTDP13hL426
+screens:   6
+elapsed:   46s
+
+⚠ pipeline OK but public URL not 200 — check proxy/frontend
