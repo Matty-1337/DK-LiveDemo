@@ -35,7 +35,29 @@
 		respond "OK" 200
 	}
 
-	# ── Main reverse proxy with HTML head injection ───────────
+	# ── Backend-served public pages ──────────────────────────
+	# The LiveDemo backend renders these as full HTML server-side.
+	# Routing them to the frontend SPA results in an SPA-router
+	# 404 fallback (signup page) — verified empirically 2026-04-25.
+	#   /livedemos/:storyId  — public demo player (the Strategy C output URL)
+	#   /preview/:storyId    — JSON preview for embed clients
+	#   /oembed              — oEmbed discovery endpoint
+	#   /l/:linkId           — story-link short-uuid resolver (UNVERIFIED — add only if the SPA fails to handle it; current pattern: SPA + JS fetches story by link)
+	@backendPaths {
+		path /livedemos/* /preview/* /oembed
+	}
+	handle @backendPaths {
+		reverse_proxy livedemo-backend.railway.internal:3005 {
+			header_up Host {upstream_hostport}
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+			header_down -Server
+		}
+		replace "</head>" "<link rel=\"stylesheet\" href=\"/dk-brand.css\" />\n</head>"
+	}
+
+	# ── Frontend SPA (catch-all) with HTML head injection ───────
 	# `replace` from caddy-replace-response streams through the upstream
 	# body and rewrites matches. Kept outside reverse_proxy so it acts
 	# as a post-handler (handle_response needs a terminal handler like
