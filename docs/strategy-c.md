@@ -171,6 +171,41 @@ Scale ceiling at pool size 3: concurrent generations cap at 3, each
 ~30–60s. So ~180 generations/hour = 4,320/day if fully saturated. Real
 usage will be 10–50/day; no scaling concerns at that rate.
 
+## Upstream image patches
+
+Both `livedemo/livedemo-backend:latest` and `livedemo/livedemo-web-app:latest`
+are closed-source upstream images that ship to Docker Hub maintained by
+the original LiveDemo project. They occasionally get rebuilt with bugs
+or hardcodings that don't match a self-hosted DK install. Our pattern
+for those: **fork the image with a small `RUN`/`COPY` patch, build,
+push to GHCR, point Railway at `ghcr.io/matty-1337/dk-livedemo-<service>:v<n>`.**
+
+Active patches:
+
+| Service | Image | Patch | Why |
+|---|---|---|---|
+| backend | `ghcr.io/matty-1337/dk-livedemo-backend:v1` | `sed` rename `'livedemo-cdn'` → `'dk-livedemo-cdn'` (5 occurrences in `helpers/livedemoHelpers.js` + 5 in `helpers/flixHelpers.js`) | Upstream hardcodes a globally-taken S3 bucket name. We own `dk-livedemo-cdn` in `us-east-1`. See `backend-patch/`. |
+| frontend | `ghcr.io/matty-1337/dk-livedemo-frontend:v1` | `COPY` a stub `src/utils/postLoginRedirect.js` exporting `getPostLoginPathFromLocation` + `sanitizeReturnPath` | Upstream's `LoginPage.js` and `Auth.js` import a file that's missing from the image; Vite throws `import-analysis` error overlay on every page including `/livedemos/:id`. See `frontend-patch/`. |
+
+Pattern (replicate for the next patch):
+
+1. `docker pull livedemo/livedemo-<svc>:latest`
+2. `docker inspect ... --format='{{.Config.User}} ...'` — capture base config
+3. Locate the bug — grep source inside the image, identify the missing/hardcoded file
+4. Write a `<svc>-patch/Dockerfile` that `FROM`s the upstream tag and applies the minimum diff (`sed -i ... && grep -c ... && test ...` pattern; load-bearing assertions in the build itself so a regression fails the build)
+5. Write `verify.sh` — checks expected counts/files + `docker inspect` cfg matches upstream byte-for-byte (no USER/ENTRYPOINT drift)
+6. Write `README.md` — what's patched, why, how to rebuild, when to retire
+7. Build, verify, push to `ghcr.io/matty-1337/dk-livedemo-<svc>:v<n>`
+8. Set Railway service source to that GHCR tag (NOT `:latest` — pin)
+9. Add row to the table above
+10. **Tag bumps go up monotonically.** Never push a different image to the same `vN` tag.
+
+When upstream finally fixes the bug, retire the patch by:
+- pull fresh upstream
+- inside container, verify the bug is gone
+- switch Railway source back to the upstream tag
+- delete the `<svc>-patch/` directory in a follow-up commit, link it from the table entry as "retired YYYY-MM-DD, see commit X"
+
 ## Credentials lifecycle
 
 - Backend `PRIVATE_AUTH_TOKEN` — **dead code**, do not maintain. See

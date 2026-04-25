@@ -11,7 +11,7 @@
       ]
     },
     "livedemo-backend": {
-      "source": { "image": "docker.io/livedemo/livedemo-backend:latest" },
+      "source": { "image": "ghcr.io/matty-1337/dk-livedemo-backend:v1" },
       "deploy": {
         "restartPolicyType": "ON_FAILURE",
         "healthcheckPath": "/health",
@@ -19,7 +19,7 @@
       }
     },
     "livedemo-frontend": {
-      "source": { "image": "docker.io/livedemo/livedemo-web-app:latest" },
+      "source": { "image": "ghcr.io/matty-1337/dk-livedemo-frontend:v1" },
       "deploy": {
         "restartPolicyType": "ON_FAILURE"
       }
@@ -27,20 +27,20 @@
     "livedemo-proxy": {
       "build": {
         "builder": "DOCKERFILE",
-        "dockerfilePath": "proxy/Dockerfile",
-        "dockerContext": "proxy"
+        "dockerfilePath": "Dockerfile"
       },
       "deploy": {
+        "rootDirectory": "proxy",
         "restartPolicyType": "ON_FAILURE"
       }
     },
     "livedemo-mcp": {
       "build": {
         "builder": "DOCKERFILE",
-        "dockerfilePath": "mcp/Dockerfile",
-        "dockerContext": "mcp"
+        "dockerfilePath": "Dockerfile"
       },
       "deploy": {
+        "rootDirectory": "mcp",
         "startCommand": "node dist/index.js",
         "healthcheckPath": "/health",
         "healthcheckTimeout": 30,
@@ -50,10 +50,10 @@
     "livedemo-browser": {
       "build": {
         "builder": "DOCKERFILE",
-        "dockerfilePath": "browser/Dockerfile",
-        "dockerContext": "browser"
+        "dockerfilePath": "Dockerfile"
       },
       "deploy": {
+        "rootDirectory": "browser",
         "startCommand": "node dist/index.js",
         "healthcheckPath": "/health",
         "healthcheckTimeout": 30,
