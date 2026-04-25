@@ -35,7 +35,17 @@ export async function coretapAuth(ctx: BrowserContext): Promise<Page> {
   page.setDefaultTimeout(DEFAULT_TIMEOUT_MS);
 
   log.info('coretap: navigating to login', { loginUrl: redactUrl(loginUrl) });
-  await page.goto(loginUrl, { waitUntil: 'domcontentloaded' });
+  // CoreTAP is a React SPA — `domcontentloaded` returns BEFORE React
+  // hydrates and renders the login form, so the email input doesn't
+  // exist in the DOM yet. `networkidle` waits for the bundle download
+  // to settle, but isn't reliable on its own — explicitly wait for
+  // the email input to mount before searching for it.
+  await page.goto(loginUrl, { waitUntil: 'networkidle' });
+  await page
+    .locator('input[type="email"], #email, input[autocomplete="email"]')
+    .first()
+    .waitFor({ state: 'visible', timeout: 15_000 })
+    .catch(() => undefined); // fall through; firstPresent will surface a clear error
 
   const emailField = await firstPresent(page, [
     'input[type="email"]',           // primary — confirmed 2026-04-25
