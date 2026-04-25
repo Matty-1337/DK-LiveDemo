@@ -27,20 +27,18 @@
     "livedemo-proxy": {
       "build": {
         "builder": "DOCKERFILE",
-        "dockerfilePath": "Dockerfile"
+        "dockerfilePath": "proxy/Dockerfile"
       },
       "deploy": {
-        "rootDirectory": "proxy",
         "restartPolicyType": "ON_FAILURE"
       }
     },
     "livedemo-mcp": {
       "build": {
         "builder": "DOCKERFILE",
-        "dockerfilePath": "Dockerfile"
+        "dockerfilePath": "mcp/Dockerfile"
       },
       "deploy": {
-        "rootDirectory": "mcp",
         "startCommand": "node dist/index.js",
         "healthcheckPath": "/health",
         "healthcheckTimeout": 30,
@@ -50,10 +48,9 @@
     "livedemo-browser": {
       "build": {
         "builder": "DOCKERFILE",
-        "dockerfilePath": "Dockerfile"
+        "dockerfilePath": "browser/Dockerfile"
       },
       "deploy": {
-        "rootDirectory": "browser",
         "startCommand": "node dist/index.js",
         "healthcheckPath": "/health",
         "healthcheckTimeout": 30,
