@@ -13,8 +13,9 @@ const OUT = process.argv[3] || '/c/AI-Workspaces/dk-livedemo/docs/_e2e-demo-rend
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   console.log(`→ ${URL}`);
   await page.goto(URL, { waitUntil: 'networkidle', timeout: 30000 });
-  // Give the React player a moment to render the popup overlay
-  await page.waitForTimeout(3000);
+  // The LiveDemo player is async — inlined HTML state, then JS renders
+  // the iframe + popup overlay over a few seconds. 12s is conservative.
+  await page.waitForTimeout(12000);
   const buf = await page.screenshot({ fullPage: false });
   writeFileSync(OUT, buf);
   console.log(`  wrote ${OUT}  (${buf.length} bytes)`);

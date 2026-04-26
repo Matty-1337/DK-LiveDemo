@@ -1,19 +1,15 @@
-# livedemo-proxy — build from repository root
+# livedemo-proxy — Docker context is proxy/ (player + Caddy + inject live there)
 #
-# Railway only uploads files under the service Root Directory. If Root Directory
-# is set to "proxy", the snapshot excludes ../player and COPY proxy/Caddyfile fails
-# (see docs/troubleshooting.md § "Proxy Docker build: /proxy/Caddyfile not found").
+# Railway often sets Root Directory to "proxy" for this service. The build
+# snapshot is then proxy/** only — player sources must live under proxy/player/
+# and COPY paths in proxy/Dockerfile must be relative to proxy/ (not repo root).
 #
-# Required: Railway Dashboard → livedemo-proxy → Settings → Root Directory → EMPTY
-# (repository root). Watch paths can still limit redeploys to proxy/** and player/**.
-#
-# Other services (mcp, browser, …) keep their own subdirectory Root Directory and
-# their own railway.toml inside those folders — do not point them at this file.
+# Local: docker build -f proxy/Dockerfile proxy
 
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "proxy/Dockerfile"
-dockerContext = "."
+dockerContext = "proxy"
 
 [deploy]
 restartPolicyType = "ON_FAILURE"

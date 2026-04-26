@@ -22,7 +22,7 @@
       "build": {
         "builder": "DOCKERFILE",
         "dockerfilePath": "proxy/Dockerfile",
-        "dockerContext": "."
+        "dockerContext": "proxy"
       },
       "deploy": {
         "restartPolicyType": "ON_FAILURE"

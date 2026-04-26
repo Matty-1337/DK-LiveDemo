@@ -1,9 +1,11 @@
 # =============================================================
 # Delta Kinetics — LiveDemo edge proxy + DK Player static host
 #
-# Build context = repo root (per proxy/railway.toml dockerContext="..")
-# Stage 1: build the player SPA from /player using Node + Vite.
-# Stage 2: copy built assets into caddy:2-alpine.
+# Build context MUST be the proxy/ directory (see railway.toml):
+#   docker build -f proxy/Dockerfile proxy
+#
+# That layout lets Railway use Root Directory = "proxy" (snapshot is
+# proxy/** only) while still building the Vite app from proxy/player/.
 # =============================================================
 
 # --- Stage 1: Build the player SPA ---
@@ -22,10 +24,10 @@ RUN apk add --no-cache curl
 COPY --from=player-build /app/dist/ /srv/player/
 
 # Brand CSS (kept as a static asset for back-compat).
-COPY proxy/inject/ /srv/inject/
+COPY inject/ /srv/inject/
 
 # Caddy config.
-COPY proxy/Caddyfile /etc/caddy/Caddyfile
+COPY Caddyfile /etc/caddy/Caddyfile
 
 EXPOSE 80
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \

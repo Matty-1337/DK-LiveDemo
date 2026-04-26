@@ -1,7 +1,7 @@
 # DK Player
 
 Static React SPA that renders Delta Kinetics live demos. Built once with
-Vite, served by Caddy from `proxy/` in this monorepo.
+Vite; sources live in `proxy/player/` and ship inside the `livedemo-proxy` image.
 
 ---
 
@@ -67,8 +67,7 @@ beyond Caddy. Every visitor request to `/livedemos/*` gets the same
    token first.
 4. `npm run build` and inspect bundle size. Budget: keep the gzipped JS
    under 100KB. Currently ~56KB.
-5. Deploy with `./scripts/deploy-proxy.sh --detach` (rebuilds player +
-   uploads to Railway).
+5. Push to git; Railway builds `proxy/Dockerfile` with context `proxy/`.
 
 ---
 
@@ -95,7 +94,7 @@ case a component needs a token at runtime.
 ## Local dev
 
 ```bash
-cd player
+cd proxy/player
 npm install
 npm run dev   # http://localhost:5173
 ```
@@ -112,20 +111,10 @@ http://localhost:5173/livedemos/<storyId>
 
 ## Deploy
 
-Always go through the wrapper:
-
-```bash
-./scripts/deploy-proxy.sh --detach
-```
-
-That script:
-1. `npm ci && npm run build` in `/player`
-2. Copies `player/dist/` → `proxy/player-dist/`
-3. `railway up --service livedemo-proxy` (uploads working tree, builds
-   the proxy Docker image which copies `player-dist/` into `/srv/player/`)
-
-`proxy/player-dist/` is **not** committed to git but is **not**
-gitignored either — Railway upload would otherwise skip it.
+Deploy by pushing to `main` or your feature branch: Railway builds
+[`proxy/Dockerfile`](../proxy/Dockerfile) with Docker context **`proxy/`**
+(see [`railway.toml`](../railway.toml)). The image runs `npm run build` in
+`proxy/player` during the Docker build — no separate `railway up` step.
 
 ---
 

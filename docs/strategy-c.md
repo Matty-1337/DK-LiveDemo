@@ -25,7 +25,7 @@ User in claude.ai                  Prospect (browser)
 livedemo-mcp     (public 3100)     livedemo-proxy   (public 80, demo.deltakinetics.io)
    │ orchestrate                       │
    │ personalize                       ├──► /livedemos/:id   → static DK Player SPA
-   │                                   │       (built from /player, served by Caddy)
+   │                                   │       (built from proxy/player, served by Caddy)
    ├──► livedemo-browser  (internal)   │
    │      Playwright capture           └──► /api/v1/demos/:id → rewrite → /preview/:id
    │                                                          │
@@ -45,7 +45,7 @@ and `livedemo-proxy` (`demo.deltakinetics.io`). Backend, mongo, browser
 service are internal-only via Railway DNS.
 
 **The upstream `livedemo-frontend` service is gone** as of 2026-04-25 —
-replaced by the static DK Player SPA in `/player`, served by Caddy. See
+replaced by the static DK Player SPA in `proxy/player`, served by Caddy. See
 `docs/upstream-patches.md` for the rationale and the patch retirement log,
 and `docs/player.md` for the player architecture.
 

@@ -5,32 +5,28 @@ to unstick them. Each entry: symptom → diagnosis → fix.
 
 ---
 
-## Proxy Docker build: `/proxy/Caddyfile` not found (or `player/` missing)
+## Proxy Docker build: `/proxy/Caddyfile` not found
 
 **Symptom.** `livedemo-proxy` build fails on Railway with:
 
 `failed to solve: ... "/proxy/Caddyfile": not found`
 
-Build logs also show `[DBUG] root directory set as 'proxy'`.
+Build logs show `[DBUG] root directory set as 'proxy'` (or `root directory sanitized to 'proxy'`).
 
-**Diagnosis.** With **Root Directory** set to `proxy`, Railway only uploads
-that subtree for the build. The multi-stage `proxy/Dockerfile` expects the
-**repository root** as Docker context (`COPY player/`, `COPY proxy/Caddyfile`).
-Setting `dockerContext = ".."` in a nested `railway.toml` does **not** expand
-the snapshot to the parent — the parent files are never sent to the builder.
+**Diagnosis.** With **Root Directory** = `proxy`, Railway only uploads **proxy/**
+into the Docker build context. A Dockerfile written for **repository root**
+(`COPY proxy/Caddyfile`, `COPY player/` with `player/` at repo root) will fail.
+`dockerContext = ".."` does **not** add parent directories to the upload.
 
-Local `docker build -f proxy/Dockerfile .` from the repo root succeeds; only
-Railway misconfiguration fails.
+**Fix (current layout).** Sources live under **`proxy/player/`**; [`proxy/Dockerfile`](../proxy/Dockerfile)
+uses paths relative to **`proxy/`** (`COPY player/`, `COPY Caddyfile`, `COPY inject/`).
+[`railway.toml`](../railway.toml) sets `dockerContext = "proxy"`.
 
-**Fix.**
+Local verify:
 
-1. Railway Dashboard → `DK-LiveDemo` → `livedemo-proxy` → **Settings → Source**.
-2. Set **Root Directory** to **empty** (repository root), **not** `proxy`.
-3. Confirm build uses **Dockerfile** path `proxy/Dockerfile` and context `.`
-   (repo-level [`railway.toml`](../railway.toml) encodes this for git-integrated
-   deploys once Root Directory is correct).
-4. Optional: set **Watch paths** to `proxy/**` and `player/**` so unrelated
-   commits do not redeploy the proxy.
+```bash
+docker build -f proxy/Dockerfile proxy
+```
 
 ---
 

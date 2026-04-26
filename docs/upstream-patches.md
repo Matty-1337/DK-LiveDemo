@@ -57,6 +57,6 @@ assumption that didn't fit our agentic-generation use case:
 The data layer (Mongo schema + S3 storage) was always correct. Only the
 *player* — the SPA that renders captured screens with popup overlays —
 was the source of friction. So we replaced it with a 180KB static React
-SPA in `/player`, served by Caddy, calling the backend's public
+SPA in `proxy/player`, served by Caddy, calling the backend's public
 `/preview/:storyId` route directly. Zero upstream player code remains in
 the deployed artifact. See `strategy-c.md` for the new architecture.
