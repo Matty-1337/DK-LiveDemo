@@ -17,37 +17,37 @@ prospect.
 ## Architecture
 
 ```
-User in claude.ai
-      │
-      ▼
-livedemo-mcp                                    (public, port 3100)
-   │    — livedemo_generate_demo orchestration
-   │    — lazy 401 re-auth against upstream
-   │    — catalog lookup / personalization
-   │
-   ├──►  livedemo-browser                       (internal, port 3200)
-   │        — Fastify + Playwright + warm pool (3 Chromium)
-   │        — POST /capture → {screens: [...]}
-   │        — auth per product (CoreTAP, AtlasTAP)
-   │
+Generation path                    Render path
+──────────────────────             ─────────────────────────────
+User in claude.ai                  Prospect (browser)
+      │                                  │
+      ▼                                  ▼
+livedemo-mcp     (public 3100)     livedemo-proxy   (public 80, demo.deltakinetics.io)
+   │ orchestrate                       │
+   │ personalize                       ├──► /livedemos/:id   → static DK Player SPA
+   │                                   │       (built from /player, served by Caddy)
+   ├──► livedemo-browser  (internal)   │
+   │      Playwright capture           └──► /api/v1/demos/:id → rewrite → /preview/:id
+   │                                                          │
+   ▼                                                          ▼
+livedemo-backend (internal 3005) ◄───────────────────────────┘
+   │  existing LiveDemo Express API, 115 routes
+   │  /emptyStory, /screens (PNG→S3), /steps, /publish
+   │  /preview/:id is the public 🌐 read-only story route
    ▼
-livedemo-backend                                (internal, port 3005)
-   │    — existing LiveDemo Express API, 115 routes
-   │    — Mongoose stories/screens/forms/sessions
-   │    — /emptyStory, /screens (uploads PNG→S3), /steps,
-   │      /publish, /links
+livedemo-mongo   (internal 27017)
    │
-   ▼
-livedemo-mongo                                  (internal, port 27017)
-   │    — Mongo 8 replica set rs0
-   │
-   └──► S3                                      (Delta Kinetics AWS)
-           — screenshots persisted at upload time
+   └──► S3       (Delta Kinetics AWS)
 ```
 
 Public surface: only `livedemo-mcp` (`livedemo-mcp-production.up.railway.app`)
-and `livedemo-proxy` (`demo.deltakinetics.io`). Everything else is
-internal-only via Railway DNS.
+and `livedemo-proxy` (`demo.deltakinetics.io`). Backend, mongo, browser
+service are internal-only via Railway DNS.
+
+**The upstream `livedemo-frontend` service is gone** as of 2026-04-25 —
+replaced by the static DK Player SPA in `/player`, served by Caddy. See
+`docs/upstream-patches.md` for the rationale and the patch retirement log,
+and `docs/player.md` for the player architecture.
 
 ## Request flow (livedemo_generate_demo)
 
@@ -173,38 +173,20 @@ usage will be 10–50/day; no scaling concerns at that rate.
 
 ## Upstream image patches
 
-Both `livedemo/livedemo-backend:latest` and `livedemo/livedemo-web-app:latest`
-are closed-source upstream images that ship to Docker Hub maintained by
-the original LiveDemo project. They occasionally get rebuilt with bugs
-or hardcodings that don't match a self-hosted DK install. Our pattern
-for those: **fork the image with a small `RUN`/`COPY` patch, build,
-push to GHCR, point Railway at `ghcr.io/matty-1337/dk-livedemo-<service>:v<n>`.**
+Active patches reduced to **1** as of 2026-04-25:
 
-Active patches:
+- `backend :v1` — `sed` renames the hardcoded `livedemo-cdn` S3 bucket
+  to our `dk-livedemo-cdn` (still required; backend uploads PNGs on
+  every screen create).
 
-| Service | Image | Patch | Why |
-|---|---|---|---|
-| backend | `ghcr.io/matty-1337/dk-livedemo-backend:v1` | `sed` rename `'livedemo-cdn'` → `'dk-livedemo-cdn'` (5 occurrences in `helpers/livedemoHelpers.js` + 5 in `helpers/flixHelpers.js`) | Upstream hardcodes a globally-taken S3 bucket name. We own `dk-livedemo-cdn` in `us-east-1`. See `backend-patch/`. |
-| frontend | `ghcr.io/matty-1337/dk-livedemo-frontend:v1` | `COPY` a stub `src/utils/postLoginRedirect.js` exporting `getPostLoginPathFromLocation` + `sanitizeReturnPath` | Upstream's `LoginPage.js` and `Auth.js` import a file that's missing from the image; Vite throws `import-analysis` error overlay on every page including `/livedemos/:id`. See `frontend-patch/`. |
+The other four (backend `:v2`, `:v3`; frontend `:v1`, `:v2`) became
+obsolete when the custom DK Player shipped — they all patched code paths
+the static player no longer touches. Full table, retirement reasoning,
+and the patch authoring pattern moved to `docs/upstream-patches.md`.
 
-Pattern (replicate for the next patch):
-
-1. `docker pull livedemo/livedemo-<svc>:latest`
-2. `docker inspect ... --format='{{.Config.User}} ...'` — capture base config
-3. Locate the bug — grep source inside the image, identify the missing/hardcoded file
-4. Write a `<svc>-patch/Dockerfile` that `FROM`s the upstream tag and applies the minimum diff (`sed -i ... && grep -c ... && test ...` pattern; load-bearing assertions in the build itself so a regression fails the build)
-5. Write `verify.sh` — checks expected counts/files + `docker inspect` cfg matches upstream byte-for-byte (no USER/ENTRYPOINT drift)
-6. Write `README.md` — what's patched, why, how to rebuild, when to retire
-7. Build, verify, push to `ghcr.io/matty-1337/dk-livedemo-<svc>:v<n>`
-8. Set Railway service source to that GHCR tag (NOT `:latest` — pin)
-9. Add row to the table above
-10. **Tag bumps go up monotonically.** Never push a different image to the same `vN` tag.
-
-When upstream finally fixes the bug, retire the patch by:
-- pull fresh upstream
-- inside container, verify the bug is gone
-- switch Railway source back to the upstream tag
-- delete the `<svc>-patch/` directory in a follow-up commit, link it from the table entry as "retired YYYY-MM-DD, see commit X"
+When upstream fixes the v1 bucket hardcoding, switch Railway back to
+upstream `:latest`, delete `backend-patch/`, and we're off the fork
+entirely.
 
 ## Credentials lifecycle
 

@@ -18,12 +18,6 @@
         "healthcheckTimeout": 30
       }
     },
-    "livedemo-frontend": {
-      "source": { "image": "ghcr.io/matty-1337/dk-livedemo-frontend:v1" },
-      "deploy": {
-        "restartPolicyType": "ON_FAILURE"
-      }
-    },
     "livedemo-proxy": {
       "build": {
         "builder": "DOCKERFILE",
