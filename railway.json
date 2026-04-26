@@ -27,7 +27,8 @@
     "livedemo-proxy": {
       "build": {
         "builder": "DOCKERFILE",
-        "dockerfilePath": "proxy/Dockerfile"
+        "dockerfilePath": "proxy/Dockerfile",
+        "dockerContext": "."
       },
       "deploy": {
         "restartPolicyType": "ON_FAILURE"
