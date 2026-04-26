@@ -371,27 +371,35 @@ img { display: block; max-width: 100%; }
   }
 }
 
-/* ========== Desktop: framed canvas at 16:10, popup anchored to corner ========== */
-/* The dashboard image becomes a framed display on the dark DK background.
-   Popup floats in a bottom corner so the screen content stays visible. */
+/* ========== Desktop: full-bleed canvas, popup anchored to corner ========== */
+/* Sales prospects need the dashboard to feel like THEIR product, not a
+   thumbnail in a frame. Fill the viewport and overlay the popup. */
 
 @media (min-width: 1024px) {
   .dk-player {
-    padding: 2rem 2rem calc(6rem + env(safe-area-inset-bottom, 0));
+    padding: 0;
   }
 
   .dk-canvas {
-    flex: 0 1 auto;
-    /* min() bounds width by both viewport width AND height — a tall
-       narrow window still picks the height-driven width so the frame
-       doesn't crop. */
-    width: min(100%, 1280px, calc((100vh - 10rem) * 1.6));
-    height: auto;
-    aspect-ratio: 1280 / 800;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    aspect-ratio: auto;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .dk-canvas__bg {
+    border-radius: 0;
+    /* Captures are 1280x800; on 1920+ displays we upscale. Hint the
+       browser to keep edges sharp instead of bilinear-blurring. */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
   }
 
   .dk-popup {
-    padding: 1.75rem;
+    padding: 1.75rem 2rem calc(6rem + env(safe-area-inset-bottom, 0));
     align-items: flex-end;
   }
 

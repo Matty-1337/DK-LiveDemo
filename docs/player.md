@@ -129,6 +129,18 @@ gitignored either — Railway upload would otherwise skip it.
 
 ---
 
+## TODO: bump capture resolution
+
+The browser service (`/browser`) currently captures screens at
+**1280×800**. The desktop player is now full-bleed, so on 1920+ displays
+those captures are upscaled and look slightly soft. Mitigated for now
+with `image-rendering: crisp-edges` on `.dk-canvas__bg`, but the real
+fix is to capture at native desktop resolution (e.g. 1920×1200) in the
+Playwright viewport config. Deferred because it requires regenerating
+existing demos.
+
+---
+
 ## What's intentionally not here
 
 - **No auth, no editor, no recording UI.** This player only renders
