@@ -43,7 +43,8 @@
     "livedemo-browser": {
       "build": {
         "builder": "DOCKERFILE",
-        "dockerfilePath": "browser/Dockerfile"
+        "dockerfilePath": "browser/Dockerfile",
+        "dockerContext": "browser"
       },
       "deploy": {
         "startCommand": "node dist/index.js",

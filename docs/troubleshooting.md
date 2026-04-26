@@ -30,6 +30,30 @@ docker build -f proxy/Dockerfile proxy
 
 ---
 
+## Browser service build: `/Caddyfile` not found (wrong Dockerfile)
+
+**Symptom.** GitHub check **DK-LiveDemo - livedemo-browser** fails. Build logs show
+`load build definition from proxy/Dockerfile` and:
+
+`"/Caddyfile": not found`
+
+**Diagnosis.** The **`livedemo-browser`** Railway service is using **repository root**
+as its **Root Directory**, so it picks up the **top-level** [`railway.toml`](../railway.toml)
+(which builds the **proxy** image). Browser has no `Caddyfile`.
+
+**Fix.**
+
+1. Railway dashboard → `livedemo-browser` → **Settings → Source → Root Directory** → set to **`browser`** (the folder with [`browser/Dockerfile`](../browser/Dockerfile) and [`browser/railway.toml`](../browser/railway.toml)).
+2. Redeploy the service (or push a commit touching `browser/`).
+
+Local verify:
+
+```bash
+docker build -f browser/Dockerfile browser
+```
+
+---
+
 ## Backend stuck in scaled-to-zero
 
 **Symptom.** `railway ssh --service livedemo-backend` returns
