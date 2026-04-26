@@ -5,6 +5,35 @@ to unstick them. Each entry: symptom → diagnosis → fix.
 
 ---
 
+## Proxy Docker build: `/proxy/Caddyfile` not found (or `player/` missing)
+
+**Symptom.** `livedemo-proxy` build fails on Railway with:
+
+`failed to solve: ... "/proxy/Caddyfile": not found`
+
+Build logs also show `[DBUG] root directory set as 'proxy'`.
+
+**Diagnosis.** With **Root Directory** set to `proxy`, Railway only uploads
+that subtree for the build. The multi-stage `proxy/Dockerfile` expects the
+**repository root** as Docker context (`COPY player/`, `COPY proxy/Caddyfile`).
+Setting `dockerContext = ".."` in a nested `railway.toml` does **not** expand
+the snapshot to the parent — the parent files are never sent to the builder.
+
+Local `docker build -f proxy/Dockerfile .` from the repo root succeeds; only
+Railway misconfiguration fails.
+
+**Fix.**
+
+1. Railway Dashboard → `DK-LiveDemo` → `livedemo-proxy` → **Settings → Source**.
+2. Set **Root Directory** to **empty** (repository root), **not** `proxy`.
+3. Confirm build uses **Dockerfile** path `proxy/Dockerfile` and context `.`
+   (repo-level [`railway.toml`](../railway.toml) encodes this for git-integrated
+   deploys once Root Directory is correct).
+4. Optional: set **Watch paths** to `proxy/**` and `player/**` so unrelated
+   commits do not redeploy the proxy.
+
+---
+
 ## Backend stuck in scaled-to-zero
 
 **Symptom.** `railway ssh --service livedemo-backend` returns
