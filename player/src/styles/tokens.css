@@ -1,0 +1,28 @@
+:root {
+  --dk-bg: #0A1420;
+  --dk-bg-elevated: #0F1B2C;
+  --dk-surface: rgba(20, 33, 51, 0.72);
+  --dk-surface-border: rgba(64, 240, 240, 0.28);
+
+  --dk-cyan: #40F0F0;
+  --dk-cyan-soft: #92F7FC;
+  --dk-blue-soft: #B6E2FF;
+  --dk-magenta: #E040C0;
+
+  --dk-text-primary: #FFFFFF;
+  --dk-text-secondary: #B6E2FF;
+  --dk-text-muted: rgba(255, 255, 255, 0.62);
+
+  --dk-gradient: linear-gradient(90deg, #92F7FC 0%, #B6E2FF 100%);
+  --dk-gradient-magenta: linear-gradient(90deg, #40F0F0 0%, #E040C0 100%);
+
+  --dk-font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --dk-font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+
+  --dk-radius: 14px;
+  --dk-radius-lg: 20px;
+  --dk-shadow: 0 18px 50px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(64, 240, 240, 0.15);
+  --dk-shadow-popup: 0 24px 70px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(64, 240, 240, 0.32);
+
+  --dk-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
