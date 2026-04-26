@@ -44,10 +44,13 @@ Public surface: only `livedemo-mcp` (`livedemo-mcp-production.up.railway.app`)
 and `livedemo-proxy` (`demo.deltakinetics.io`). Backend, mongo, browser
 service are internal-only via Railway DNS.
 
-**The upstream `livedemo-frontend` service is gone** as of 2026-04-25 —
-replaced by the static DK Player SPA in `proxy/player`, served by Caddy. See
-`docs/upstream-patches.md` for the rationale and the patch retirement log,
-and `docs/player.md` for the player architecture.
+**The upstream Vite frontend (`livedemo-web-app`) is off the request path** as
+of 2026-04-25 — replaced by the static DK Player SPA in `proxy/player`, served
+by Caddy. A dormant **`livedemo-frontend` Railway service** may still exist in
+the dashboard until manually removed; it is not in `railway.json` and receives
+no traffic. **Owner decision:** delete after confirming no external dependency.
+See `docs/upstream-patches.md` for patch retirement and `docs/player.md` for
+player architecture.
 
 ## Request flow (livedemo_generate_demo)
 

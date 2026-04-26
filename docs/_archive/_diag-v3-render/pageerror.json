@@ -1,0 +1,8 @@
+[
+  {
+    "ts": 1777164669554,
+    "name": "AxiosError",
+    "message": "Request failed with status code 500",
+    "stack": "AxiosError: Request failed with status code 500\n    at Pn (https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js:2:3032344)\n    at XMLHttpRequest.g (https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js:2:3036874)\n    at na.request (https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js:2:3045561)"
+  }
+]

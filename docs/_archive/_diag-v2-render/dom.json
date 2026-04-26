@@ -1,0 +1,41 @@
+{
+  "url": "https://demo.deltakinetics.io/livedemos/69ec68ec3f18e64100767017",
+  "title": "LiveDemo",
+  "bodyChildCount": 1,
+  "bodyChildren": [
+    {
+      "tag": "div",
+      "id": "app",
+      "className": "",
+      "childElementCount": 0,
+      "textPreview": ""
+    }
+  ],
+  "appExists": true,
+  "appChildCount": 0,
+  "appHTMLPreview": "",
+  "iframes": [],
+  "visibleText": "",
+  "readyState": "complete",
+  "headLinks": [
+    {
+      "rel": "shortcut icon",
+      "href": "https://livedemo-cdn.s3.amazonaws.com/static/logo-round.png"
+    },
+    {
+      "rel": "apple-touch-icon",
+      "href": "https://livedemo-cdn.s3.amazonaws.com/static/logo-round.png"
+    },
+    {
+      "rel": "alternate",
+      "href": "https://demo.deltakinetics.io/oembed?url=/workspaces/69ea79a8d7a9e7a66f4a784c/stories/69ec68ec3f18e64100767017/preview"
+    },
+    {
+      "rel": "shortcut icon",
+      "href": "https://app.livedemo.ai/favicon.ico"
+    }
+  ],
+  "headScripts": [
+    "https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js"
+  ]
+}

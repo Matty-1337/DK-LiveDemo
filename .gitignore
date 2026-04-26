@@ -34,9 +34,11 @@ Thumbs.db
 *.swo
 
 # Local notes / per-machine state
-HANDOFF.md
 CLAUDE.md
 .cursor/hooks/state/
+
+# Claude Code local lockfiles
+.claude/
 
 # Coverage / cache
 coverage/
@@ -55,5 +57,5 @@ infisical-config.json
 *.tar
 browser/src/scripts/output/
 
-# proxy/player-dist/ — legacy staging dir from old deploy-proxy.sh; optional.
-# Player is built in-image from proxy/player/ (see proxy/Dockerfile).
+# Legacy staging dir (removed); never commit pre-built player blobs
+proxy/player-dist/

@@ -4,7 +4,8 @@
 # =============================================================
 
 [build]
-  dockerImage = "docker.io/livedemo/livedemo-backend:latest"
+  # Patched image: S3 bucket livedemo-cdn → dk-livedemo-cdn (see backend-patch/)
+  dockerImage = "ghcr.io/matty-1337/dk-livedemo-backend:v1"
 
 [deploy]
   restartPolicyType = "ON_FAILURE"

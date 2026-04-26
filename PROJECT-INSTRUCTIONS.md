@@ -80,10 +80,10 @@ livedemo-backend.railway.internal:3005
 | Service | Type | URL | Status |
 |---|---|---|---|
 | livedemo-mongo | Docker: mongo:8 | internal only | ✅ Online |
-| livedemo-backend | Docker: livedemo/livedemo-backend:latest | internal only | ✅ Online |
-| livedemo-frontend | Docker: livedemo/livedemo-web-app (wrapped) | internal only | ✅ Online |
-| livedemo-proxy | Repo: proxy/Dockerfile | demo.deltakinetics.io | ✅ Online |
+| livedemo-backend | Docker: **ghcr.io/matty-1337/dk-livedemo-backend:v1** | internal only | ✅ Online |
+| livedemo-proxy | Repo: `proxy/Dockerfile` (context `proxy/`) | demo.deltakinetics.io | ✅ Online |
 | livedemo-mcp | Repo: mcp/Dockerfile | livedemo-mcp-production.up.railway.app | ✅ Online |
+| livedemo-browser | Repo: browser/Dockerfile | internal only | ✅ Online |
 
 ---
 

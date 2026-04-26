@@ -2,11 +2,12 @@
 // player rendered with branding + personalized popup. Runs locally —
 // driver: Playwright (already installed in browser/node_modules).
 
-const { chromium } = require('C:/AI-Workspaces/dk-livedemo/browser/node_modules/playwright');
+const path = require('node:path');
 const { writeFileSync } = require('node:fs');
+const { chromium } = require(path.join(__dirname, '..', 'browser', 'node_modules', 'playwright'));
 
 const URL = process.argv[2] || 'https://demo.deltakinetics.io/livedemos/69ec68ec3f18e64100767017';
-const OUT = process.argv[3] || '/c/AI-Workspaces/dk-livedemo/docs/_e2e-demo-render.png';
+const OUT = process.argv[3] || path.join(__dirname, '..', 'docs', '_e2e-demo-render.png');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
