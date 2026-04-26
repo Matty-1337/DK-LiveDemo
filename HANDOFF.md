@@ -57,7 +57,7 @@ Prod demo JSON already shows `imageUrl` under `dk-livedemo-cdn` — uploads are 
 - Branch: `feature/strategy-c-automation` (Strategy C + proxy/player layout).
 - **Do not force-push or rewrite history.**
 
-**GitHub check `livedemo-browser`:** If it fails with `proxy/Dockerfile` and `Caddyfile` not found, the Railway service **Root Directory** is wrong — set it to **`browser`** (see `browser/railway.toml` + `docs/troubleshooting.md`).
+**GitHub check `livedemo-browser`:** Was failing because `railway.json` lacked `dockerContext: "browser"` (repo-root config built the proxy image). Fixed in commit `9e5629e`. If it regresses, set Railway **Root Directory** to **`browser`** — see `docs/troubleshooting.md`.
 
 ---
 
