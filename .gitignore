@@ -54,3 +54,9 @@ infisical-config.json
 # Docker
 *.tar
 browser/src/scripts/output/
+
+# proxy/player-dist/ is intentionally NOT gitignored:
+# scripts/deploy-proxy.sh writes it before `railway up`, and Railway
+# excludes gitignored paths from the upload tarball. We rely on its
+# absence from `git status` discipline (see scripts/deploy-proxy.sh
+# which always rebuilds it from /player).

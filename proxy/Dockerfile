@@ -1,30 +1,26 @@
 # =============================================================
-# Delta Kinetics — LiveDemo Edge Proxy + DK Player static host
+# Delta Kinetics — LiveDemo edge proxy + DK Player static host
 #
-# Stage 1 builds the DK player SPA (player/) with Vite.
-# Stage 2 is stock Caddy: serves player/dist statically and reverse-
-# proxies the read-only /api/v1/demos route to the backend's PUBLIC
-# /preview/:storyId endpoint (no auth needed, it's a 🌐 route per
-# upstream-api.md).
+# Build context = proxy/ (per proxy/railway.toml).
+# Player static files must be staged at proxy/player-dist/ before
+# `railway up` — see scripts/deploy-proxy.sh which wraps `npm run
+# build` in /player and copies dist into proxy/player-dist/.
 #
-# Build context MUST be repo root.
-#   railway.json: dockerContext = ".", dockerfilePath = "proxy/Dockerfile"
+# `proxy/player-dist/` is gitignored.
 # =============================================================
 
-# ---- Stage 1: build the player ----
-FROM node:20-alpine AS player-build
-WORKDIR /player
-COPY player/package.json player/package-lock.json ./
-RUN npm ci --no-audit --no-fund
-COPY player/ ./
-RUN npm run build
-
-# ---- Stage 2: caddy serves player + proxies API ----
 FROM caddy:2-alpine
 RUN apk add --no-cache curl
-COPY --from=player-build /player/dist /srv/player
-COPY proxy/inject/ /srv/inject/
-COPY proxy/Caddyfile /etc/caddy/Caddyfile
+
+# Static SPA (built by Vite in /player, staged by deploy-proxy.sh).
+COPY player-dist/ /srv/player/
+
+# Brand CSS (kept as a static asset for back-compat).
+COPY inject/ /srv/inject/
+
+# Caddy config.
+COPY Caddyfile /etc/caddy/Caddyfile
+
 EXPOSE 80
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -f "http://localhost:${PORT:-80}/caddy-health" || exit 1
