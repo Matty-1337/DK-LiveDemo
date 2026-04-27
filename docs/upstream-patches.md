@@ -33,10 +33,11 @@ value or missing reference that breaks self-hosting, our pattern was:
 | backend `:v1` | `ghcr.io/matty-1337/dk-livedemo-backend:v1` | `sed` rename `'livedemo-cdn'` → `'dk-livedemo-cdn'` in `helpers/livedemoHelpers.js` (5 occ) + `helpers/flixHelpers.js` (5 occ). | **ACTIVE.** Still required — backend uploads screen PNGs to our S3 bucket on every screen create. |
 | backend `:v2` | `ghcr.io/matty-1337/dk-livedemo-backend:v2` | All v1 patches **plus** strip two stale `<link>` tags from `handlers/getLiveDemoPreview.js` (`app.livedemo.ai/main.5e127e43*.css` + `npm.antd.22ac6b*.css`). | **OBSOLETE — superseded by DK player (2026-04-25).** This patch only mattered when the proxy routed `/livedemos/:id` to `getLiveDemoPreview.js`. After Phase 6 the player is static and that handler is no longer reached. v1 is the canonical backend image. |
 | backend `:v3` | `ghcr.io/matty-1337/dk-livedemo-backend:v3` | All v1+v2 patches **plus** rename the React mount target from `<div id="app">` → `<div id="reactInjectTourApp">` in `handlers/getLiveDemoPreview.js:234`. | **OBSOLETE — superseded by DK player (2026-04-25).** Same reasoning as v2. |
+| backend `:v4` | `ghcr.io/matty-1337/dk-livedemo-backend:v4` | All v1 patches **plus** replace the env dump at `src/server.js:165` (`console.log(process.env)`) with a sanitized count-only log. | **ACTIVE.** Required before backend log diagnostics — env values were exposed in Railway stdout during BFF diagnosis on 2026-04-27. Secrets already emitted before v4 still need rotation as standard hygiene. |
 | frontend `:v1` | `ghcr.io/matty-1337/dk-livedemo-frontend:v1` | `COPY` a stub `src/utils/postLoginRedirect.js` (exports `getPostLoginPathFromLocation` + `sanitizeReturnPath`). | **OBSOLETE — not in deploy path (2026-04-25).** Remove any dormant Railway `livedemo-frontend` when safe. |
 | frontend `:v2` | `ghcr.io/matty-1337/dk-livedemo-frontend:v2` | All v1 patches **plus** inline-stub `src/utils/storyDemoBackground.js` (exports `resolveStoryDemoOuterBackground` + default). | **OBSOLETE — not in deploy path (2026-04-25).** |
 
-**Net active patches after 2026-04-25:** 1 (backend `:v1`, S3 bucket rename).
+**Net active patches after 2026-04-27:** 1 (backend `:v4`, S3 bucket rename + env-dump strip).
 
 When upstream finally fixes the v1 bucket hardcoding, retire it by switching
 Railway back to upstream `:latest` and deleting `backend-patch/`.

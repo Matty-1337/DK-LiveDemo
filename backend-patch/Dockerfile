@@ -35,10 +35,20 @@ RUN set -eux; \
     test "$NEW_F" = "5" || { echo "expected 5 replacements in flixHelpers.js, got $NEW_F"; exit 1; }; \
     test "$OLD_F" = "0" || { echo "expected 0 'livedemo-cdn' remaining in flixHelpers.js, got $OLD_F"; exit 1; }
 
+# v4: strip env-dump from boot logs. The upstream backend logs all
+# process.env values at /home/app/src/server.js:165, which leaks secrets
+# into Railway logs. Keep a count-only boot signal instead.
+RUN set -eux; \
+    grep -n "console.log(process.env)" /home/app/src/server.js; \
+    sed -i 's/console\.log(process\.env)/console.log("env loaded: " + Object.keys(process.env).length + " vars")/' \
+        /home/app/src/server.js; \
+    grep -n 'env loaded:' /home/app/src/server.js; \
+    test "$(grep -c "console.log(process.env)" /home/app/src/server.js || true)" = "0"
+
 # Label for provenance. Inspect with `docker inspect`.
 LABEL org.opencontainers.image.source="https://github.com/Matty-1337/DK-LiveDemo" \
-      org.opencontainers.image.description="DK fork of livedemo-backend: S3 bucket patched to dk-livedemo-cdn" \
+      org.opencontainers.image.description="DK fork of livedemo-backend: S3 bucket patched to dk-livedemo-cdn and env dump stripped" \
       org.opencontainers.image.vendor="Delta Kinetics" \
       dk.patch.source-image="docker.io/livedemo/livedemo-backend:latest" \
       dk.patch.source-digest="sha256:6e63e427ac9f602a9057f6d20c2a0094b2e849c33b75c4d69b0eac85b05a43bb" \
-      dk.patch.rev="v1"
+      dk.patch.rev="v4"
