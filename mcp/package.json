@@ -4,6 +4,7 @@
   "description": "LiveDemo MCP Server for Delta Kinetics",
   "main": "dist/index.js",
   "scripts": {
+    "prebuild": "node scripts/copy-catalog.cjs",
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts"

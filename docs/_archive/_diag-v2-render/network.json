@@ -1,0 +1,22 @@
+[
+  {
+    "ts": 1777135180111,
+    "url": "https://demo.deltakinetics.io/livedemos/69ec68ec3f18e64100767017",
+    "method": "GET",
+    "type": "document",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "contentLength": null,
+    "failed": null
+  },
+  {
+    "ts": 1777135183499,
+    "url": "https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js",
+    "method": "GET",
+    "type": "script",
+    "status": 200,
+    "contentType": "text/javascript",
+    "contentLength": 4610499,
+    "failed": null
+  }
+]

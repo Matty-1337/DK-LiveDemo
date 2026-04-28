@@ -324,6 +324,200 @@ curl -I https://demo.deltakinetics.io/
 
 ---
 
+## Phase 4 follow-up — discovery-probe-v2 (2026-04-24, Strategy C session)
+
+### Context
+Fallback (a) from the Strategy C Phase 1 playbook — skip the LiveDemo
+recorder UI (fragile, high-cost via Playwright), hit `POST /emptyStory`
+and `POST /screens` directly with synthetic HTML + 1×1 gray PNG.
+Authorised by the session directive: "If the LiveDemo recorder UI blocks
+Playwright (...), try POST /emptyStory directly to create an empty story,
+then POST /screens with synthesized HTML + a small PNG placeholder."
+
+### Prereq — two pre-existing production misconfigurations discovered
+
+**(A) Backend was stuck in scaled-to-zero after prior session work.** Root
+cause: Railway env var `DB_URI` got unset between sessions (unclear how —
+last-session variable writes touched `LIVEDEMO_*` and `ENABLE_*` only).
+The backend's `src/models/index.js:111` passes `DB_URI` (empty string)
+to `mongoose.createConnection()`, which throws
+`MongoParseError: Invalid scheme, expected connection string to start with
+"mongodb://" or "mongodb+srv://"`. The process stays running but never
+binds port 3005. Restored via
+`railway variables --set "DB_URI=mongodb://livedemo-mongo.railway.internal:27017/livedemo?replicaSet=rs0"`
+on service `livedemo-backend`. Backend came up within 20 seconds of
+redeploy after that.
+
+**Lesson:** the backend requires BOTH `MONGO_URI` and `DB_URI` — they are
+read in different code paths (server.js worker uses `MONGO_URI`,
+models/index.js API uses `DB_URI`). Any future CLI-driven env changes
+that touch mongo config must preserve both. Consider consolidating to a
+single canonical var in a follow-up.
+
+**(B) Backend S3 credentials are broken/stale.** `POST /screens`
+consistently returns 500 with backend log:
+```
+Code: 'AuthorizationHeaderMalformed',
+  RequestId: 'HRFSWNFGKPW0PQVK',
+  ... at @aws-sdk/middleware-sdk-s3 ...
+```
+The handler (`postScreens.js`) calls `helpers.uploadImage(imageData, ...)`
+before writing anything to Mongo. No valid AWS creds → no screens ever
+get created. The backend env has `AWS_ACCESS_KEY_ID` and
+`AWS_SECRET_ACCESS_KEY` set, but they're either expired, malformed, or
+pointing at the wrong bucket/region. Escalated as a Strategy-C blocker
+in [SUMMARY.md](SUMMARY.md) and [troubleshooting.md](troubleshooting.md).
+
+### Probe flow
+
+1. `POST /users/password-authenticate` → **200**, token acquired.
+2. `POST /emptyStory` with `{name: "discovery-probe-v2", workspaceId, windowMeasures:{innerWidth:1280,innerHeight:800}, aspectRatio:1.6}` → **200**, `{_id: "69eab570d1622a2b258fc350"}`.
+3. `POST /workspaces/:ws/stories/:sid/screens` (1×1 gray PNG, synthetic HTML) → **500**, empty body. S3 auth failure (see B above).
+4. Aborted full screen capture; ran `probe-v2-partial.js` on the empty story to capture everything else — auth, story schema, all indexes, publish flow, API GET round-trip, story link, public URL.
+
+### Story doc — verified shape (empty story, from `db.stories.findOne`)
+
+```json
+{
+  "_id": ObjectId("69eab570d1622a2b258fc350"),
+  "name": "discovery-probe-v2",
+  "workspaceId": ObjectId("69ea79a8d7a9e7a66f4a784c"),
+  "screens": [],
+  "filePath": "",                 // [server-generated] empty for /emptyStory; populated by /stories (recorder path)
+  "status": "ready",              // [server-generated]
+  "isPublished": false,           // [server-generated] initial; flipped by /publish
+  "type": "web",                  // [server-generated] default; /desktopStories sets "desktop"
+  "capturedEvents": [],           // [server-generated] empty for /emptyStory
+  "windowMeasures": { "innerWidth": 1280, "innerHeight": 800 },  // [validated] passed-through from request
+  "aspectRatio": "1.6",           // ⚠ STORED AS STRING even though sent as number. Mongoose schema:
+                                  //   aspectRatio: {type: mongoose.Schema.Types.String}
+  "content": { "contentStatus": "" },
+  "custom": {
+    "header":     { "isActive": false, "imageUrl": "", "personName": "", "text": "" },
+    "theme":      { "isActive": false, "stepBackgroundColor": "#1070ff", "backgroundColor": "#FFFFFF",
+                    "textColor": "#FFFFFF", "buttonBackgroundColor": "#1070ff", "buttonTextColor": "#FFFFFF",
+                    "overlayBackgroundColor": "rgba(0,0,0,0.65)",
+                    "watermarkConfig": { "imageUrl": "", "text": "", "url": "", "isActive": false } },
+    "misc":       { "isActive": false, "confettiOnLastStep": true, "isOmniBarDisabled": false,
+                    "isLiveDemoWatermarkEnabled": true, "isTabsEnabled": true },
+    "background": { "isActive": false, "backgroundColor": "#FFFFFF", "backgroundBlur": 0,
+                    "backgroundType": "color", "wallpaperImage": "", "padding": 24 },
+    "variables": []
+  },
+  "thumbnailImageUrl": "",
+  "links": [],
+  "deletedAt": null,
+  "createdAt": "2026-04-24T00:12:32.894Z",
+  "updatedAt": "2026-04-24T00:12:32.894Z",
+  "__v": 0
+}
+```
+
+**Every Mongoose default fires on create.** Even though `POST /emptyStory`
+only passes 4 fields (`name`, `workspaceId`, `windowMeasures`,
+`aspectRatio`), the persisted document has the full `custom.*` tree
+populated with defaults. This matters for the Strategy C generator: we
+don't need to populate branding at creation time — it's safe to leave it
+and patch later if needed.
+
+### /publish behavior — verified
+
+- Request: `POST /workspaces/:ws/stories/:sid/publish` with `{isPublished: true}` → **200**.
+- Response body: the populated story doc (same shape as `GET /.../stories/:id`) with `isPublished: true`, `screens: []` (because none exist), and **no `publishedlivedemos` or `livedemos` row created** (checked Mongo 3 seconds after publish — both collections still have count 0).
+- **Conclusion:** `POST /publish` just flips `stories.isPublished`. It does NOT populate `publishedlivedemos` or `livedemos`. Those rows appear to be created by a worker/queue process that either (a) didn't run (ENABLE_CONSUMER was false during the probe), (b) requires screens to exist, or (c) is triggered by a different code path (perhaps the first `GET /livedemos/:storyId` lazy-creates them — not tested). This is a lower-priority UNVERIFIED for the next probe once AWS creds are fixed and we can test with real screens.
+
+### Public URL — verified (negative)
+
+`GET https://demo.deltakinetics.io/livedemos/69eab570d1622a2b258fc350`
+→ **404**. An empty published story is not served by the proxy/frontend.
+At least one screen is required for the public URL to render. Screen
+count is the true readiness signal; `isPublished=true` is necessary but
+not sufficient.
+
+### Story link — verified
+
+`POST /workspaces/:ws/stories/:sid/links` with `{name: "probe-v2-link"}` →
+**200**, body:
+```json
+{
+  "_id": "bBjyadP5PqbeXAxLyFR798",     // short-uuid, NOT ObjectId — confirmed from Link schema
+  "name": "probe-v2-link",
+  "workspaceId": "69ea79a8d7a9e7a66f4a784c",
+  "storyId": "69eab570d1622a2b258fc350",
+  "variables": [],
+  "createdAt": "2026-04-24T00:14:06.579Z",
+  "updatedAt": "2026-04-24T00:14:06.579Z",
+  "__v": 0
+}
+```
+
+### Workspace doc — confirmed shape (re-captured, matches prior session)
+
+Same as last session's bootstrap Step 3 capture. No drift.
+
+### AuthToken doc — confirmed shape
+
+```json
+{
+  "_id": ObjectId(...),
+  "token": "<64-hex>",           // [REDACTED in output]
+  "type": "AuthToken_User",
+  "status": "active",
+  "userId": "69ea6d7d10a3c3c5d93195b3",  // note: stored as STRING, not ObjectId
+  "clientId": "publicClient",
+  "authorizedInstances": [],
+  "scopes": [],
+  "createdAt": "...", "updatedAt": "..."
+}
+```
+
+**No `expiresAt` field. `authtokens` collection has no TTL index** —
+verified by `db.authtokens.indexes()` output (see below).
+
+### Indexes — fully captured
+
+| Collection | Indexes |
+|---|---|
+| `users` | `_id_`, `email_1` (**unique**) |
+| `authtokens` | `_id_`, `token_1` (**unique**) — **NO TTL** |
+| `workspaces` | `_id_` only |
+| `stories` | `_id_` only |
+| `screens` | `_id_` only — **no index on storyId** (query perf concern at scale) |
+| `forms`, `leads`, `sessions`, `sessionevents`, `links`, `publishedlivedemos`, `livedemos`, `demoactivityevents`, `audios`, `autorecordings` | `_id_` only |
+| `cursorpositions` | `_id_`, `storyId_1` |
+
+### Collections — full list from `db.listCollections()`
+
+```
+audios, authtokens, autorecordingevents, autorecordings, cards, charges,
+configs, contents, cursorpositions, demoactivityevents, demosuggestions,
+emails, forms, hubspottokens, jobs, jobs-monq, leads, links, livedemos,
+monq_resume_tokens, publishedlivedemos, requests, screens, screensteps,
+screentransitions, scripts, sessionevents, sessions, stepaudios, steps,
+stories, storycontents, subscriptions, tours, tutorials, users,
+workspacemembers, workspaces, zoomspanscreenshots, zoomspanvideos
+```
+
+**Surprise:** both `steps` and `screensteps` collections exist as
+physical collections (both count 0). Source code creates steps
+**embedded** in `screens.steps[]` only — so these two collections must
+be legacy/vestigial. Safe to ignore; document as such.
+
+### Raw output
+
+Full JSON at `docs/_probe-v2-partial-raw.json` (committed for reference).
+Partial probe script at `scripts/probe-v2-partial.js`. Original (failed)
+probe at `scripts/probe-v2.js`.
+
+### Probe story left in place (per directive)
+
+Not deleted — the empty published story `69eab570d1622a2b258fc350`
+remains in the `DK CoreTAP Demos` workspace for manual inspection. Its
+link `bBjyadP5PqbeXAxLyFR798` also remains. Because no screens exist,
+the public URL 404s — that's expected.
+
+---
+
 ## Cleanup / artifacts left on disk
 
 - `docs/_handlers-dump.txt` (2279 lines) — full bodies of critical handlers.

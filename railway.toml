@@ -1,0 +1,15 @@
+# livedemo-proxy — Docker context is proxy/ (player + Caddy + inject live there)
+#
+# Railway often sets Root Directory to "proxy" for this service. The build
+# snapshot is then proxy/** only — player sources must live under proxy/player/
+# and COPY paths in proxy/Dockerfile must be relative to proxy/ (not repo root).
+#
+# Local: docker build -f proxy/Dockerfile proxy
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "proxy/Dockerfile"
+dockerContext = "proxy"
+
+[deploy]
+restartPolicyType = "ON_FAILURE"

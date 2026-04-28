@@ -1,0 +1,112 @@
+[
+  {
+    "ts": 1777164669047,
+    "type": "log",
+    "text": "set inner values - 1232 x 752",
+    "location": {
+      "url": "https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js",
+      "lineNumber": 1,
+      "columnNumber": 4578010
+    }
+  },
+  {
+    "ts": 1777164669054,
+    "type": "log",
+    "text": "set inner values - 1232 x 752",
+    "location": {
+      "url": "https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js",
+      "lineNumber": 1,
+      "columnNumber": 4578010
+    }
+  },
+  {
+    "ts": 1777164669071,
+    "type": "log",
+    "text": "set inner values - 1232 x 752",
+    "location": {
+      "url": "https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js",
+      "lineNumber": 1,
+      "columnNumber": 4578010
+    }
+  },
+  {
+    "ts": 1777164669358,
+    "type": "log",
+    "text": "step audio",
+    "location": {
+      "url": "https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js",
+      "lineNumber": 1,
+      "columnNumber": 4559215
+    }
+  },
+  {
+    "ts": 1777164669358,
+    "type": "log",
+    "text": "currentStep.stepAudioId",
+    "location": {
+      "url": "https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js",
+      "lineNumber": 1,
+      "columnNumber": 4559241
+    }
+  },
+  {
+    "ts": 1777164669358,
+    "type": "log",
+    "text": "null",
+    "location": {
+      "url": "https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js",
+      "lineNumber": 1,
+      "columnNumber": 4559280
+    }
+  },
+  {
+    "ts": 1777164669358,
+    "type": "log",
+    "text": "p: 0.0068359375 ms",
+    "location": {
+      "url": "https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js",
+      "lineNumber": 1,
+      "columnNumber": 4559629
+    }
+  },
+  {
+    "ts": 1777164669359,
+    "type": "log",
+    "text": "beforeChangeStep",
+    "location": {
+      "url": "https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js",
+      "lineNumber": 1,
+      "columnNumber": 4568391
+    }
+  },
+  {
+    "ts": 1777164669359,
+    "type": "log",
+    "text": "middlePromise",
+    "location": {
+      "url": "https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js",
+      "lineNumber": 1,
+      "columnNumber": 4559688
+    }
+  },
+  {
+    "ts": 1777164669367,
+    "type": "log",
+    "text": "set inner values - 1232 x 752",
+    "location": {
+      "url": "https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js",
+      "lineNumber": 1,
+      "columnNumber": 4578010
+    }
+  },
+  {
+    "ts": 1777164669500,
+    "type": "error",
+    "text": "Failed to load resource: the server responded with a status of 500 ()",
+    "location": {
+      "url": "https://story-api.livedemo.ai/workspaces/69ea79a8d7a9e7a66f4a784c/stories/69ec68ec3f18e64100767017/screens/69ec68ec3f18e6410076701d/preview",
+      "lineNumber": 0,
+      "columnNumber": 0
+    }
+  }
+]

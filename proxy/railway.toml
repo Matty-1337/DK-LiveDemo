@@ -1,3 +1,6 @@
+# Used when livedemo-proxy Root Directory = "proxy" (common for monorepo services).
+# Docker context is this directory; see proxy/Dockerfile.
+
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"

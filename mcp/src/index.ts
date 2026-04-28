@@ -10,13 +10,20 @@ import { McpTool } from './lib/tool.js';
 import { zodToJsonSchema } from './lib/tool.js';
 import { demoTools } from './tools/demos.js';
 import { stepTools } from './tools/steps.js';
-import { templateTools } from './tools/templates.js';
 import { analyticsTools } from './tools/analytics.js';
+import { catalogTools } from './tools/catalog.js';
+import { statusTools } from './tools/status.js';
+import { generateTools } from './tools/generate.js';
 
 const ALL_TOOLS: McpTool[] = [
+  // Strategy C primary surface — put these first so they show up first
+  // in tools/list responses.
+  ...generateTools,
+  ...catalogTools,
+  ...statusTools,
+  // CRUD/analytics surface for direct manipulation + observability.
   ...demoTools,
   ...stepTools,
-  ...templateTools,
   ...analyticsTools,
 ];
 
@@ -68,7 +75,7 @@ function buildMcpServer(): Server {
 }
 
 const PORT = Number(process.env.PORT ?? 3100);
-const API_URL = process.env.LIVEDEMO_API_URL ?? 'http://livedemo-backend:3005';
+const API_URL = process.env.LIVEDEMO_API_URL ?? 'http://livedemo-backend.railway.internal:3005';
 
 // Track active SSE transports by sessionId so POST /messages can route to them.
 const transports = new Map<string, SSEServerTransport>();

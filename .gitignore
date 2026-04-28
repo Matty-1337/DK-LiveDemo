@@ -34,9 +34,11 @@ Thumbs.db
 *.swo
 
 # Local notes / per-machine state
-HANDOFF.md
 CLAUDE.md
 .cursor/hooks/state/
+
+# Claude Code local lockfiles
+.claude/
 
 # Coverage / cache
 coverage/
@@ -53,3 +55,7 @@ infisical-config.json
 
 # Docker
 *.tar
+browser/src/scripts/output/
+
+# Legacy staging dir (removed); never commit pre-built player blobs
+proxy/player-dist/

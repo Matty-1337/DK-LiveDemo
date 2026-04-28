@@ -1,0 +1,8 @@
+[
+  {
+    "ts": 1777135184665,
+    "name": "Error",
+    "message": "Minified React error #299; visit https://reactjs.org/docs/error-decoder.html?invariant=299 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+    "stack": "Error: Minified React error #299; visit https://reactjs.org/docs/error-decoder.html?invariant=299 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\n    at t.createRoot (https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js:2:727296)\n    at lY (https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js:2:4596601)\n    at https://livedemo-cdn.s3.us-east-1.amazonaws.com/static/injectScript.bundle.js:2:4597773"
+  }
+]

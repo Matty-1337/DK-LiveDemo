@@ -3,6 +3,8 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install --no-audit --no-fund
 COPY tsconfig.json ./
+COPY config ./config
+COPY scripts ./scripts
 COPY src ./src
 RUN npm run build
 
@@ -14,6 +16,7 @@ RUN addgroup -S app && adduser -S app -G app
 COPY package.json package-lock.json* ./
 RUN npm install --omit=dev --no-audit --no-fund && npm cache clean --force
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/config ./config
 USER app
 EXPOSE 3100
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \

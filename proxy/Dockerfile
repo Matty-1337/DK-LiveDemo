@@ -1,17 +1,34 @@
 # =============================================================
-# Delta Kinetics — LiveDemo Brand Proxy (Caddy)
-# Injects DK CSS branding into LiveDemo frontend responses
-# Requires caddy-replace-response plugin (built via xcaddy)
+# Delta Kinetics — LiveDemo edge proxy + DK Player static host
+#
+# Build context MUST be the proxy/ directory (see railway.toml):
+#   docker build -f proxy/Dockerfile proxy
+#
+# That layout lets Railway use Root Directory = "proxy" (snapshot is
+# proxy/** only) while still building the Vite app from proxy/player/.
 # =============================================================
 
-FROM caddy:2-builder-alpine AS builder
-RUN xcaddy build --with github.com/caddyserver/replace-response
+# --- Stage 1: Build the player SPA ---
+FROM node:20-alpine AS player-build
+WORKDIR /app
+COPY player/package.json player/package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY player/ ./
+RUN npm run build
 
+# --- Stage 2: Caddy with static assets ---
 FROM caddy:2-alpine
-COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 RUN apk add --no-cache curl
-COPY Caddyfile /etc/caddy/Caddyfile
+
+# Static SPA (built in stage 1).
+COPY --from=player-build /app/dist/ /srv/player/
+
+# Brand CSS (kept as a static asset for back-compat).
 COPY inject/ /srv/inject/
+
+# Caddy config.
+COPY Caddyfile /etc/caddy/Caddyfile
+
 EXPOSE 80
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -f "http://localhost:${PORT:-80}/caddy-health" || exit 1

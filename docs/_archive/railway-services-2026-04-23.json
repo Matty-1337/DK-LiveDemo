@@ -1,0 +1,808 @@
+{
+  "id": "df0626c1-9a73-45b3-b73a-911a0e2a823e",
+  "name": "DK-LiveDemo",
+  "deletedAt": null,
+  "workspace": {
+    "name": "matty-1337's Projects"
+  },
+  "buckets": {
+    "edges": []
+  },
+  "environments": {
+    "edges": [
+      {
+        "node": {
+          "id": "f8c0a159-3d31-4634-9958-faf6f210fb02",
+          "name": "production",
+          "canAccess": true,
+          "deletedAt": null,
+          "unmergedChangesCount": null,
+          "serviceInstances": {
+            "edges": [
+              {
+                "node": {
+                  "id": "64f9fba0-08b0-4a37-aade-2e7b9e2acb81",
+                  "serviceId": "579efef2-645e-4ee3-98b0-561bfda0222d",
+                  "serviceName": "livedemo-proxy",
+                  "environmentId": "f8c0a159-3d31-4634-9958-faf6f210fb02",
+                  "latestDeployment": {
+                    "canRedeploy": true,
+                    "id": "1a2cd64c-fa7c-44bd-abcb-e519cca942ca",
+                    "meta": {
+                      "buildOnly": false,
+                      "configFile": "railway.toml",
+                      "fileServiceManifest": {
+                        "build": {
+                          "builder": "DOCKERFILE",
+                          "dockerfilePath": "Dockerfile"
+                        },
+                        "deploy": {
+                          "restartPolicyType": "ON_FAILURE"
+                        }
+                      },
+                      "ignoreWatchPatterns": true,
+                      "imageDigest": "sha256:0712bb13bdcf155b723bd0934ed4d3fa41fbd2438027f67eda3644253eb3c681",
+                      "logsV2": true,
+                      "nixpacksProviders": [],
+                      "propertyFileMapping": {
+                        "build.builder": "$.build.builder",
+                        "build.dockerContext": "$.build.dockerContext",
+                        "build.dockerfilePath": "$.build.dockerfilePath",
+                        "deploy.restartPolicyType": "$.deploy.restartPolicyType"
+                      },
+                      "reason": "redeploy",
+                      "rootDirectory": null,
+                      "runtime": "V2",
+                      "serviceManifest": {
+                        "build": {
+                          "buildCommand": null,
+                          "buildEnvironment": null,
+                          "builder": "DOCKERFILE",
+                          "dockerfilePath": "Dockerfile",
+                          "nixpacksConfigPath": null,
+                          "nixpacksPlan": null,
+                          "watchPatterns": []
+                        },
+                        "deploy": {
+                          "cronSchedule": null,
+                          "drainingSeconds": null,
+                          "healthcheckPath": null,
+                          "healthcheckTimeout": null,
+                          "ipv6EgressEnabled": false,
+                          "limitOverride": null,
+                          "multiRegionConfig": {
+                            "us-west2": {
+                              "numReplicas": 1
+                            }
+                          },
+                          "numReplicas": 1,
+                          "overlapSeconds": null,
+                          "preDeployCommand": null,
+                          "region": null,
+                          "registryCredentials": null,
+                          "requiredMountPath": null,
+                          "restartPolicyMaxRetries": 10,
+                          "restartPolicyType": "ON_FAILURE",
+                          "runtime": "V2",
+                          "sleepApplication": false,
+                          "startCommand": null,
+                          "useLegacyStacker": false
+                        }
+                      },
+                      "skipBuildCache": true,
+                      "volumeMounts": []
+                    },
+                    "status": "SUCCESS",
+                    "createdAt": "2026-04-23T05:27:23.710Z",
+                    "deploymentStopped": false
+                  },
+                  "activeDeployments": [
+                    {
+                      "id": "1a2cd64c-fa7c-44bd-abcb-e519cca942ca",
+                      "status": "SUCCESS",
+                      "createdAt": "2026-04-23T05:27:23.710Z",
+                      "meta": {
+                        "buildOnly": false,
+                        "configFile": "railway.toml",
+                        "fileServiceManifest": {
+                          "build": {
+                            "builder": "DOCKERFILE",
+                            "dockerfilePath": "Dockerfile"
+                          },
+                          "deploy": {
+                            "restartPolicyType": "ON_FAILURE"
+                          }
+                        },
+                        "ignoreWatchPatterns": true,
+                        "imageDigest": "sha256:0712bb13bdcf155b723bd0934ed4d3fa41fbd2438027f67eda3644253eb3c681",
+                        "logsV2": true,
+                        "nixpacksProviders": [],
+                        "propertyFileMapping": {
+                          "build.builder": "$.build.builder",
+                          "build.dockerContext": "$.build.dockerContext",
+                          "build.dockerfilePath": "$.build.dockerfilePath",
+                          "deploy.restartPolicyType": "$.deploy.restartPolicyType"
+                        },
+                        "reason": "redeploy",
+                        "rootDirectory": null,
+                        "runtime": "V2",
+                        "serviceManifest": {
+                          "build": {
+                            "buildCommand": null,
+                            "buildEnvironment": null,
+                            "builder": "DOCKERFILE",
+                            "dockerfilePath": "Dockerfile",
+                            "nixpacksConfigPath": null,
+                            "nixpacksPlan": null,
+                            "watchPatterns": []
+                          },
+                          "deploy": {
+                            "cronSchedule": null,
+                            "drainingSeconds": null,
+                            "healthcheckPath": null,
+                            "healthcheckTimeout": null,
+                            "ipv6EgressEnabled": false,
+                            "limitOverride": null,
+                            "multiRegionConfig": {
+                              "us-west2": {
+                                "numReplicas": 1
+                              }
+                            },
+                            "numReplicas": 1,
+                            "overlapSeconds": null,
+                            "preDeployCommand": null,
+                            "region": null,
+                            "registryCredentials": null,
+                            "requiredMountPath": null,
+                            "restartPolicyMaxRetries": 10,
+                            "restartPolicyType": "ON_FAILURE",
+                            "runtime": "V2",
+                            "sleepApplication": false,
+                            "startCommand": null,
+                            "useLegacyStacker": false
+                          }
+                        },
+                        "skipBuildCache": true,
+                        "volumeMounts": []
+                      }
+                    }
+                  ],
+                  "source": {
+                    "repo": null,
+                    "image": null
+                  },
+                  "domains": {
+                    "serviceDomains": [
+                      {
+                        "id": "a3d3657d-2467-4ae6-99f4-89af3d51932d",
+                        "domain": "livedemo-proxy-production.up.railway.app",
+                        "targetPort": null
+                      }
+                    ],
+                    "customDomains": []
+                  },
+                  "cronSchedule": null,
+                  "nextCronRunAt": null,
+                  "startCommand": null
+                }
+              },
+              {
+                "node": {
+                  "id": "66647f55-8a47-4325-82e7-0a39f28c87c6",
+                  "serviceId": "594e3b2d-c95b-4506-9f69-aecaa221915e",
+                  "serviceName": "livedemo-backend",
+                  "environmentId": "f8c0a159-3d31-4634-9958-faf6f210fb02",
+                  "latestDeployment": {
+                    "canRedeploy": true,
+                    "id": "84bc2958-3554-4987-a3fa-d541ef03369c",
+                    "meta": {
+                      "duration": 21,
+                      "ignoreWatchPatterns": true,
+                      "image": "docker.io/livedemo/livedemo-backend:latest",
+                      "imageDigest": "sha256:6e63e427ac9f602a9057f6d20c2a0094b2e849c33b75c4d69b0eac85b05a43bb",
+                      "logsV2": true,
+                      "patchId": "967c68f0-f9c2-4998-ad28-2dfeb9472257",
+                      "reason": "redeploy",
+                      "runtime": "V2",
+                      "serviceManifest": {
+                        "build": {
+                          "buildCommand": null,
+                          "buildEnvironment": null,
+                          "builder": "RAILPACK",
+                          "dockerfilePath": null,
+                          "nixpacksConfigPath": null,
+                          "nixpacksPlan": null,
+                          "watchPatterns": []
+                        },
+                        "deploy": {
+                          "cronSchedule": null,
+                          "drainingSeconds": null,
+                          "healthcheckPath": null,
+                          "healthcheckTimeout": null,
+                          "ipv6EgressEnabled": false,
+                          "limitOverride": null,
+                          "multiRegionConfig": {
+                            "us-west2": {
+                              "numReplicas": 1
+                            }
+                          },
+                          "numReplicas": 1,
+                          "overlapSeconds": null,
+                          "preDeployCommand": null,
+                          "region": null,
+                          "registryCredentials": null,
+                          "requiredMountPath": null,
+                          "restartPolicyMaxRetries": 10,
+                          "restartPolicyType": "ON_FAILURE",
+                          "runtime": "V2",
+                          "sleepApplication": false,
+                          "startCommand": null,
+                          "useLegacyStacker": false
+                        }
+                      },
+                      "skipBuildCache": true,
+                      "volumeMounts": []
+                    },
+                    "status": "SUCCESS",
+                    "createdAt": "2026-04-23T10:05:14.711Z",
+                    "deploymentStopped": true
+                  },
+                  "activeDeployments": [
+                    {
+                      "id": "84bc2958-3554-4987-a3fa-d541ef03369c",
+                      "status": "SUCCESS",
+                      "createdAt": "2026-04-23T10:05:14.711Z",
+                      "meta": {
+                        "duration": 21,
+                        "ignoreWatchPatterns": true,
+                        "image": "docker.io/livedemo/livedemo-backend:latest",
+                        "imageDigest": "sha256:6e63e427ac9f602a9057f6d20c2a0094b2e849c33b75c4d69b0eac85b05a43bb",
+                        "logsV2": true,
+                        "patchId": "967c68f0-f9c2-4998-ad28-2dfeb9472257",
+                        "reason": "redeploy",
+                        "runtime": "V2",
+                        "serviceManifest": {
+                          "build": {
+                            "buildCommand": null,
+                            "buildEnvironment": null,
+                            "builder": "RAILPACK",
+                            "dockerfilePath": null,
+                            "nixpacksConfigPath": null,
+                            "nixpacksPlan": null,
+                            "watchPatterns": []
+                          },
+                          "deploy": {
+                            "cronSchedule": null,
+                            "drainingSeconds": null,
+                            "healthcheckPath": null,
+                            "healthcheckTimeout": null,
+                            "ipv6EgressEnabled": false,
+                            "limitOverride": null,
+                            "multiRegionConfig": {
+                              "us-west2": {
+                                "numReplicas": 1
+                              }
+                            },
+                            "numReplicas": 1,
+                            "overlapSeconds": null,
+                            "preDeployCommand": null,
+                            "region": null,
+                            "registryCredentials": null,
+                            "requiredMountPath": null,
+                            "restartPolicyMaxRetries": 10,
+                            "restartPolicyType": "ON_FAILURE",
+                            "runtime": "V2",
+                            "sleepApplication": false,
+                            "startCommand": null,
+                            "useLegacyStacker": false
+                          }
+                        },
+                        "skipBuildCache": true,
+                        "volumeMounts": []
+                      }
+                    }
+                  ],
+                  "source": {
+                    "repo": null,
+                    "image": "docker.io/livedemo/livedemo-backend:latest"
+                  },
+                  "domains": {
+                    "serviceDomains": [],
+                    "customDomains": []
+                  },
+                  "cronSchedule": null,
+                  "nextCronRunAt": null,
+                  "startCommand": null
+                }
+              },
+              {
+                "node": {
+                  "id": "68e44873-cd6e-49b6-88ff-c43f92d54925",
+                  "serviceId": "083b923b-df58-4233-a57f-5755bf3fefad",
+                  "serviceName": "livedemo-frontend",
+                  "environmentId": "f8c0a159-3d31-4634-9958-faf6f210fb02",
+                  "latestDeployment": {
+                    "canRedeploy": true,
+                    "id": "72801f8d-65ec-4f83-8d6c-cb7d10de3a26",
+                    "meta": {
+                      "ignoreWatchPatterns": true,
+                      "image": "docker.io/livedemo/livedemo-web-app:latest",
+                      "imageDigest": "sha256:65c821ebb1dccc2dc3acf966e101256bb57a6a529f1a24913153056cf434b353",
+                      "logsV2": true,
+                      "patchId": "8277b172-3b7c-43ff-8839-7b035587f852",
+                      "reason": "redeploy",
+                      "runtime": "V2",
+                      "serviceManifest": {
+                        "build": {
+                          "buildCommand": null,
+                          "buildEnvironment": null,
+                          "builder": "RAILPACK",
+                          "dockerfilePath": null,
+                          "nixpacksConfigPath": null,
+                          "nixpacksPlan": null,
+                          "watchPatterns": []
+                        },
+                        "deploy": {
+                          "cronSchedule": null,
+                          "drainingSeconds": null,
+                          "healthcheckPath": null,
+                          "healthcheckTimeout": null,
+                          "ipv6EgressEnabled": false,
+                          "limitOverride": null,
+                          "multiRegionConfig": {
+                            "us-west2": {
+                              "numReplicas": 1
+                            }
+                          },
+                          "numReplicas": 1,
+                          "overlapSeconds": null,
+                          "preDeployCommand": null,
+                          "region": null,
+                          "registryCredentials": null,
+                          "requiredMountPath": null,
+                          "restartPolicyMaxRetries": 10,
+                          "restartPolicyType": "ON_FAILURE",
+                          "runtime": "V2",
+                          "sleepApplication": false,
+                          "startCommand": null,
+                          "useLegacyStacker": false
+                        }
+                      },
+                      "skipBuildCache": true,
+                      "volumeMounts": []
+                    },
+                    "status": "SUCCESS",
+                    "createdAt": "2026-04-23T09:58:36.442Z",
+                    "deploymentStopped": false
+                  },
+                  "activeDeployments": [
+                    {
+                      "id": "72801f8d-65ec-4f83-8d6c-cb7d10de3a26",
+                      "status": "SUCCESS",
+                      "createdAt": "2026-04-23T09:58:36.442Z",
+                      "meta": {
+                        "ignoreWatchPatterns": true,
+                        "image": "docker.io/livedemo/livedemo-web-app:latest",
+                        "imageDigest": "sha256:65c821ebb1dccc2dc3acf966e101256bb57a6a529f1a24913153056cf434b353",
+                        "logsV2": true,
+                        "patchId": "8277b172-3b7c-43ff-8839-7b035587f852",
+                        "reason": "redeploy",
+                        "runtime": "V2",
+                        "serviceManifest": {
+                          "build": {
+                            "buildCommand": null,
+                            "buildEnvironment": null,
+                            "builder": "RAILPACK",
+                            "dockerfilePath": null,
+                            "nixpacksConfigPath": null,
+                            "nixpacksPlan": null,
+                            "watchPatterns": []
+                          },
+                          "deploy": {
+                            "cronSchedule": null,
+                            "drainingSeconds": null,
+                            "healthcheckPath": null,
+                            "healthcheckTimeout": null,
+                            "ipv6EgressEnabled": false,
+                            "limitOverride": null,
+                            "multiRegionConfig": {
+                              "us-west2": {
+                                "numReplicas": 1
+                              }
+                            },
+                            "numReplicas": 1,
+                            "overlapSeconds": null,
+                            "preDeployCommand": null,
+                            "region": null,
+                            "registryCredentials": null,
+                            "requiredMountPath": null,
+                            "restartPolicyMaxRetries": 10,
+                            "restartPolicyType": "ON_FAILURE",
+                            "runtime": "V2",
+                            "sleepApplication": false,
+                            "startCommand": null,
+                            "useLegacyStacker": false
+                          }
+                        },
+                        "skipBuildCache": true,
+                        "volumeMounts": []
+                      }
+                    }
+                  ],
+                  "source": {
+                    "repo": null,
+                    "image": null
+                  },
+                  "domains": {
+                    "serviceDomains": [],
+                    "customDomains": []
+                  },
+                  "cronSchedule": null,
+                  "nextCronRunAt": null,
+                  "startCommand": null
+                }
+              },
+              {
+                "node": {
+                  "id": "6db3ba44-3b0b-4836-bb55-041ef02ac46c",
+                  "serviceId": "dc756cc5-3cf2-47bd-b463-6c8028f614a0",
+                  "serviceName": "livedemo-mcp",
+                  "environmentId": "f8c0a159-3d31-4634-9958-faf6f210fb02",
+                  "latestDeployment": {
+                    "canRedeploy": true,
+                    "id": "a0c8e1ac-0a36-4c5a-8541-0d4e50cb830d",
+                    "meta": {
+                      "buildOnly": false,
+                      "configFile": "railway.toml",
+                      "fileServiceManifest": {
+                        "build": {
+                          "builder": "DOCKERFILE",
+                          "dockerfilePath": "Dockerfile"
+                        },
+                        "deploy": {
+                          "healthcheckPath": "/health",
+                          "healthcheckTimeout": 30,
+                          "restartPolicyType": "ON_FAILURE",
+                          "startCommand": "node dist/index.js"
+                        }
+                      },
+                      "imageDigest": "sha256:6a61c058d67c5e7219bf842c27bc4b7a086274a84388e4cc0043c79a2a92364a",
+                      "logsV2": true,
+                      "nixpacksProviders": [
+                        "node"
+                      ],
+                      "propertyFileMapping": {
+                        "build.builder": "$.build.builder",
+                        "build.dockerContext": "$.build.dockerContext",
+                        "build.dockerfilePath": "$.build.dockerfilePath",
+                        "deploy.healthcheckPath": "$.deploy.healthcheckPath",
+                        "deploy.healthcheckTimeout": "$.deploy.healthcheckTimeout",
+                        "deploy.restartPolicyType": "$.deploy.restartPolicyType",
+                        "deploy.startCommand": "$.deploy.startCommand"
+                      },
+                      "reason": "deploy",
+                      "rootDirectory": null,
+                      "runtime": "V2",
+                      "serviceManifest": {
+                        "build": {
+                          "buildCommand": null,
+                          "buildEnvironment": null,
+                          "builder": "DOCKERFILE",
+                          "dockerfilePath": "Dockerfile",
+                          "nixpacksConfigPath": null,
+                          "nixpacksPlan": null,
+                          "watchPatterns": []
+                        },
+                        "deploy": {
+                          "cronSchedule": null,
+                          "drainingSeconds": null,
+                          "healthcheckPath": "/health",
+                          "healthcheckTimeout": 30,
+                          "ipv6EgressEnabled": false,
+                          "limitOverride": null,
+                          "multiRegionConfig": {
+                            "us-west2": {
+                              "numReplicas": 1
+                            }
+                          },
+                          "numReplicas": 1,
+                          "overlapSeconds": null,
+                          "preDeployCommand": null,
+                          "region": null,
+                          "registryCredentials": null,
+                          "requiredMountPath": null,
+                          "restartPolicyMaxRetries": 10,
+                          "restartPolicyType": "ON_FAILURE",
+                          "runtime": "V2",
+                          "sleepApplication": false,
+                          "startCommand": "node dist/index.js",
+                          "useLegacyStacker": false
+                        }
+                      },
+                      "volumeMounts": []
+                    },
+                    "status": "SUCCESS",
+                    "createdAt": "2026-04-23T05:29:34.309Z",
+                    "deploymentStopped": false
+                  },
+                  "activeDeployments": [
+                    {
+                      "id": "a0c8e1ac-0a36-4c5a-8541-0d4e50cb830d",
+                      "status": "SUCCESS",
+                      "createdAt": "2026-04-23T05:29:34.309Z",
+                      "meta": {
+                        "buildOnly": false,
+                        "configFile": "railway.toml",
+                        "fileServiceManifest": {
+                          "build": {
+                            "builder": "DOCKERFILE",
+                            "dockerfilePath": "Dockerfile"
+                          },
+                          "deploy": {
+                            "healthcheckPath": "/health",
+                            "healthcheckTimeout": 30,
+                            "restartPolicyType": "ON_FAILURE",
+                            "startCommand": "node dist/index.js"
+                          }
+                        },
+                        "imageDigest": "sha256:6a61c058d67c5e7219bf842c27bc4b7a086274a84388e4cc0043c79a2a92364a",
+                        "logsV2": true,
+                        "nixpacksProviders": [
+                          "node"
+                        ],
+                        "propertyFileMapping": {
+                          "build.builder": "$.build.builder",
+                          "build.dockerContext": "$.build.dockerContext",
+                          "build.dockerfilePath": "$.build.dockerfilePath",
+                          "deploy.healthcheckPath": "$.deploy.healthcheckPath",
+                          "deploy.healthcheckTimeout": "$.deploy.healthcheckTimeout",
+                          "deploy.restartPolicyType": "$.deploy.restartPolicyType",
+                          "deploy.startCommand": "$.deploy.startCommand"
+                        },
+                        "reason": "deploy",
+                        "rootDirectory": null,
+                        "runtime": "V2",
+                        "serviceManifest": {
+                          "build": {
+                            "buildCommand": null,
+                            "buildEnvironment": null,
+                            "builder": "DOCKERFILE",
+                            "dockerfilePath": "Dockerfile",
+                            "nixpacksConfigPath": null,
+                            "nixpacksPlan": null,
+                            "watchPatterns": []
+                          },
+                          "deploy": {
+                            "cronSchedule": null,
+                            "drainingSeconds": null,
+                            "healthcheckPath": "/health",
+                            "healthcheckTimeout": 30,
+                            "ipv6EgressEnabled": false,
+                            "limitOverride": null,
+                            "multiRegionConfig": {
+                              "us-west2": {
+                                "numReplicas": 1
+                              }
+                            },
+                            "numReplicas": 1,
+                            "overlapSeconds": null,
+                            "preDeployCommand": null,
+                            "region": null,
+                            "registryCredentials": null,
+                            "requiredMountPath": null,
+                            "restartPolicyMaxRetries": 10,
+                            "restartPolicyType": "ON_FAILURE",
+                            "runtime": "V2",
+                            "sleepApplication": false,
+                            "startCommand": "node dist/index.js",
+                            "useLegacyStacker": false
+                          }
+                        },
+                        "volumeMounts": []
+                      }
+                    }
+                  ],
+                  "source": {
+                    "repo": null,
+                    "image": null
+                  },
+                  "domains": {
+                    "serviceDomains": [
+                      {
+                        "id": "c1c9faae-16a1-43be-a2c9-09a36683c003",
+                        "domain": "livedemo-mcp-production.up.railway.app",
+                        "targetPort": null
+                      }
+                    ],
+                    "customDomains": []
+                  },
+                  "cronSchedule": null,
+                  "nextCronRunAt": null,
+                  "startCommand": null
+                }
+              },
+              {
+                "node": {
+                  "id": "88321204-c585-4943-a182-0419df22ec1a",
+                  "serviceId": "864289d4-7c59-401d-84af-797576dbe6d1",
+                  "serviceName": "livedemo-mongo",
+                  "environmentId": "f8c0a159-3d31-4634-9958-faf6f210fb02",
+                  "latestDeployment": {
+                    "canRedeploy": true,
+                    "id": "1531ab43-f059-4e93-b570-6b1d42921ff7",
+                    "meta": {
+                      "image": "mongo:8",
+                      "imageDigest": "sha256:7abfba0d07c9330373f8173981ea4d09cd8a82cdf0e86ccaf7008848d1d24f62",
+                      "logsV2": true,
+                      "patchId": "bccdec54-8b58-4c9e-a656-0cd4820e2639",
+                      "reason": "deploy",
+                      "runtime": "V2",
+                      "serviceManifest": {
+                        "build": {
+                          "buildCommand": null,
+                          "buildEnvironment": null,
+                          "builder": "RAILPACK",
+                          "dockerfilePath": null,
+                          "nixpacksConfigPath": null,
+                          "nixpacksPlan": null,
+                          "watchPatterns": []
+                        },
+                        "deploy": {
+                          "cronSchedule": null,
+                          "drainingSeconds": null,
+                          "healthcheckPath": null,
+                          "healthcheckTimeout": null,
+                          "ipv6EgressEnabled": false,
+                          "limitOverride": null,
+                          "multiRegionConfig": {
+                            "us-west2": {
+                              "numReplicas": 1
+                            }
+                          },
+                          "numReplicas": 1,
+                          "overlapSeconds": null,
+                          "preDeployCommand": null,
+                          "region": null,
+                          "registryCredentials": null,
+                          "requiredMountPath": null,
+                          "restartPolicyMaxRetries": 10,
+                          "restartPolicyType": "ON_FAILURE",
+                          "runtime": "V2",
+                          "sleepApplication": false,
+                          "startCommand": "mongod --replSet rs0 --bind_ip_all",
+                          "useLegacyStacker": false
+                        }
+                      },
+                      "volumeMounts": [
+                        "/data/db"
+                      ]
+                    },
+                    "status": "SUCCESS",
+                    "createdAt": "2026-04-23T10:04:24.038Z",
+                    "deploymentStopped": false
+                  },
+                  "activeDeployments": [
+                    {
+                      "id": "1531ab43-f059-4e93-b570-6b1d42921ff7",
+                      "status": "SUCCESS",
+                      "createdAt": "2026-04-23T10:04:24.038Z",
+                      "meta": {
+                        "image": "mongo:8",
+                        "imageDigest": "sha256:7abfba0d07c9330373f8173981ea4d09cd8a82cdf0e86ccaf7008848d1d24f62",
+                        "logsV2": true,
+                        "patchId": "bccdec54-8b58-4c9e-a656-0cd4820e2639",
+                        "reason": "deploy",
+                        "runtime": "V2",
+                        "serviceManifest": {
+                          "build": {
+                            "buildCommand": null,
+                            "buildEnvironment": null,
+                            "builder": "RAILPACK",
+                            "dockerfilePath": null,
+                            "nixpacksConfigPath": null,
+                            "nixpacksPlan": null,
+                            "watchPatterns": []
+                          },
+                          "deploy": {
+                            "cronSchedule": null,
+                            "drainingSeconds": null,
+                            "healthcheckPath": null,
+                            "healthcheckTimeout": null,
+                            "ipv6EgressEnabled": false,
+                            "limitOverride": null,
+                            "multiRegionConfig": {
+                              "us-west2": {
+                                "numReplicas": 1
+                              }
+                            },
+                            "numReplicas": 1,
+                            "overlapSeconds": null,
+                            "preDeployCommand": null,
+                            "region": null,
+                            "registryCredentials": null,
+                            "requiredMountPath": null,
+                            "restartPolicyMaxRetries": 10,
+                            "restartPolicyType": "ON_FAILURE",
+                            "runtime": "V2",
+                            "sleepApplication": false,
+                            "startCommand": "mongod --replSet rs0 --bind_ip_all",
+                            "useLegacyStacker": false
+                          }
+                        },
+                        "volumeMounts": [
+                          "/data/db"
+                        ]
+                      }
+                    }
+                  ],
+                  "source": {
+                    "repo": null,
+                    "image": "mongo:8"
+                  },
+                  "domains": {
+                    "serviceDomains": [],
+                    "customDomains": []
+                  },
+                  "cronSchedule": null,
+                  "nextCronRunAt": null,
+                  "startCommand": "mongod --replSet rs0 --bind_ip_all"
+                }
+              }
+            ]
+          },
+          "volumeInstances": {
+            "edges": [
+              {
+                "node": {
+                  "serviceId": "864289d4-7c59-401d-84af-797576dbe6d1",
+                  "mountPath": "/data/db",
+                  "environmentId": "f8c0a159-3d31-4634-9958-faf6f210fb02",
+                  "currentSizeMB": 0.0,
+                  "sizeMB": 50000,
+                  "volume": {
+                    "name": "livedemo-mongo-volume",
+                    "id": "9b34b19b-c31f-40aa-b2ee-90618da7c7d1"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "services": {
+    "edges": [
+      {
+        "node": {
+          "id": "083b923b-df58-4233-a57f-5755bf3fefad",
+          "name": "livedemo-frontend"
+        }
+      },
+      {
+        "node": {
+          "id": "579efef2-645e-4ee3-98b0-561bfda0222d",
+          "name": "livedemo-proxy"
+        }
+      },
+      {
+        "node": {
+          "id": "594e3b2d-c95b-4506-9f69-aecaa221915e",
+          "name": "livedemo-backend"
+        }
+      },
+      {
+        "node": {
+          "id": "864289d4-7c59-401d-84af-797576dbe6d1",
+          "name": "livedemo-mongo"
+        }
+      },
+      {
+        "node": {
+          "id": "dc756cc5-3cf2-47bd-b463-6c8028f614a0",
+          "name": "livedemo-mcp"
+        }
+      }
+    ]
+  }
+}

@@ -1,28 +1,31 @@
 # =============================================================
-# Delta Kinetics — LiveDemo Caddy Reverse Proxy
-# Injects DK brand CSS into every HTML response
-# Serves static brand assets from /srv/inject/
+# Delta Kinetics — LiveDemo edge proxy
+# - Serves the static DK player SPA at /livedemos/*
+# - Forwards /api/v1/demos/:storyId to the backend's public
+#   /preview/:storyId route (a 🌐 unauthenticated endpoint)
+# - Backend / frontend / mongo never touch the public internet
 # =============================================================
 
 {
-	# Global options
 	admin off
 	auto_https off
 }
 
 :{$PORT:80} {
-	# ── Logging ──────────────────────────────────────────────
 	log {
 		output stdout
 		format json
 		level INFO
 	}
 
-	# ── Compression ───────────────────────────────────────────
 	encode gzip zstd
 
-	# ── Serve brand CSS as static file ───────────────────────
-	# Must be declared BEFORE the reverse_proxy catch-all
+	# ── Health check (Railway uses this) ─────────────────────
+	handle /caddy-health {
+		respond "OK" 200
+	}
+
+	# ── Brand CSS (kept as a static asset for back-compat). ──
 	handle /dk-brand.css {
 		root * /srv/inject
 		file_server
@@ -30,25 +33,48 @@
 		header Content-Type "text/css; charset=utf-8"
 	}
 
-	# ── Health check endpoint (Railway uses this) ─────────────
-	handle /caddy-health {
-		respond "OK" 200
-	}
-
-	# ── Main reverse proxy with HTML head injection ───────────
-	# `replace` from caddy-replace-response streams through the upstream
-	# body and rewrites matches. Kept outside reverse_proxy so it acts
-	# as a post-handler (handle_response needs a terminal handler like
-	# copy_response to emit a modified body — simpler to skip that).
-	handle {
-		reverse_proxy livedemo-frontend.railway.internal:5000 {
+	# ── BFF: /api/v1/demos/:storyId → backend /preview/:storyId
+	#    Public route, no auth header required.
+	handle_path /api/v1/demos/* {
+		rewrite * /preview{path}
+		reverse_proxy livedemo-backend.railway.internal:3005 {
 			header_up Host {upstream_hostport}
 			header_up X-Real-IP {remote_host}
 			header_up X-Forwarded-For {remote_host}
 			header_up X-Forwarded-Proto {scheme}
 			header_down -Server
+			header_up Accept "application/json"
 		}
-		replace "</head>" "<link rel=\"stylesheet\" href=\"/dk-brand.css\" />\n</head>"
+	}
+
+	# ── Static DK player SPA ─────────────────────────────────
+	# All /livedemos/* paths serve index.html so client-side
+	# routing handles the :storyId param.
+	handle /livedemos/* {
+		root * /srv/player
+		try_files {path} /index.html
+		file_server
+	}
+
+	# ── Player static assets (Vite emits absolute /assets/* refs)
+	handle /assets/* {
+		root * /srv/player
+		file_server
+		header Cache-Control "public, max-age=31536000, immutable"
+	}
+
+	handle /favicon.svg {
+		root * /srv/player
+		file_server
+	}
+
+	# ── Root + everything else ────────────────────────────────
+	handle / {
+		respond "Delta Kinetics — Live Demo. Open a /livedemos/<id> URL." 200
+	}
+
+	handle {
+		respond "Not found" 404
 	}
 
 	# ── Security headers ──────────────────────────────────────
