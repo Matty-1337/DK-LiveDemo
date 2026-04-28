@@ -55,6 +55,17 @@ export interface CaptureResult {
 
 const HARD_TIMEOUT_MS = 120_000; // server-side cap per Strategy C §2
 
+/** IHDR width/height in physical pixels (matches Playwright PNG output with deviceScaleFactor). */
+function readPngDimensions(buf: Buffer): { width: number; height: number } {
+  if (buf.length < 24 || buf[0] !== 0x89) {
+    throw new Error('capture: screenshot is not a valid PNG');
+  }
+  return {
+    width: buf.readUInt32BE(16),
+    height: buf.readUInt32BE(20),
+  };
+}
+
 export async function runCapture(pool: BrowserPool, req: CaptureRequest): Promise<CaptureResult> {
   const start = Date.now();
   const soft = (req.timeoutSeconds ?? 90) * 1000;
@@ -84,8 +95,13 @@ export async function runCapture(pool: BrowserPool, req: CaptureRequest): Promis
       const hideList = [...defaultHide, ...(step.hideSelectors ?? [])];
       if (hideList.length) await hideElements(page, hideList);
 
-      const viewport = page.viewportSize() ?? { width: 1280, height: 800 };
-      const pngBuf = await page.screenshot({ fullPage: true, type: 'png' });
+      const pngBuf = await page.screenshot({
+        fullPage: true,
+        type: 'png',
+        omitBackground: false,
+        animations: 'disabled',
+      });
+      const { width, height } = readPngDimensions(pngBuf);
       const pngBase64 = pngBuf.toString('base64');
       const html = await page.content();
       const pageTitle = await page.title();
@@ -93,8 +109,8 @@ export async function runCapture(pool: BrowserPool, req: CaptureRequest): Promis
       screens.push({
         html,
         pngBase64,
-        width: viewport.width,
-        height: viewport.height,
+        width,
+        height,
         pageTitle,
         capturedAt: new Date().toISOString(),
         source: { path: step.path, note: step.note },

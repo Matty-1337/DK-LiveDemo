@@ -124,7 +124,10 @@ export class BrowserPool {
       this.release(slot);
       throw new Error(`pool.withContext: slot ${slot.id} has no browser`);
     }
-    const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    const ctx = await browser.newContext({
+      viewport: { width: 1920, height: 1080 },
+      deviceScaleFactor: 2,
+    });
     try {
       return await fn(ctx, browser);
     } finally {
